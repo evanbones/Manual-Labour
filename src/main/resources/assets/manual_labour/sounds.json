@@ -1,0 +1,12 @@
+{
+  "block.workstone.hammer1": {
+    "category": "block",
+    "subtitle": "subtitles.manual_labour.block.workstone.hammer",
+    "sounds": ["manual_labour:block/workstone/hammer1"]
+  },
+  "block.workstone.hammer2": {
+    "category": "block",
+    "subtitle": "subtitles.manual_labour.block.workstone.hammer",
+    "sounds": ["manual_labour:block/workstone/hammer2"]
+  }
+}

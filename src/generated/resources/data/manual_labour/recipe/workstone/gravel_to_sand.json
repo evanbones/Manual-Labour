@@ -1,0 +1,24 @@
+{
+  "type": "manual_labour:workstone",
+  "ingredient": {
+    "item": "minecraft:gravel"
+  },
+  "results": [
+    {
+      "result": {
+        "count": 1,
+        "id": "minecraft:sand"
+      }
+    },
+    {
+      "chance": 0.25,
+      "result": {
+        "count": 1,
+        "id": "minecraft:flint"
+      }
+    }
+  ],
+  "tool": {
+    "tag": "manual_labour:hammers"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "X": {
+      "tag": "c:ingots/iron"
+    },
+    "|": {
+      "item": "minecraft:stick"
+    }
+  },
+  "pattern": [
+    "XXX",
+    "X|X",
+    " | "
+  ],
+  "result": {
+    "count": 1,
+    "id": "manual_labour:iron_hammer"
+  }
+}

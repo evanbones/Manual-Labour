@@ -1,0 +1,44 @@
+{
+  "parent": "minecraft:block/block",
+  "elements": [
+    {
+      "faces": {
+        "down": {
+          "texture": "#bottom"
+        },
+        "east": {
+          "texture": "#side"
+        },
+        "north": {
+          "texture": "#front"
+        },
+        "south": {
+          "texture": "#front"
+        },
+        "up": {
+          "texture": "#top"
+        },
+        "west": {
+          "texture": "#side"
+        }
+      },
+      "from": [
+        3,
+        0,
+        3
+      ],
+      "to": [
+        13,
+        12,
+        13
+      ]
+    }
+  ],
+  "textures": {
+    "bottom": "manual_labour:block/workstone_bottom",
+    "front": "manual_labour:block/workstone_front",
+    "particle": "manual_labour:block/workstone_top",
+    "side": "manual_labour:block/workstone_side",
+    "top": "manual_labour:block/workstone_top"
+  }
+}
