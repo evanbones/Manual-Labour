@@ -2,12 +2,7 @@ package com.evandev.manual_labour;
 
 import com.evandev.manual_labour.client.ClientConfigSetup;
 import com.evandev.manual_labour.config.ModConfig;
-import com.evandev.manual_labour.registry.ModBlockEntities;
-import com.evandev.manual_labour.registry.ModBlocks;
-import com.evandev.manual_labour.registry.ModItems;
-import com.evandev.manual_labour.registry.ModRecipeSerializers;
-import com.evandev.manual_labour.registry.ModRecipeTypes;
-import com.evandev.manual_labour.registry.ModSounds;
+import com.evandev.manual_labour.registry.*;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -38,10 +33,6 @@ public class ManualLabour {
         }
     }
 
-    private void commonSetup(final FMLCommonSetupEvent event) {
-        ModConfig.load();
-    }
-
     @SubscribeEvent
     public static void registerCapabilities(RegisterCapabilitiesEvent event) {
         event.registerBlockEntity(
@@ -49,12 +40,23 @@ public class ManualLabour {
                 ModBlockEntities.WORKSTONE.get(),
                 (be, context) -> be.getInventory()
         );
+        event.registerBlockEntity(
+                Capabilities.ItemHandler.BLOCK,
+                ModBlockEntities.MORTAR.get(),
+                (be, context) -> be.getItemHandler()
+        );
+        event.registerBlockEntity(
+                Capabilities.FluidHandler.BLOCK,
+                ModBlockEntities.MORTAR.get(),
+                (be, context) -> be.getFluidHandler()
+        );
     }
 
     @SubscribeEvent
     public static void buildContents(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey() == CreativeModeTabs.FUNCTIONAL_BLOCKS) {
             event.accept(ModItems.WORKSTONE_ITEM);
+            event.accept(ModItems.MORTAR_ITEM);
         }
         if (event.getTabKey() == CreativeModeTabs.TOOLS_AND_UTILITIES) {
             event.accept(ModItems.FLINT_HAMMER);
@@ -62,6 +64,12 @@ public class ManualLabour {
             event.accept(ModItems.GOLDEN_HAMMER);
             event.accept(ModItems.DIAMOND_HAMMER);
             event.accept(ModItems.NETHERITE_HAMMER);
+            event.accept(ModItems.PESTLE);
+            event.accept(ModItems.LADLE);
         }
+    }
+
+    private void commonSetup(final FMLCommonSetupEvent event) {
+        ModConfig.load();
     }
 }

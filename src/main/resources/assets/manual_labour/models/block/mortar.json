@@ -1,6 +1,7 @@
 {
 	"format_version": "1.21.11",
 	"credit": "Bailey and Co! <3",
+	"parent": "minecraft:block/block",
 	"textures": {
 		"0": "manual_labour:block/mortar_top",
 		"1": "manual_labour:block/mortar_bottom",

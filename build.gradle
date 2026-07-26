@@ -64,6 +64,32 @@ repositories {
             includeGroup "dev.emi"
         }
     }
+
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = "CreateMod"
+                url = "https://maven.createmod.net"
+            }
+        }
+        filter {
+            includeGroup "com.simibubi.create"
+            includeGroup "net.createmod.ponder"
+            includeGroup "dev.engine-room.flywheel"
+        }
+    }
+
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = "Registrate"
+                url = "https://maven.ithundxr.dev/snapshots"
+            }
+        }
+        filter {
+            includeGroup "com.tterrag.registrate"
+        }
+    }
 }
 
 neoForge {
@@ -114,6 +140,9 @@ dependencies {
     // EMI
     compileOnly "dev.emi:emi-neoforge:${emi_version}"
     runtimeOnly "dev.emi:emi-neoforge:${emi_version}"
+
+    // Create
+    implementation "com.simibubi.create:create-${minecraft_version}:${create_version}"
 
     compileOnly group: 'org.spongepowered', name: 'mixin', version: '0.8.5'
     compileOnly group: 'org.ow2.asm', name: 'asm-tree', version: '9.6'

@@ -19,14 +19,19 @@ public class ModLanguageProvider extends LanguageProvider {
         add("config.manual_labour.option.enabled", "Enabled");
 
         addBlock(ModBlocks.WORKSTONE, "Workstone");
+        addBlock(ModBlocks.MORTAR, "Mortar");
 
         addItem(ModItems.FLINT_HAMMER, "Flint Hammer");
         addItem(ModItems.IRON_HAMMER, "Iron Hammer");
         addItem(ModItems.GOLDEN_HAMMER, "Golden Hammer");
         addItem(ModItems.DIAMOND_HAMMER, "Diamond Hammer");
         addItem(ModItems.NETHERITE_HAMMER, "Netherite Hammer");
+        addItem(ModItems.PESTLE, "Pestle");
+        addItem(ModItems.LADLE, "Ladle");
 
         add("subtitles.manual_labour.block.workstone.hammer", "Workstone hammered");
         add("emi.category.manual_labour.workstone", "Workstone");
+        add("emi.category.manual_labour.mortar_grinding", "Mortar Grinding");
+        add("emi.category.manual_labour.mortar_mixing", "Mortar Mixing");
     }
 }

@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "#": {
+      "item": "minecraft:stick"
+    },
+    "H": {
+      "item": "minecraft:honeycomb"
+    },
+    "X": {
+      "tag": "minecraft:planks"
+    }
+  },
+  "pattern": [
+    "# ",
+    "# ",
+    "XH"
+  ],
+  "result": {
+    "count": 1,
+    "id": "manual_labour:ladle"
+  }
+}

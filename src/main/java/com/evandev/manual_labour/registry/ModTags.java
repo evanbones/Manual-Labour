@@ -9,6 +9,8 @@ import net.minecraft.world.item.Item;
 public class ModTags {
     public static class Items {
         public static final TagKey<Item> HAMMERS = tag("hammers");
+        public static final TagKey<Item> PESTLES = tag("pestles");
+        public static final TagKey<Item> LADLES = tag("ladles");
 
         private static TagKey<Item> tag(String name) {
             return ItemTags.create(ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, name));

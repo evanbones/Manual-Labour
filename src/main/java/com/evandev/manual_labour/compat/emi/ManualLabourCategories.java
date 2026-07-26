@@ -14,4 +14,18 @@ public class ManualLabourCategories {
             WORKSTONE_STACK,
             WORKSTONE_STACK
     );
+
+    public static final EmiStack MORTAR_STACK = EmiStack.of(ModItems.MORTAR_ITEM.get());
+
+    public static final EmiRecipeCategory MORTAR_GRINDING = new EmiRecipeCategory(
+            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "mortar_grinding"),
+            EmiStack.of(ModItems.PESTLE.get()),
+            MORTAR_STACK
+    );
+
+    public static final EmiRecipeCategory MORTAR_MIXING = new EmiRecipeCategory(
+            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "mortar_mixing"),
+            EmiStack.of(ModItems.LADLE.get()),
+            MORTAR_STACK
+    );
 }

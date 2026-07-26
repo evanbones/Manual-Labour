@@ -21,9 +21,11 @@ public class ModBlockTagsProvider extends BlockTagsProvider {
     @Override
     protected void addTags(HolderLookup.@NotNull Provider provider) {
         this.tag(BlockTags.MINEABLE_WITH_PICKAXE)
-                .add(ModBlocks.WORKSTONE.get());
+                .add(ModBlocks.WORKSTONE.get())
+                .add(ModBlocks.MORTAR.get());
 
         this.tag(BlockTags.NEEDS_STONE_TOOL)
-                .add(ModBlocks.WORKSTONE.get());
+                .add(ModBlocks.WORKSTONE.get())
+                .add(ModBlocks.MORTAR.get());
     }
 }

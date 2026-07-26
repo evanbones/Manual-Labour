@@ -75,6 +75,35 @@ public class ModRecipeProvider extends RecipeProvider {
                 ModItems.NETHERITE_HAMMER.get()
         ).unlocks("has_netherite_ingot", has(Items.NETHERITE_INGOT)).save(output, "netherite_hammer_smithing");
 
+        ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModBlocks.MORTAR.get())
+                .pattern("C C")
+                .pattern("CCC")
+                .pattern("L L")
+                .define('C', Blocks.COBBLESTONE)
+                .define('L', ItemTags.LOGS)
+                .unlockedBy("has_cobblestone", has(Blocks.COBBLESTONE))
+                .save(output);
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, ModItems.PESTLE.get())
+                .pattern("L")
+                .pattern("X")
+                .pattern("X")
+                .define('L', Items.LEATHER)
+                .define('X', Blocks.COBBLESTONE)
+                .unlockedBy("has_cobblestone", has(Blocks.COBBLESTONE))
+                .save(output);
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, ModItems.LADLE.get())
+                .pattern("# ")
+                .pattern("# ")
+                .pattern("XH")
+                .define('#', Items.STICK)
+                .define('X', ItemTags.PLANKS)
+                .define('H', Items.HONEYCOMB)
+                .unlockedBy("has_honeycomb", has(Items.HONEYCOMB))
+                .save(output);
+
         WorkstoneRecipeProvider.buildRecipes(output);
+        MortarRecipeProvider.buildRecipes(output);
     }
 }

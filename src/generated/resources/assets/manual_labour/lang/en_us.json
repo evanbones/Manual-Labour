@@ -1,13 +1,18 @@
 {
+  "block.manual_labour.mortar": "Mortar",
   "block.manual_labour.workstone": "Workstone",
   "config.manual_labour.category.general": "General",
   "config.manual_labour.option.enabled": "Enabled",
   "config.manual_labour.title": "Manual Labour Config",
+  "emi.category.manual_labour.mortar_grinding": "Mortar Grinding",
+  "emi.category.manual_labour.mortar_mixing": "Mortar Mixing",
   "emi.category.manual_labour.workstone": "Workstone",
   "item.manual_labour.diamond_hammer": "Diamond Hammer",
   "item.manual_labour.flint_hammer": "Flint Hammer",
   "item.manual_labour.golden_hammer": "Golden Hammer",
   "item.manual_labour.iron_hammer": "Iron Hammer",
+  "item.manual_labour.ladle": "Ladle",
   "item.manual_labour.netherite_hammer": "Netherite Hammer",
+  "item.manual_labour.pestle": "Pestle",
   "subtitles.manual_labour.block.workstone.hammer": "Workstone hammered"
 }

@@ -19,10 +19,11 @@ public class ModBlockLootProvider extends BlockLootSubProvider {
     @Override
     protected void generate() {
         this.dropSelf(ModBlocks.WORKSTONE.get());
+        this.dropSelf(ModBlocks.MORTAR.get());
     }
 
     @Override
     protected @NotNull Iterable<Block> getKnownBlocks() {
-        return List.of(ModBlocks.WORKSTONE.get());
+        return List.of(ModBlocks.WORKSTONE.get(), ModBlocks.MORTAR.get());
     }
 }

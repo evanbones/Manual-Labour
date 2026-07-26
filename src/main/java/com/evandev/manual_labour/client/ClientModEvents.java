@@ -1,6 +1,7 @@
 package com.evandev.manual_labour.client;
 
 import com.evandev.manual_labour.Constants;
+import com.evandev.manual_labour.client.renderer.MortarRenderer;
 import com.evandev.manual_labour.client.renderer.WorkstoneRenderer;
 import com.evandev.manual_labour.registry.ModBlockEntities;
 import net.neoforged.api.distmarker.Dist;
@@ -13,5 +14,6 @@ public class ClientModEvents {
     @SubscribeEvent
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerBlockEntityRenderer(ModBlockEntities.WORKSTONE.get(), WorkstoneRenderer::new);
+        event.registerBlockEntityRenderer(ModBlockEntities.MORTAR.get(), MortarRenderer::new);
     }
 }

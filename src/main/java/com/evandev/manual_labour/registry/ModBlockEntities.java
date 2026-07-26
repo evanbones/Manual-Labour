@@ -1,6 +1,7 @@
 package com.evandev.manual_labour.registry;
 
 import com.evandev.manual_labour.Constants;
+import com.evandev.manual_labour.content.block.entity.MortarBlockEntity;
 import com.evandev.manual_labour.content.block.entity.WorkstoneBlockEntity;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -12,4 +13,7 @@ public class ModBlockEntities {
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<WorkstoneBlockEntity>> WORKSTONE =
             BLOCK_ENTITIES.register("workstone", () -> BlockEntityType.Builder.of(WorkstoneBlockEntity::new, ModBlocks.WORKSTONE.get()).build(null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<MortarBlockEntity>> MORTAR =
+            BLOCK_ENTITIES.register("mortar", () -> BlockEntityType.Builder.of(MortarBlockEntity::new, ModBlocks.MORTAR.get()).build(null));
 }

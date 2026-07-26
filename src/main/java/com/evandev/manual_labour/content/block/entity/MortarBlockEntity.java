@@ -1,0 +1,426 @@
+package com.evandev.manual_labour.content.block.entity;
+
+import com.evandev.manual_labour.content.block.MortarBlock;
+import com.evandev.manual_labour.recipe.MortarGrindingRecipe;
+import com.evandev.manual_labour.recipe.MortarGrindingRecipeInput;
+import com.evandev.manual_labour.recipe.MortarMixingRecipe;
+import com.evandev.manual_labour.recipe.MortarProcess;
+import com.evandev.manual_labour.registry.ModBlockEntities;
+import com.evandev.manual_labour.registry.ModRecipeTypes;
+import com.simibubi.create.AllRecipeTypes;
+import com.simibubi.create.content.kinetics.crusher.CrushingRecipe;
+import com.simibubi.create.content.kinetics.millstone.MillingRecipe;
+import com.simibubi.create.content.kinetics.mixer.MixingRecipe;
+import com.simibubi.create.content.processing.burner.BlazeBurnerBlock.HeatLevel;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.particles.ItemParticleOption;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.*;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
+import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
+import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.items.ItemStackHandler;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
+import java.util.Optional;
+
+public class MortarBlockEntity extends BlockEntity {
+    public static final int SLOT_COUNT = 6;
+    public static final int TANK_CAPACITY = 2000;
+    private static final int HOLD_GRACE_TICKS = 10;
+    private static final int PARTICLE_INTERVAL = 5;
+
+    private final ItemStackHandler inventory = new ItemStackHandler(SLOT_COUNT) {
+        @Override
+        protected void onContentsChanged(int slot) {
+            setChanged();
+            syncToClients();
+        }
+    };
+
+    private final FluidTank fluidTank = new FluidTank(TANK_CAPACITY) {
+        @Override
+        protected void onContentsChanged() {
+            setChanged();
+            syncToClients();
+        }
+    };
+
+    private final RecipeManager.CachedCheck<MortarGrindingRecipeInput, MortarGrindingRecipe> grindingCheck;
+
+    private int holdGraceTicks = 0;
+    private int heldDurationTicks = 0;
+    @Nullable
+    private MortarProcess activeProcess;
+    private boolean processingIsGrinding;
+    @Nullable
+    private Player activePlayer;
+
+    private ItemStack activeTool = ItemStack.EMPTY;
+    private long processingStartGameTime = -1L;
+    private int processingDuration = 0;
+
+    public MortarBlockEntity(BlockPos pos, BlockState state) {
+        super(ModBlockEntities.MORTAR.get(), pos, state);
+        grindingCheck = RecipeManager.createCheck(ModRecipeTypes.MORTAR_GRINDING.get());
+    }
+
+    public static void serverTick(Level level, BlockPos pos, BlockState state, MortarBlockEntity be) {
+        if (be.activeProcess == null) return;
+
+        if (be.holdGraceTicks <= 0) {
+            be.cancelHold();
+            return;
+        }
+
+        be.holdGraceTicks--;
+        be.heldDurationTicks++;
+
+        if (be.heldDurationTicks % PARTICLE_INTERVAL == 0) {
+            be.spawnProcessingEffects();
+        }
+
+        if (be.heldDurationTicks >= be.processingDuration) {
+            be.completeProcess();
+        }
+    }
+
+    public boolean startOrContinueGrind(Player player, ItemStack toolStack) {
+        return attemptProcess(player, toolStack, true);
+    }
+
+    public boolean startOrContinueMix(Player player, ItemStack toolStack) {
+        return attemptProcess(player, toolStack, false);
+    }
+
+    private boolean attemptProcess(Player player, ItemStack toolStack, boolean grinding) {
+        if (level == null || level.isClientSide) return false;
+
+        if (activeProcess != null && processingIsGrinding == grinding) {
+            holdGraceTicks = HOLD_GRACE_TICKS;
+            activePlayer = player;
+            activeTool = toolStack;
+            return true;
+        }
+
+        Optional<MortarProcess> found = grinding ? findGrindingProcess() : findMixingProcess();
+        if (found.isEmpty()) return false;
+
+        activeProcess = found.get();
+        processingIsGrinding = grinding;
+        activeTool = toolStack;
+        activePlayer = player;
+        holdGraceTicks = HOLD_GRACE_TICKS;
+        heldDurationTicks = 0;
+        processingStartGameTime = level.getGameTime();
+        processingDuration = Math.max(1, activeProcess.processingTime());
+        setChanged();
+        syncToClients();
+        return true;
+    }
+
+    private void cancelHold() {
+        activeProcess = null;
+        activePlayer = null;
+        heldDurationTicks = 0;
+        holdGraceTicks = 0;
+        activeTool = ItemStack.EMPTY;
+        processingStartGameTime = -1L;
+        processingDuration = 0;
+        setChanged();
+        syncToClients();
+    }
+
+    private void completeProcess() {
+        if (level == null || activeProcess == null) {
+            cancelHold();
+            return;
+        }
+
+        MortarProcess process = activeProcess;
+        ItemStack tool = activeTool;
+        Player player = activePlayer;
+        boolean wasGrinding = processingIsGrinding;
+
+        if (!consumeIngredients(process, true)) {
+            cancelHold();
+            return;
+        }
+        consumeIngredients(process, false);
+
+        ejectOutputs(process.rollResults(level.random));
+
+        for (FluidStack fluidResult : process.fluidResults()) {
+            if (!fluidResult.isEmpty()) {
+                fluidTank.fill(fluidResult.copy(), IFluidHandler.FluidAction.EXECUTE);
+            }
+        }
+
+        if (!level.isClientSide && player != null && !tool.isEmpty() && level instanceof ServerLevel serverLevel) {
+            tool.hurtAndBreak(1, serverLevel, player, item -> {
+            });
+        }
+
+        playCompletionSound(wasGrinding);
+        cancelHold();
+    }
+
+    private Optional<MortarProcess> findGrindingProcess() {
+        if (level == null) return Optional.empty();
+        ItemStack primary = getPrimaryItem();
+        if (primary.isEmpty()) return Optional.empty();
+
+        Optional<RecipeHolder<MortarGrindingRecipe>> own = grindingCheck.getRecipeFor(new MortarGrindingRecipeInput(primary), level);
+        if (own.isPresent()) {
+            return Optional.of(new MortarProcess.OwnGrindingProcess(own.get().value()));
+        }
+
+        SingleRecipeInput createInput = new SingleRecipeInput(primary);
+
+        Optional<RecipeHolder<MillingRecipe>> milling = AllRecipeTypes.MILLING.find(createInput, level);
+        if (milling.isPresent()) {
+            return Optional.of(new MortarProcess.CreateProcess(milling.get().value()));
+        }
+
+        Optional<RecipeHolder<CrushingRecipe>> crushing = AllRecipeTypes.CRUSHING.find(createInput, level);
+        return crushing.map(holder -> new MortarProcess.CreateProcess(holder.value()));
+    }
+
+    private Optional<MortarProcess> findMixingProcess() {
+        if (level == null) return Optional.empty();
+
+        for (RecipeHolder<MortarMixingRecipe> holder : level.getRecipeManager().getAllRecipesFor(ModRecipeTypes.MORTAR_MIXING.get())) {
+            MortarProcess process = new MortarProcess.OwnMixingProcess(holder.value());
+            if (consumeIngredients(process, true)) return Optional.of(process);
+        }
+
+        List<RecipeHolder<MixingRecipe>> mixingRecipes =
+                level.getRecipeManager().getAllRecipesFor(AllRecipeTypes.MIXING.<RecipeInput, MixingRecipe>getType());
+        for (RecipeHolder<MixingRecipe> holder : mixingRecipes) {
+            MixingRecipe recipe = holder.value();
+            if (!recipe.getRequiredHeat().testBlazeBurner(HeatLevel.NONE)) continue;
+            MortarProcess process = new MortarProcess.CreateProcess(recipe);
+            if (consumeIngredients(process, true)) return Optional.of(process);
+        }
+
+        return Optional.empty();
+    }
+
+    private ItemStack getPrimaryItem() {
+        for (int i = 0; i < inventory.getSlots(); i++) {
+            ItemStack stack = inventory.getStackInSlot(i);
+            if (!stack.isEmpty()) return stack;
+        }
+        return ItemStack.EMPTY;
+    }
+
+    private boolean consumeIngredients(MortarProcess process, boolean simulate) {
+        boolean[] claimedSlots = new boolean[inventory.getSlots()];
+        for (Ingredient ingredient : process.ingredients()) {
+            int slot = findMatchingUnclaimedSlot(ingredient, claimedSlots);
+            if (slot < 0) return false;
+            claimedSlots[slot] = true;
+            if (!simulate) inventory.extractItem(slot, 1, false);
+        }
+
+        for (SizedFluidIngredient fluidIngredient : process.fluidIngredients()) {
+            if (!fluidIngredient.test(fluidTank.getFluid())) return false;
+            if (!simulate) fluidTank.drain(fluidIngredient.amount(), IFluidHandler.FluidAction.EXECUTE);
+        }
+
+        return true;
+    }
+
+    private int findMatchingUnclaimedSlot(Ingredient ingredient, boolean[] claimedSlots) {
+        for (int i = 0; i < inventory.getSlots(); i++) {
+            if (claimedSlots[i]) continue;
+            ItemStack stack = inventory.getStackInSlot(i);
+            if (!stack.isEmpty() && ingredient.test(stack)) return i;
+        }
+        return -1;
+    }
+
+    private void ejectOutputs(List<ItemStack> outputs) {
+        if (level == null) return;
+        Direction direction = getBlockState().getValue(MortarBlock.FACING).getCounterClockWise();
+        for (ItemStack output : outputs) {
+            if (output.isEmpty()) continue;
+            ItemEntity entity = new ItemEntity(
+                    level, worldPosition.getX() + 0.5 + (direction.getStepX() * 0.2),
+                    worldPosition.getY() + 0.8, worldPosition.getZ() + 0.5 + (direction.getStepZ() * 0.2),
+                    output
+            );
+            entity.setDeltaMovement(direction.getStepX() * 0.2F, 0.0F, direction.getStepZ() * 0.2F);
+            level.addFreshEntity(entity);
+        }
+    }
+
+    private void spawnProcessingEffects() {
+        if (!(level instanceof ServerLevel serverLevel)) return;
+
+        ItemStack particleItem = getPrimaryItem();
+        if (particleItem.isEmpty()) particleItem = activeTool;
+        if (!particleItem.isEmpty()) {
+            serverLevel.sendParticles(new ItemParticleOption(ParticleTypes.ITEM, particleItem),
+                    worldPosition.getX() + 0.5, worldPosition.getY() + 0.8, worldPosition.getZ() + 0.5,
+                    3, 0.15, 0.1, 0.15, 0.02);
+        }
+
+        if (!processingIsGrinding) {
+            serverLevel.sendParticles(ParticleTypes.SPLASH,
+                    worldPosition.getX() + 0.5, worldPosition.getY() + 0.85, worldPosition.getZ() + 0.5,
+                    2, 0.15, 0.05, 0.15, 0.0);
+        }
+    }
+
+    private void playCompletionSound(boolean grinding) {
+        if (level == null) return;
+        double x = worldPosition.getX() + 0.5;
+        double y = worldPosition.getY() + 0.5;
+        double z = worldPosition.getZ() + 0.5;
+
+        if (grinding) {
+            SoundEvent[] options = {SoundEvents.NETHERRACK_HIT, SoundEvents.GRAVEL_PLACE, SoundEvents.NETHERITE_BLOCK_BREAK};
+            SoundEvent sound = options[level.random.nextInt(options.length)];
+            level.playSound(null, x, y, z, sound, SoundSource.BLOCKS, 0.8F, 1.0F);
+        } else {
+            level.playSound(null, x, y, z, SoundEvents.GILDED_BLACKSTONE_BREAK, SoundSource.BLOCKS, 0.8F, 1.0F);
+            level.playSound(null, x, y, z, SoundEvents.NETHERRACK_BREAK, SoundSource.BLOCKS, 0.6F, 0.8F);
+        }
+    }
+
+    public boolean canAddItem(ItemStack stack) {
+        if (stack.isEmpty()) return false;
+        for (int i = 0; i < inventory.getSlots(); i++) {
+            if (inventory.insertItem(i, stack.copy(), true).getCount() != stack.getCount()) return true;
+        }
+        return false;
+    }
+
+    public ItemStack addItem(ItemStack stack) {
+        ItemStack remainder = stack.copy();
+        for (int i = 0; i < inventory.getSlots() && !remainder.isEmpty(); i++) {
+            remainder = inventory.insertItem(i, remainder, false);
+        }
+        return remainder;
+    }
+
+    public ItemStack removeItem() {
+        for (int i = 0; i < inventory.getSlots(); i++) {
+            ItemStack stack = inventory.getStackInSlot(i);
+            if (!stack.isEmpty()) {
+                return inventory.extractItem(i, stack.getCount(), false);
+            }
+        }
+        return ItemStack.EMPTY;
+    }
+
+    public boolean isEmpty() {
+        for (int i = 0; i < inventory.getSlots(); i++) {
+            if (!inventory.getStackInSlot(i).isEmpty()) return false;
+        }
+        return fluidTank.isEmpty();
+    }
+
+    public IItemHandler getItemHandler() {
+        return inventory;
+    }
+
+    public IFluidHandler getFluidHandler() {
+        return fluidTank;
+    }
+
+    public void dropContents(Level level, BlockPos pos) {
+        for (int i = 0; i < inventory.getSlots(); i++) {
+            net.minecraft.world.Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), inventory.getStackInSlot(i));
+        }
+    }
+
+    public boolean isProcessing() {
+        return processingStartGameTime >= 0L && processingDuration > 0;
+    }
+
+    public ItemStack getActiveTool() {
+        return activeTool;
+    }
+
+    public float getProcessingProgress(float partialTick) {
+        if (!isProcessing() || level == null) return 0F;
+        float elapsed = (level.getGameTime() - processingStartGameTime) + partialTick;
+        return Mth.clamp(elapsed / processingDuration, 0F, 1F);
+    }
+
+    @Override
+    public void onLoad() {
+        super.onLoad();
+        if (level != null && !level.isClientSide && activeProcess == null && processingStartGameTime >= 0L) {
+            processingStartGameTime = -1L;
+            processingDuration = 0;
+            activeTool = ItemStack.EMPTY;
+            setChanged();
+        }
+    }
+
+    private void syncToClients() {
+        if (level != null && !level.isClientSide) {
+            level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), Block.UPDATE_ALL);
+        }
+    }
+
+    @Override
+    public @NotNull CompoundTag getUpdateTag(HolderLookup.@NotNull Provider registries) {
+        CompoundTag tag = new CompoundTag();
+        saveAdditional(tag, registries);
+        return tag;
+    }
+
+    @Nullable
+    @Override
+    public Packet<ClientGamePacketListener> getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
+    }
+
+    @Override
+    protected void loadAdditional(@NotNull CompoundTag tag, HolderLookup.@NotNull Provider registries) {
+        super.loadAdditional(tag, registries);
+        inventory.deserializeNBT(registries, tag.getCompound("Inventory"));
+        fluidTank.readFromNBT(registries, tag.getCompound("FluidTank"));
+        activeTool = tag.contains("ActiveTool") ? ItemStack.parseOptional(registries, tag.getCompound("ActiveTool")) : ItemStack.EMPTY;
+        processingStartGameTime = tag.getLong("ProcessingStart");
+        processingDuration = tag.getInt("ProcessingDuration");
+    }
+
+    @Override
+    protected void saveAdditional(@NotNull CompoundTag tag, HolderLookup.@NotNull Provider registries) {
+        super.saveAdditional(tag, registries);
+        tag.put("Inventory", inventory.serializeNBT(registries));
+        tag.put("FluidTank", fluidTank.writeToNBT(registries, new CompoundTag()));
+        if (!activeTool.isEmpty()) {
+            tag.put("ActiveTool", activeTool.save(registries));
+        }
+        tag.putLong("ProcessingStart", processingStartGameTime);
+        tag.putInt("ProcessingDuration", processingDuration);
+    }
+}

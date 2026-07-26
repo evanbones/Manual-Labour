@@ -34,5 +34,9 @@ public class ModBlockStateProvider extends BlockStateProvider {
 
         horizontalBlock(ModBlocks.WORKSTONE.get(), workstoneModel);
         simpleBlockItem(ModBlocks.WORKSTONE.get(), workstoneModel);
+
+        ModelFile mortarModel = models().getExistingFile(modLoc("block/mortar"));
+        horizontalBlock(ModBlocks.MORTAR.get(), mortarModel);
+        simpleBlockItem(ModBlocks.MORTAR.get(), mortarModel);
     }
 }

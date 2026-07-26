@@ -1,6 +1,7 @@
 package com.evandev.manual_labour.registry;
 
 import com.evandev.manual_labour.Constants;
+import com.evandev.manual_labour.content.block.MortarBlock;
 import com.evandev.manual_labour.content.block.WorkstoneBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
@@ -13,4 +14,7 @@ public class ModBlocks {
 
     public static final DeferredBlock<Block> WORKSTONE = BLOCKS.register("workstone",
             () -> new WorkstoneBlock(BlockBehaviour.Properties.of().strength(2.0f).sound(SoundType.STONE)));
+
+    public static final DeferredBlock<Block> MORTAR = BLOCKS.register("mortar",
+            () -> new MortarBlock(BlockBehaviour.Properties.of().strength(2.0f).sound(SoundType.STONE).noOcclusion()));
 }
