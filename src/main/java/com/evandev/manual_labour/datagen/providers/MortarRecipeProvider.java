@@ -19,15 +19,6 @@ import java.util.Optional;
 public class MortarRecipeProvider {
 
     public static void buildRecipes(RecipeOutput output) {
-        createGrindingRecipe(output, "bone_to_bone_meal",
-                Ingredient.of(Items.BONE), 100,
-                List.of(new ChanceResult(new ItemStack(Items.BONE_MEAL, 3), 1.0F)));
-
-        createMixingRecipe(output, "sand_gravel_to_clay_ball",
-                List.of(Ingredient.of(Items.SAND), Ingredient.of(Items.GRAVEL)),
-                Optional.of(SizedFluidIngredient.of(Fluids.WATER, 250)),
-                120,
-                List.of(new ChanceResult(new ItemStack(Items.CLAY_BALL, 2), 1.0F)));
     }
 
     private static void createGrindingRecipe(RecipeOutput output, String recipeName, Ingredient input, int processingTime, List<ChanceResult> resultsList) {

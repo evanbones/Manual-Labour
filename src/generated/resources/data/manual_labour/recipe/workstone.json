@@ -6,13 +6,13 @@
       "tag": "minecraft:logs"
     },
     "S": {
-      "item": "minecraft:smooth_stone"
+      "item": "minecraft:smooth_stone_slab"
     }
   },
   "pattern": [
-    "SSS",
-    "L L",
-    "L L"
+    "SS",
+    "LL",
+    "LL"
   ],
   "result": {
     "count": 1,

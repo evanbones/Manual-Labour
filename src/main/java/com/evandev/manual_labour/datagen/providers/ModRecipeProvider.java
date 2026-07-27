@@ -23,10 +23,10 @@ public class ModRecipeProvider extends RecipeProvider {
     @Override
     protected void buildRecipes(@NotNull RecipeOutput output) {
         ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModBlocks.WORKSTONE.get())
-                .pattern("SSS")
-                .pattern("L L")
-                .pattern("L L")
-                .define('S', Blocks.SMOOTH_STONE)
+                .pattern("SS")
+                .pattern("LL")
+                .pattern("LL")
+                .define('S', Blocks.SMOOTH_STONE_SLAB)
                 .define('L', ItemTags.LOGS)
                 .unlockedBy("has_smooth_stone", has(Blocks.SMOOTH_STONE))
                 .save(output);
