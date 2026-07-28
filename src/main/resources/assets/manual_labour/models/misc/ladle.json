@@ -2,8 +2,8 @@
 	"format_version": "1.21.11",
 	"credit": "Bailey and Co! <3",
 	"textures": {
-		"0": "manual_labour:block/ladle",
-		"particle": "manual_labour:block/ladle"
+		"0": "manual_labour:misc/ladle",
+		"particle": "manual_labour:misc/ladle"
 	},
 	"elements": [
 		{

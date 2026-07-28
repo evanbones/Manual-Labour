@@ -2,7 +2,7 @@
 	"format_version": "1.21.11",
 	"credit": "Bailey and Co! <3",
 	"textures": {
-		"1": "manual_labour:block/pestle"
+		"1": "manual_labour:misc/pestle"
 	},
 	"elements": [
 		{

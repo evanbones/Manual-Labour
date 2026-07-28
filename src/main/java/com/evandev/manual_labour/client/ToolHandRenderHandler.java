@@ -31,7 +31,11 @@ public class ToolHandRenderHandler {
 
         Level level = mc.level;
         BlockEntity blockEntity = level.getBlockEntity(blockHit.getBlockPos());
-        if (blockEntity instanceof MortarBlockEntity || blockEntity instanceof BasinBlockEntity) {
+        if (blockEntity instanceof MortarBlockEntity mortar) {
+            if (mortar.isProcessing()) {
+                event.setCanceled(true);
+            }
+        } else if (blockEntity instanceof BasinBlockEntity) {
             event.setCanceled(true);
         }
     }

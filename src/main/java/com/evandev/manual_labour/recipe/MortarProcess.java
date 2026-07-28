@@ -95,7 +95,8 @@ public interface MortarProcess {
 
         @Override
         public int processingTime() {
-            return Math.max(1, recipe.getProcessingDuration());
+            int duration = recipe.getProcessingDuration();
+            return duration > 0 ? duration : MortarMixingRecipe.DEFAULT_PROCESSING_TIME;
         }
 
         @Override

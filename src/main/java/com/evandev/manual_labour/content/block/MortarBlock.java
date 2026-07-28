@@ -10,7 +10,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.ItemInteractionResult;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -83,14 +82,19 @@ public class MortarBlock extends BaseEntityBlock implements SimpleWaterloggedBlo
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
 
-        if (stack.is(ModTags.Items.PESTLES)) {
-            if (level.isClientSide) return ItemInteractionResult.CONSUME;
-            return mortar.startOrContinueGrind(player, stack) ? ItemInteractionResult.SUCCESS : ItemInteractionResult.CONSUME;
-        }
+        if (stack.is(ModTags.Items.PESTLES) || stack.is(ModTags.Items.LADLES)) {
+            if (player.isShiftKeyDown()) {
+                if (level.isClientSide) return ItemInteractionResult.CONSUME;
+                return mortar.placeDecorativeTool(stack, player.getAbilities().instabuild) ? ItemInteractionResult.SUCCESS : ItemInteractionResult.CONSUME;
+            }
 
-        if (stack.is(ModTags.Items.LADLES)) {
-            if (level.isClientSide) return ItemInteractionResult.CONSUME;
-            return mortar.startOrContinueMix(player, stack) ? ItemInteractionResult.SUCCESS : ItemInteractionResult.CONSUME;
+            if (stack.is(ModTags.Items.PESTLES)) {
+                boolean started = mortar.startOrContinueGrind(player, stack);
+                return started ? ItemInteractionResult.sidedSuccess(level.isClientSide) : ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+            }
+
+            boolean started = mortar.startOrContinueMix(player, stack);
+            return started ? ItemInteractionResult.sidedSuccess(level.isClientSide) : ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
 
         if (!stack.isEmpty()) {
@@ -98,22 +102,41 @@ public class MortarBlock extends BaseEntityBlock implements SimpleWaterloggedBlo
                 return ItemInteractionResult.sidedSuccess(level.isClientSide);
             }
 
-            if (mortar.canAddItem(stack)) {
-                if (level.isClientSide) return ItemInteractionResult.CONSUME;
-                ItemStack remainderStack = mortar.addItem(player.getAbilities().instabuild ? stack.copy() : stack);
-                if (!player.isCreative()) player.setItemSlot(EquipmentSlot.MAINHAND, remainderStack);
-                Vec3 centerPos = pos.getCenter();
-                level.playSound(null, centerPos.x(), centerPos.y(), centerPos.z(), SoundEvents.STONE_PLACE, SoundSource.BLOCKS, 1.0F, 0.8F);
-                return ItemInteractionResult.SUCCESS;
-            }
+            if (level.isClientSide) return ItemInteractionResult.SUCCESS;
 
-            return ItemInteractionResult.CONSUME;
+            ItemStack previous = mortar.setPrimaryItem(stack.copy());
+            if (!previous.isEmpty()) {
+                player.getInventory().placeItemBackInInventory(previous);
+            }
+            player.setItemInHand(hand, ItemStack.EMPTY);
+
+            Vec3 centerPos = pos.getCenter();
+            level.playSound(null, centerPos.x(), centerPos.y(), centerPos.z(), SoundEvents.STONE_PLACE, SoundSource.BLOCKS, 1.0F, 0.8F);
+            return ItemInteractionResult.SUCCESS;
         }
 
-        if (mortar.isEmpty() || level.isClientSide) return ItemInteractionResult.CONSUME;
+        ItemStack decorativeTool = mortar.getDecorativeTool();
+
+        if (player.isShiftKeyDown() && !decorativeTool.isEmpty()) {
+            if (level.isClientSide) return ItemInteractionResult.CONSUME;
+            ItemStack removedTool = mortar.removeDecorativeTool();
+            if (!player.isCreative()) player.getInventory().add(removedTool);
+            return ItemInteractionResult.SUCCESS;
+        }
+
+        if (!decorativeTool.isEmpty() && (decorativeTool.is(ModTags.Items.PESTLES) || decorativeTool.is(ModTags.Items.LADLES))) {
+            if (level.isClientSide) return ItemInteractionResult.CONSUME;
+            boolean success = decorativeTool.is(ModTags.Items.PESTLES)
+                    ? mortar.startOrContinueGrind(player, decorativeTool)
+                    : mortar.startOrContinueMix(player, decorativeTool);
+            return success ? ItemInteractionResult.SUCCESS : ItemInteractionResult.CONSUME;
+        }
+
+        if (!mortar.hasItem()) return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        if (level.isClientSide) return ItemInteractionResult.CONSUME;
+
         ItemStack removedStack = mortar.removeItem();
-        if (removedStack.isEmpty()) return ItemInteractionResult.CONSUME;
-        if (!player.isCreative()) player.getInventory().add(removedStack);
+        player.getInventory().placeItemBackInInventory(removedStack);
         Vec3 centerPos = pos.getCenter();
         level.playSound(null, centerPos.x(), centerPos.y(), centerPos.z(), SoundEvents.STONE_PLACE, SoundSource.BLOCKS, 0.25F, 0.5F);
         return ItemInteractionResult.SUCCESS;

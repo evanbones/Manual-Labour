@@ -26,6 +26,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
+import net.minecraft.world.Containers;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -47,8 +48,8 @@ import java.util.List;
 import java.util.Optional;
 
 public class MortarBlockEntity extends BlockEntity {
-    public static final int SLOT_COUNT = 6;
-    public static final int TANK_CAPACITY = 2000;
+    public static final int SLOT_COUNT = 1;
+    public static final int TANK_CAPACITY = 1000;
     private static final int HOLD_GRACE_TICKS = 10;
     private static final int PARTICLE_INTERVAL = 5;
 
@@ -81,6 +82,8 @@ public class MortarBlockEntity extends BlockEntity {
     private ItemStack activeTool = ItemStack.EMPTY;
     private long processingStartGameTime = -1L;
     private int processingDuration = 0;
+
+    private ItemStack decorativeTool = ItemStack.EMPTY;
 
     public MortarBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.MORTAR.get(), pos, state);
@@ -116,9 +119,10 @@ public class MortarBlockEntity extends BlockEntity {
     }
 
     private boolean attemptProcess(Player player, ItemStack toolStack, boolean grinding) {
-        if (level == null || level.isClientSide) return false;
+        if (level == null) return false;
 
         if (activeProcess != null && processingIsGrinding == grinding) {
+            if (level.isClientSide) return true;
             holdGraceTicks = HOLD_GRACE_TICKS;
             activePlayer = player;
             activeTool = toolStack;
@@ -127,6 +131,7 @@ public class MortarBlockEntity extends BlockEntity {
 
         Optional<MortarProcess> found = grinding ? findGrindingProcess() : findMixingProcess();
         if (found.isEmpty()) return false;
+        if (level.isClientSide) return true;
 
         activeProcess = found.get();
         processingIsGrinding = grinding;
@@ -237,25 +242,39 @@ public class MortarBlockEntity extends BlockEntity {
     }
 
     private boolean consumeIngredients(MortarProcess process, boolean simulate) {
-        boolean[] claimedSlots = new boolean[inventory.getSlots()];
+        int slotCount = inventory.getSlots();
+        int[] remaining = new int[slotCount];
+        int[] toExtract = new int[slotCount];
+        for (int i = 0; i < slotCount; i++) {
+            remaining[i] = inventory.getStackInSlot(i).getCount();
+        }
+
         for (Ingredient ingredient : process.ingredients()) {
-            int slot = findMatchingUnclaimedSlot(ingredient, claimedSlots);
+            int slot = findMatchingSlotWithRemaining(ingredient, remaining);
             if (slot < 0) return false;
-            claimedSlots[slot] = true;
-            if (!simulate) inventory.extractItem(slot, 1, false);
+            remaining[slot]--;
+            toExtract[slot]++;
         }
 
         for (SizedFluidIngredient fluidIngredient : process.fluidIngredients()) {
             if (!fluidIngredient.test(fluidTank.getFluid())) return false;
-            if (!simulate) fluidTank.drain(fluidIngredient.amount(), IFluidHandler.FluidAction.EXECUTE);
+        }
+
+        if (!simulate) {
+            for (int i = 0; i < slotCount; i++) {
+                if (toExtract[i] > 0) inventory.extractItem(i, toExtract[i], false);
+            }
+            for (SizedFluidIngredient fluidIngredient : process.fluidIngredients()) {
+                fluidTank.drain(fluidIngredient.amount(), IFluidHandler.FluidAction.EXECUTE);
+            }
         }
 
         return true;
     }
 
-    private int findMatchingUnclaimedSlot(Ingredient ingredient, boolean[] claimedSlots) {
+    private int findMatchingSlotWithRemaining(Ingredient ingredient, int[] remaining) {
         for (int i = 0; i < inventory.getSlots(); i++) {
-            if (claimedSlots[i]) continue;
+            if (remaining[i] <= 0) continue;
             ItemStack stack = inventory.getStackInSlot(i);
             if (!stack.isEmpty() && ingredient.test(stack)) return i;
         }
@@ -311,20 +330,10 @@ public class MortarBlockEntity extends BlockEntity {
         }
     }
 
-    public boolean canAddItem(ItemStack stack) {
-        if (stack.isEmpty()) return false;
-        for (int i = 0; i < inventory.getSlots(); i++) {
-            if (inventory.insertItem(i, stack.copy(), true).getCount() != stack.getCount()) return true;
-        }
-        return false;
-    }
-
-    public ItemStack addItem(ItemStack stack) {
-        ItemStack remainder = stack.copy();
-        for (int i = 0; i < inventory.getSlots() && !remainder.isEmpty(); i++) {
-            remainder = inventory.insertItem(i, remainder, false);
-        }
-        return remainder;
+    public ItemStack setPrimaryItem(ItemStack stack) {
+        ItemStack previous = inventory.getStackInSlot(0);
+        inventory.setStackInSlot(0, stack);
+        return previous;
     }
 
     public ItemStack removeItem() {
@@ -335,6 +344,13 @@ public class MortarBlockEntity extends BlockEntity {
             }
         }
         return ItemStack.EMPTY;
+    }
+
+    public boolean hasItem() {
+        for (int i = 0; i < inventory.getSlots(); i++) {
+            if (!inventory.getStackInSlot(i).isEmpty()) return true;
+        }
+        return false;
     }
 
     public boolean isEmpty() {
@@ -354,7 +370,10 @@ public class MortarBlockEntity extends BlockEntity {
 
     public void dropContents(Level level, BlockPos pos) {
         for (int i = 0; i < inventory.getSlots(); i++) {
-            net.minecraft.world.Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), inventory.getStackInSlot(i));
+            Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), inventory.getStackInSlot(i));
+        }
+        if (!decorativeTool.isEmpty()) {
+            Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), decorativeTool);
         }
     }
 
@@ -364,6 +383,34 @@ public class MortarBlockEntity extends BlockEntity {
 
     public ItemStack getActiveTool() {
         return activeTool;
+    }
+
+    public ItemStack getDecorativeTool() {
+        return decorativeTool;
+    }
+
+    public boolean placeDecorativeTool(ItemStack stack, boolean creative) {
+        if (level == null || level.isClientSide || !decorativeTool.isEmpty()) return false;
+
+        decorativeTool = stack.copyWithCount(1);
+        if (!creative) stack.shrink(1);
+        setChanged();
+        syncToClients();
+
+        level.playSound(null, worldPosition, SoundEvents.STONE_HIT, SoundSource.BLOCKS, 0.5F, 1.2F);
+        return true;
+    }
+
+    public ItemStack removeDecorativeTool() {
+        ItemStack result = decorativeTool;
+        decorativeTool = ItemStack.EMPTY;
+        setChanged();
+        syncToClients();
+
+        if (level != null) {
+            level.playSound(null, worldPosition, SoundEvents.STONE_HIT, SoundSource.BLOCKS, 0.5F, 0.8F);
+        }
+        return result;
     }
 
     public float getProcessingProgress(float partialTick) {
@@ -410,6 +457,7 @@ public class MortarBlockEntity extends BlockEntity {
         activeTool = tag.contains("ActiveTool") ? ItemStack.parseOptional(registries, tag.getCompound("ActiveTool")) : ItemStack.EMPTY;
         processingStartGameTime = tag.getLong("ProcessingStart");
         processingDuration = tag.getInt("ProcessingDuration");
+        decorativeTool = tag.contains("DecorativeTool") ? ItemStack.parseOptional(registries, tag.getCompound("DecorativeTool")) : ItemStack.EMPTY;
     }
 
     @Override
@@ -422,5 +470,8 @@ public class MortarBlockEntity extends BlockEntity {
         }
         tag.putLong("ProcessingStart", processingStartGameTime);
         tag.putInt("ProcessingDuration", processingDuration);
+        if (!decorativeTool.isEmpty()) {
+            tag.put("DecorativeTool", decorativeTool.save(registries));
+        }
     }
 }
