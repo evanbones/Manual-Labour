@@ -1,6 +1,7 @@
 package com.evandev.manual_labour.client;
 
 import com.evandev.manual_labour.Constants;
+import com.evandev.manual_labour.client.renderer.MillstoneRotorRenderer;
 import com.evandev.manual_labour.client.renderer.MortarRenderer;
 import com.evandev.manual_labour.client.renderer.WorkstoneRenderer;
 import com.evandev.manual_labour.registry.ModBlockEntities;
@@ -16,11 +17,13 @@ public class ClientModEvents {
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerBlockEntityRenderer(ModBlockEntities.WORKSTONE.get(), WorkstoneRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.MORTAR.get(), MortarRenderer::new);
+        event.registerBlockEntityRenderer(ModBlockEntities.MILLSTONE_ROTOR.get(), MillstoneRotorRenderer::new);
     }
 
     @SubscribeEvent
     public static void registerAdditionalModels(ModelEvent.RegisterAdditional event) {
         event.register(ModToolModels.LADLE);
         event.register(ModToolModels.PESTLE);
+        event.register(MillstoneRotorRenderer.MODEL);
     }
 }

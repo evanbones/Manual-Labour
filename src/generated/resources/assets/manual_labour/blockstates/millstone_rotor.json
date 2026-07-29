@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "manual_labour:block/millstone/rotor_static"
+    }
+  }
+}

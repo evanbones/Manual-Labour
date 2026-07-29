@@ -27,6 +27,7 @@ public class ModLanguageProvider extends LanguageProvider {
 
         addBlock(ModBlocks.WORKSTONE, "Workstone");
         addBlock(ModBlocks.MORTAR, "Mortar");
+        addBlock(ModBlocks.MILLSTONE, "Millstone");
 
         addItem(ModItems.FLINT_HAMMER, "Flint Hammer");
         addItem(ModItems.IRON_HAMMER, "Iron Hammer");
@@ -43,5 +44,11 @@ public class ModLanguageProvider extends LanguageProvider {
         add("manual_labour.recipe.mortar_grinding", "Mortar Grinding");
         add("manual_labour.recipe.mortar_mixing", "Mortar Mixing");
         add("manual_labour.recipe.manual_assembly", "Manual Assembly");
+        add("manual_labour.recipe.millstone", "Milling");
+
+        add("message.manual_labour.millstone_space", "Clear Blocks for Placement");
+        add("subtitles.manual_labour.block.millstone.loop", "Millstone turns");
+        add("subtitles.manual_labour.block.millstone.use", "Millstone grinds");
+        add("manual_labour.millstone.too_fast", "Too Fast");
     }
 }

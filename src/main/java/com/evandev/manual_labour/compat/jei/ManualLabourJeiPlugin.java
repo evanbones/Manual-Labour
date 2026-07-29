@@ -9,6 +9,7 @@ import com.simibubi.create.AllRecipeTypes;
 import com.simibubi.create.compat.jei.DoubleItemIcon;
 import com.simibubi.create.compat.jei.EmptyBackground;
 import com.simibubi.create.compat.jei.category.CreateRecipeCategory;
+import com.simibubi.create.content.kinetics.crusher.AbstractCrushingRecipe;
 import com.simibubi.create.content.kinetics.crusher.CrushingRecipe;
 import com.simibubi.create.content.kinetics.millstone.MillingRecipe;
 import com.simibubi.create.content.kinetics.mixer.MixingRecipe;
@@ -42,6 +43,7 @@ public class ManualLabourJeiPlugin implements IModPlugin {
     private CreateRecipeCategory<Recipe<?>> mortarGrinding;
     private CreateRecipeCategory<Recipe<?>> mortarMixing;
     private CreateRecipeCategory<SequencedAssemblyRecipe> manualAssembly;
+    private CreateRecipeCategory<AbstractCrushingRecipe> millstone;
 
     private static ResourceLocation id(String path) {
         return ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, path);
@@ -122,7 +124,14 @@ public class ManualLabourJeiPlugin implements IModPlugin {
                 .emptyBackground(180, 115)
                 .build(id("manual_assembly"), ManualAssemblyCategory::new);
 
-        registration.addRecipeCategories(workstone, mortarGrinding, mortarMixing, manualAssembly);
+        millstone = new CreateRecipeCategory.Builder<>(AbstractCrushingRecipe.class)
+                .addTypedRecipes(AllRecipeTypes.MILLING)
+                .itemIcon(ModBlocks.MILLSTONE.get())
+                .catalyst(ModBlocks.MILLSTONE::get)
+                .emptyBackground(177, 100)
+                .build(id("millstone"), MillstoneCategory::new);
+
+        registration.addRecipeCategories(workstone, mortarGrinding, mortarMixing, manualAssembly, millstone);
     }
 
     @Override
@@ -131,6 +140,7 @@ public class ManualLabourJeiPlugin implements IModPlugin {
         mortarGrinding.registerRecipes(registration);
         mortarMixing.registerRecipes(registration);
         manualAssembly.registerRecipes(registration);
+        millstone.registerRecipes(registration);
     }
 
     @Override
@@ -139,5 +149,6 @@ public class ManualLabourJeiPlugin implements IModPlugin {
         mortarGrinding.registerCatalysts(registration);
         mortarMixing.registerCatalysts(registration);
         manualAssembly.registerCatalysts(registration);
+        millstone.registerCatalysts(registration);
     }
 }

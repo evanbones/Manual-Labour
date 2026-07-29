@@ -1,4 +1,5 @@
 {
+  "block.manual_labour.millstone": "Millstone",
   "block.manual_labour.mortar": "Mortar",
   "block.manual_labour.workstone": "Workstone",
   "config.manual_labour.category.general": "General",
@@ -18,10 +19,15 @@
   "item.manual_labour.ladle": "Ladle",
   "item.manual_labour.netherite_hammer": "Netherite Hammer",
   "item.manual_labour.pestle": "Pestle",
+  "manual_labour.millstone.too_fast": "Too Fast",
   "manual_labour.recipe.manual_assembly": "Manual Assembly",
+  "manual_labour.recipe.millstone": "Milling",
   "manual_labour.recipe.mortar_grinding": "Mortar Grinding",
   "manual_labour.recipe.mortar_mixing": "Mortar Mixing",
   "manual_labour.recipe.workstone": "Workstone",
+  "message.manual_labour.millstone_space": "Clear Blocks for Placement",
   "recipe.assembly.manual_labour.workstone": "Hit with %s",
+  "subtitles.manual_labour.block.millstone.loop": "Millstone turns",
+  "subtitles.manual_labour.block.millstone.use": "Millstone grinds",
   "subtitles.manual_labour.block.workstone.hammer": "Workstone hammered"
 }

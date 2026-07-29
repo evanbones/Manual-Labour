@@ -15,4 +15,10 @@ public class ModSounds {
 
     public static final DeferredHolder<SoundEvent, SoundEvent> HAMMER2 = SOUNDS.register("block.workstone.hammer2",
             () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "block.workstone.hammer2")));
+
+    public static final DeferredHolder<SoundEvent, SoundEvent> MILLSTONE_LOOP = SOUNDS.register("block.millstone.loop",
+            () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "block.millstone.loop")));
+
+    public static final DeferredHolder<SoundEvent, SoundEvent> MILLSTONE_USE = SOUNDS.register("block.millstone.use",
+            () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "block.millstone.use")));
 }

@@ -1,6 +1,9 @@
 {
   "values": [
     "manual_labour:workstone",
-    "manual_labour:mortar"
+    "manual_labour:mortar",
+    "manual_labour:millstone",
+    "manual_labour:millstone_structural",
+    "manual_labour:millstone_rotor"
   ]
 }

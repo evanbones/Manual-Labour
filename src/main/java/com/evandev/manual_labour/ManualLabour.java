@@ -2,8 +2,19 @@ package com.evandev.manual_labour;
 
 import com.evandev.manual_labour.client.ClientConfigSetup;
 import com.evandev.manual_labour.config.ModConfig;
+import com.evandev.manual_labour.content.block.MillstoneBlock;
+import com.evandev.manual_labour.content.block.MillstoneItemHandler;
+import com.evandev.manual_labour.content.block.MillstoneStructuralBlock;
+import com.evandev.manual_labour.content.block.entity.MillstoneBlockEntity;
 import com.evandev.manual_labour.registry.*;
+import com.simibubi.create.api.stress.BlockStressValues;
+import com.simibubi.create.foundation.item.KineticStats;
+import com.simibubi.create.foundation.item.TooltipModifier;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
@@ -14,6 +25,7 @@ import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
+import org.jetbrains.annotations.Nullable;
 
 @Mod(Constants.MOD_ID)
 @EventBusSubscriber(modid = Constants.MOD_ID)
@@ -50,6 +62,31 @@ public class ManualLabour {
                 ModBlockEntities.MORTAR.get(),
                 (be, context) -> be.getFluidHandler()
         );
+        event.registerBlock(
+                Capabilities.ItemHandler.BLOCK,
+                (level, pos, state, be, side) -> resolveMillstoneItemHandler(level, pos, state),
+                ModBlocks.MILLSTONE.get(),
+                ModBlocks.MILLSTONE_STRUCTURAL.get()
+        );
+    }
+
+    @Nullable
+    private static MillstoneItemHandler resolveMillstoneItemHandler(Level level, BlockPos pos, BlockState state) {
+        BlockPos master;
+        if (state.getBlock() instanceof MillstoneBlock) {
+            master = pos;
+        } else if (state.getBlock() instanceof MillstoneStructuralBlock) {
+            if (state.getValue(MillstoneStructuralBlock.TOP)) {
+                return null;
+            }
+            master = MillstoneStructuralBlock.getMaster(level, pos, state);
+        } else {
+            return null;
+        }
+        if (master != null && level.getBlockEntity(master) instanceof MillstoneBlockEntity millstone) {
+            return new MillstoneItemHandler(millstone);
+        }
+        return null;
     }
 
     @SubscribeEvent
@@ -57,6 +94,7 @@ public class ManualLabour {
         if (event.getTabKey() == CreativeModeTabs.FUNCTIONAL_BLOCKS) {
             event.accept(ModItems.WORKSTONE_ITEM);
             event.accept(ModItems.MORTAR_ITEM);
+            event.accept(ModItems.MILLSTONE_ITEM);
         }
         if (event.getTabKey() == CreativeModeTabs.TOOLS_AND_UTILITIES) {
             event.accept(ModItems.FLINT_HAMMER);
@@ -71,5 +109,10 @@ public class ManualLabour {
 
     private void commonSetup(final FMLCommonSetupEvent event) {
         ModConfig.load();
+        event.enqueueWork(() -> {
+            Block rotor = ModBlocks.MILLSTONE_ROTOR.get();
+            BlockStressValues.IMPACTS.register(rotor, () -> (double) com.evandev.manual_labour.content.block.entity.MillstoneRotorBlockEntity.STRESS_IMPACT);
+            TooltipModifier.REGISTRY.register(ModBlocks.MILLSTONE.get().asItem(), new KineticStats(rotor));
+        });
     }
 }
