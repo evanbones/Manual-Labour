@@ -16,8 +16,23 @@ public class ModConfig {
     private static final File CONFIG_FILE = FMLPaths.CONFIGDIR.get().resolve(Constants.MOD_ID + ".json").toFile();
     private static ModConfig INSTANCE;
 
-    @SerializedName("enabled")
-    public boolean enabled = true;
+    @SerializedName("item_pile_y")
+    public float itemPileY = 0.65F;
+
+    @SerializedName("item_pile_radius")
+    public float itemPileRadius = 0.18F;
+
+    @SerializedName("pestle_tip_contact_offset")
+    public float pestleTipContactOffset = 0.50F;
+
+    @SerializedName("decorative_tool_y")
+    public float decorativeToolY = 0.83F;
+
+    @SerializedName("decorative_tool_side_offset")
+    public float decorativeToolSideOffset = 0.30F;
+
+    @SerializedName("decorative_tool_tilt")
+    public float decorativeToolTilt = 30.0F;
 
     public static ModConfig get() {
         if (INSTANCE == null) {

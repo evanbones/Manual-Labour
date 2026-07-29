@@ -90,6 +90,18 @@ repositories {
             includeGroup "com.tterrag.registrate"
         }
     }
+
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = "BlameJared"
+                url = "https://maven.blamejared.com"
+            }
+        }
+        filter {
+            includeGroup "mezz.jei"
+        }
+    }
 }
 
 neoForge {
@@ -137,15 +149,12 @@ dependencies {
     // YACL
     implementation "maven.modrinth:yacl:${yacl_version}-neoforge"
 
-    // EMI
-    compileOnly "dev.emi:emi-neoforge:${emi_version}"
-    runtimeOnly "dev.emi:emi-neoforge:${emi_version}"
+    // JEI
+    compileOnly "mezz.jei:jei-${minecraft_version}-neoforge-api:${jei_version}"
+    runtimeOnly "mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}"
 
     // Create
     implementation "com.simibubi.create:create-${minecraft_version}:${create_version}"
-
-    // TMRV
-    runtimeOnly "maven.modrinth:tmrv:0.9.0+mc.21.1"
 
     compileOnly group: 'org.spongepowered', name: 'mixin', version: '0.8.5'
     compileOnly group: 'org.ow2.asm', name: 'asm-tree', version: '9.6'

@@ -80,6 +80,7 @@ public class MortarBlockEntity extends BlockEntity {
     private Player activePlayer;
 
     private ItemStack activeTool = ItemStack.EMPTY;
+    private boolean activeToolIsDecorative = false;
     private long processingStartGameTime = -1L;
     private int processingDuration = 0;
 
@@ -126,6 +127,7 @@ public class MortarBlockEntity extends BlockEntity {
             holdGraceTicks = HOLD_GRACE_TICKS;
             activePlayer = player;
             activeTool = toolStack;
+            activeToolIsDecorative = !decorativeTool.isEmpty() && toolStack == decorativeTool;
             return true;
         }
 
@@ -136,6 +138,7 @@ public class MortarBlockEntity extends BlockEntity {
         activeProcess = found.get();
         processingIsGrinding = grinding;
         activeTool = toolStack;
+        activeToolIsDecorative = !decorativeTool.isEmpty() && toolStack == decorativeTool;
         activePlayer = player;
         holdGraceTicks = HOLD_GRACE_TICKS;
         heldDurationTicks = 0;
@@ -152,6 +155,7 @@ public class MortarBlockEntity extends BlockEntity {
         heldDurationTicks = 0;
         holdGraceTicks = 0;
         activeTool = ItemStack.EMPTY;
+        activeToolIsDecorative = false;
         processingStartGameTime = -1L;
         processingDuration = 0;
         setChanged();
@@ -385,6 +389,10 @@ public class MortarBlockEntity extends BlockEntity {
         return activeTool;
     }
 
+    public boolean isActiveToolDecorative() {
+        return activeToolIsDecorative;
+    }
+
     public ItemStack getDecorativeTool() {
         return decorativeTool;
     }
@@ -426,6 +434,7 @@ public class MortarBlockEntity extends BlockEntity {
             processingStartGameTime = -1L;
             processingDuration = 0;
             activeTool = ItemStack.EMPTY;
+            activeToolIsDecorative = false;
             setChanged();
         }
     }
@@ -455,6 +464,7 @@ public class MortarBlockEntity extends BlockEntity {
         inventory.deserializeNBT(registries, tag.getCompound("Inventory"));
         fluidTank.readFromNBT(registries, tag.getCompound("FluidTank"));
         activeTool = tag.contains("ActiveTool") ? ItemStack.parseOptional(registries, tag.getCompound("ActiveTool")) : ItemStack.EMPTY;
+        activeToolIsDecorative = tag.getBoolean("ActiveToolIsDecorative");
         processingStartGameTime = tag.getLong("ProcessingStart");
         processingDuration = tag.getInt("ProcessingDuration");
         decorativeTool = tag.contains("DecorativeTool") ? ItemStack.parseOptional(registries, tag.getCompound("DecorativeTool")) : ItemStack.EMPTY;
@@ -468,6 +478,7 @@ public class MortarBlockEntity extends BlockEntity {
         if (!activeTool.isEmpty()) {
             tag.put("ActiveTool", activeTool.save(registries));
         }
+        tag.putBoolean("ActiveToolIsDecorative", activeToolIsDecorative);
         tag.putLong("ProcessingStart", processingStartGameTime);
         tag.putInt("ProcessingDuration", processingDuration);
         if (!decorativeTool.isEmpty()) {

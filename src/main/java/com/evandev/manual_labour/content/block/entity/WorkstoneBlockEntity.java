@@ -1,12 +1,15 @@
 package com.evandev.manual_labour.content.block.entity;
 
 import com.evandev.manual_labour.content.block.WorkstoneBlock;
-import com.evandev.manual_labour.recipe.ChanceResult;
 import com.evandev.manual_labour.recipe.WorkstoneRecipe;
-import com.evandev.manual_labour.recipe.WorkstoneRecipeInput;
 import com.evandev.manual_labour.registry.ModBlockEntities;
 import com.evandev.manual_labour.registry.ModRecipeTypes;
 import com.evandev.manual_labour.registry.ModSounds;
+import com.simibubi.create.AllDataComponents;
+import com.simibubi.create.AllRecipeTypes;
+import com.simibubi.create.content.kinetics.deployer.DeployerApplicationRecipe;
+import com.simibubi.create.content.processing.recipe.ProcessingRecipe;
+import com.simibubi.create.content.processing.sequenced.SequencedAssemblyRecipe;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -29,9 +32,11 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.ItemStackHandler;
+import net.neoforged.neoforge.items.wrapper.RecipeWrapper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Optional;
 
 public class WorkstoneBlockEntity extends BlockEntity {
@@ -45,7 +50,9 @@ public class WorkstoneBlockEntity extends BlockEntity {
         }
     };
 
-    private final RecipeManager.CachedCheck<WorkstoneRecipeInput, WorkstoneRecipe> quickCheck;
+    private final ItemStackHandler recipeInv = new ItemStackHandler(2);
+
+    private final RecipeManager.CachedCheck<RecipeWrapper, WorkstoneRecipe> quickCheck;
 
     public WorkstoneBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.WORKSTONE.get(), pos, state);
@@ -55,13 +62,19 @@ public class WorkstoneBlockEntity extends BlockEntity {
     public boolean processStoredItemUsingTool(ItemStack toolStack, Player player) {
         if (level == null) return false;
 
-        Optional<RecipeHolder<WorkstoneRecipe>> matchingRecipe = getMatchingRecipe(toolStack);
+        Optional<RecipeHolder<? extends ProcessingRecipe<RecipeWrapper, ?>>> matchingRecipe = getMatchingRecipe(toolStack);
 
         matchingRecipe.ifPresent(recipe -> {
             Direction direction = getBlockState().getValue(WorkstoneBlock.FACING).getCounterClockWise();
+            ItemStack hitItem = getStoredItem();
 
-            for (ChanceResult chanceResult : recipe.value().getResults()) {
-                ItemStack resultStack = chanceResult.rollOutput(level.random);
+            List<ItemStack> rolledResults = recipe.value().rollResults(level.random);
+            boolean stillInProgress = !rolledResults.isEmpty()
+                    && rolledResults.getFirst().has(AllDataComponents.SEQUENCED_ASSEMBLY);
+
+            int ejectFrom = stillInProgress ? 1 : 0;
+            for (int i = ejectFrom; i < rolledResults.size(); i++) {
+                ItemStack resultStack = rolledResults.get(i);
                 if (resultStack.isEmpty()) continue;
 
                 ItemEntity entity = new ItemEntity(
@@ -74,8 +87,14 @@ public class WorkstoneBlockEntity extends BlockEntity {
             }
 
             if (!level.isClientSide) {
-                toolStack.hurtAndBreak(1, (ServerLevel) level, player, (item) -> {
-                });
+                if (recipe.value() instanceof DeployerApplicationRecipe deployerRecipe) {
+                    if (!deployerRecipe.shouldKeepHeldItem()) {
+                        toolStack.shrink(1);
+                    }
+                } else {
+                    toolStack.hurtAndBreak(1, (ServerLevel) level, player, (item) -> {
+                    });
+                }
 
                 SoundEvent hitSound = level.random.nextBoolean()
                         ? ModSounds.HAMMER1.get()
@@ -86,18 +105,40 @@ public class WorkstoneBlockEntity extends BlockEntity {
             }
 
             if (level instanceof ServerLevel serverLevel) {
-                serverLevel.sendParticles(new ItemParticleOption(ParticleTypes.ITEM, getStoredItem()), worldPosition.getX() + 0.5, worldPosition.getY() + 0.8, worldPosition.getZ() + 0.5, 5, 0.1, 0.1, 0.1, 0.05D);
+                serverLevel.sendParticles(new ItemParticleOption(ParticleTypes.ITEM, hitItem), worldPosition.getX() + 0.5, worldPosition.getY() + 0.8, worldPosition.getZ() + 0.5, 5, 0.1, 0.1, 0.1, 0.05D);
             }
 
-            inventory.extractItem(0, 1, false);
+            if (stillInProgress) {
+                inventory.setStackInSlot(0, rolledResults.getFirst());
+            } else {
+                inventory.extractItem(0, 1, false);
+            }
         });
 
         return matchingRecipe.isPresent();
     }
 
-    private Optional<RecipeHolder<WorkstoneRecipe>> getMatchingRecipe(ItemStack toolStack) {
+    private Optional<RecipeHolder<? extends ProcessingRecipe<RecipeWrapper, ?>>> getMatchingRecipe(ItemStack toolStack) {
         if (level == null) return Optional.empty();
-        return quickCheck.getRecipeFor(new WorkstoneRecipeInput(getStoredItem(), toolStack), level);
+
+        recipeInv.setStackInSlot(0, getStoredItem());
+        recipeInv.setStackInSlot(1, toolStack);
+        RecipeWrapper wrapper = new RecipeWrapper(recipeInv);
+
+        Optional<RecipeHolder<WorkstoneRecipe>> workstoneStep = SequencedAssemblyRecipe.getRecipe(
+                level, wrapper, ModRecipeTypes.WORKSTONE.get(), WorkstoneRecipe.class);
+        if (workstoneStep.isPresent()) {
+            return Optional.of(workstoneStep.get());
+        }
+
+        Optional<RecipeHolder<DeployerApplicationRecipe>> deployingStep = SequencedAssemblyRecipe.getRecipe(
+                level, wrapper, AllRecipeTypes.DEPLOYING.<RecipeWrapper, DeployerApplicationRecipe>getType(), DeployerApplicationRecipe.class);
+        if (deployingStep.isPresent()) {
+            return Optional.of(deployingStep.get());
+        }
+
+        Optional<RecipeHolder<WorkstoneRecipe>> standalone = quickCheck.getRecipeFor(wrapper, level);
+        return standalone.map(h -> h);
     }
 
     public boolean canAddItem(ItemStack addedStack) {

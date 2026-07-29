@@ -1,17 +1,16 @@
 {
   "type": "manual_labour:workstone",
-  "ingredient": {
-    "item": "minecraft:cobblestone"
-  },
-  "results": [
+  "ingredients": [
     {
-      "result": {
-        "count": 1,
-        "id": "minecraft:gravel"
-      }
+      "item": "minecraft:cobblestone"
+    },
+    {
+      "tag": "manual_labour:hammers"
     }
   ],
-  "tool": {
-    "tag": "manual_labour:hammers"
-  }
+  "results": [
+    {
+      "id": "minecraft:gravel"
+    }
+  ]
 }

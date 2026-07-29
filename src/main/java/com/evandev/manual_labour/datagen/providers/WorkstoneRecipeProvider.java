@@ -1,10 +1,10 @@
 package com.evandev.manual_labour.datagen.providers;
 
 import com.evandev.manual_labour.Constants;
-import com.evandev.manual_labour.recipe.ChanceResult;
 import com.evandev.manual_labour.recipe.WorkstoneRecipe;
 import com.evandev.manual_labour.registry.ModTags;
-import net.minecraft.core.NonNullList;
+import com.simibubi.create.content.processing.recipe.ProcessingOutput;
+import com.simibubi.create.content.processing.recipe.StandardProcessingRecipe;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -19,28 +19,28 @@ public class WorkstoneRecipeProvider {
 
         createHammerRecipe(output, "cobblestone_to_gravel",
                 Ingredient.of(Items.COBBLESTONE),
-                List.of(new ChanceResult(new ItemStack(Items.GRAVEL), 1.0F)));
+                List.of(new ProcessingOutput(new ItemStack(Items.GRAVEL), 1.0F)));
 
         createHammerRecipe(output, "gravel_to_sand",
                 Ingredient.of(Items.GRAVEL),
                 List.of(
-                        new ChanceResult(new ItemStack(Items.SAND), 1.0F),
-                        new ChanceResult(new ItemStack(Items.FLINT), 0.25F)
+                        new ProcessingOutput(new ItemStack(Items.SAND), 1.0F),
+                        new ProcessingOutput(new ItemStack(Items.FLINT), 0.25F)
                 ));
     }
 
-    private static void createHammerRecipe(RecipeOutput output, String recipeName, Ingredient input, List<ChanceResult> resultsList) {
+    private static void createHammerRecipe(RecipeOutput output, String recipeName, Ingredient input, List<ProcessingOutput> resultsList) {
         Ingredient tool = Ingredient.of(ModTags.Items.HAMMERS);
 
-        NonNullList<ChanceResult> results = NonNullList.create();
-        results.addAll(resultsList);
+        StandardProcessingRecipe.Builder<WorkstoneRecipe> builder = new StandardProcessingRecipe.Builder<>(
+                WorkstoneRecipe::new, ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, recipeName))
+                .require(input)
+                .require(tool);
 
-        WorkstoneRecipe recipe = new WorkstoneRecipe("", input, tool, results);
+        for (ProcessingOutput result : resultsList) {
+            builder.output(result);
+        }
 
-        output.accept(
-                ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "workstone/" + recipeName),
-                recipe,
-                null
-        );
+        builder.build(output);
     }
 }

@@ -1,6 +1,7 @@
 package com.evandev.manual_labour.client.renderer;
 
 import com.evandev.manual_labour.client.ModToolModels;
+import com.evandev.manual_labour.config.ModConfig;
 import com.evandev.manual_labour.content.block.MortarBlock;
 import com.evandev.manual_labour.content.block.entity.MortarBlockEntity;
 import com.evandev.manual_labour.registry.ModTags;
@@ -43,9 +44,6 @@ public class MortarRenderer implements BlockEntityRenderer<MortarBlockEntity> {
     private static final float FLUID_MAX_Y = 14.0F / 16.0F;
     private static final int FLUID_ALPHA = 204;
 
-    private static final float ITEM_PILE_Y = 0.65F;
-    private static final float ITEM_PILE_RADIUS = 0.18F;
-
     private static final float TOOL_PIVOT_X = 8.0F / 16.0F;
     private static final float TOOL_PIVOT_Y = 5.5F / 16.0F;
     private static final float TOOL_PIVOT_Z = 10.5F / 16.0F;
@@ -65,11 +63,11 @@ public class MortarRenderer implements BlockEntityRenderer<MortarBlockEntity> {
         int count = stacks.size();
         for (int i = 0; i < count; i++) {
             poseStack.pushPose();
-            poseStack.translate(0.5D, ITEM_PILE_Y, 0.5D);
+            poseStack.translate(0.5D, ModConfig.get().itemPileY, 0.5D);
 
             if (count > 1) {
                 poseStack.mulPose(Axis.YP.rotationDegrees(360.0F / count * i));
-                poseStack.translate(ITEM_PILE_RADIUS, 0.0D, 0.0D);
+                poseStack.translate(ModConfig.get().itemPileRadius, 0.0D, 0.0D);
             }
 
             renderItemPile(poseStack, buffer, packedLight, packedOverlay, stacks.get(i), i);
@@ -79,7 +77,7 @@ public class MortarRenderer implements BlockEntityRenderer<MortarBlockEntity> {
 
         ItemStack decorativeTool = mortar.getDecorativeTool();
         ItemStack activeTool = mortar.getActiveTool();
-        boolean decorativeToolInUse = mortar.isProcessing() && decorativeTool == activeTool;
+        boolean decorativeToolInUse = mortar.isProcessing() && mortar.isActiveToolDecorative();
         if (!decorativeTool.isEmpty() && !decorativeToolInUse) {
             renderDecorativeTool(mortar, decorativeTool, poseStack, buffer, packedLight, packedOverlay);
         }
@@ -106,12 +104,14 @@ public class MortarRenderer implements BlockEntityRenderer<MortarBlockEntity> {
     private void renderDecorativeTool(MortarBlockEntity mortar, ItemStack tool, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay) {
         Direction facing = mortar.getBlockState().getValue(MortarBlock.FACING);
 
+        ModConfig config = ModConfig.get();
+
         poseStack.pushPose();
-        poseStack.translate(0.5D + facing.getStepX() * 0.27D, 0.55D, 0.5D + facing.getStepZ() * 0.27D);
+        poseStack.translate(0.5D + facing.getStepX() * config.decorativeToolSideOffset, config.decorativeToolY, 0.5D + facing.getStepZ() * config.decorativeToolSideOffset);
         poseStack.mulPose(Axis.YP.rotationDegrees(-facing.toYRot()));
         poseStack.scale(1.1F, 1.1F, 1.1F);
         poseStack.translate(TOOL_PIVOT_X, TOOL_PIVOT_Y, TOOL_PIVOT_Z);
-        poseStack.mulPose(Axis.XP.rotationDegrees(65.0F));
+        poseStack.mulPose(Axis.XP.rotationDegrees(config.decorativeToolTilt));
         poseStack.translate(-TOOL_PIVOT_X, -TOOL_PIVOT_Y, -TOOL_PIVOT_Z);
 
         BakedModel model = tool.is(ModTags.Items.LADLES) ? ModToolModels.ladle() : ModToolModels.pestle();
@@ -140,16 +140,17 @@ public class MortarRenderer implements BlockEntityRenderer<MortarBlockEntity> {
     private void renderPestleGrinding(ItemStack tool, ItemStack primary, float time, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay) {
         int maxStackSize = primary.isEmpty() ? 64 : primary.getMaxStackSize();
         boolean thumping = primary.getCount() > maxStackSize / 2;
+        float contactY = getPileTopY(primary) + ModConfig.get().pestleTipContactOffset;
 
         poseStack.pushPose();
 
         if (thumping) {
             float bounce = (float) Math.abs(Math.sin(Math.toRadians(time * PESTLE_THUMP_SPEED)));
-            poseStack.translate(0.5D, 0.8D + bounce * 0.35D, 0.5D);
+            poseStack.translate(0.5D, contactY + bounce * 0.35D, 0.5D);
         } else {
             float angle = time * PESTLE_GRIND_SPEED;
             Vec3 offset = new Vec3(0.08D, 0.0D, 0.0D).yRot((float) Math.toRadians(angle));
-            poseStack.translate(0.5D + offset.x(), 0.9D, 0.5D + offset.z());
+            poseStack.translate(0.5D + offset.x(), contactY, 0.5D + offset.z());
             poseStack.mulPose(Axis.XP.rotationDegrees(12.0F));
         }
 
@@ -157,6 +158,17 @@ public class MortarRenderer implements BlockEntityRenderer<MortarBlockEntity> {
         renderToolModel(tool, ModToolModels.pestle(), poseStack, buffer, packedLight, packedOverlay);
 
         poseStack.popPose();
+    }
+
+    private float getPileTopY(ItemStack stack) {
+        float itemPileY = ModConfig.get().itemPileY;
+        if (stack.isEmpty()) return itemPileY;
+
+        BakedModel bakedModel = Minecraft.getInstance().getItemRenderer().getModel(stack, null, null, 0);
+        boolean blockItem = bakedModel.isGui3d();
+        int layers = Mth.log2(stack.getCount()) / 2;
+        float layerHeight = blockItem ? 1.0F / 64.0F : 1.0F / 16.0F;
+        return itemPileY + (layers + 1) * layerHeight;
     }
 
     private void renderItemPile(PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay, ItemStack stack, int seed) {
