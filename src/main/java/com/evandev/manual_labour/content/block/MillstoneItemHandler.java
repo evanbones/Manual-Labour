@@ -3,6 +3,7 @@ package com.evandev.manual_labour.content.block;
 import com.evandev.manual_labour.content.block.entity.MillstoneBlockEntity;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.items.IItemHandler;
+import org.jetbrains.annotations.NotNull;
 
 public class MillstoneItemHandler implements IItemHandler {
     private final MillstoneBlockEntity millstone;
@@ -13,41 +14,31 @@ public class MillstoneItemHandler implements IItemHandler {
 
     @Override
     public int getSlots() {
-        return 18;
-    }
-
-    private boolean isOutputSlot(int slot) {
-        return slot < 9;
+        return millstone.capability != null ? millstone.capability.getSlots() : 10;
     }
 
     @Override
-    public ItemStack getStackInSlot(int slot) {
-        return isOutputSlot(slot) ? millstone.getBufferStack(false, slot) : millstone.getBufferStack(true, slot - 9);
+    public @NotNull ItemStack getStackInSlot(int slot) {
+        return millstone.capability != null ? millstone.capability.getStackInSlot(slot) : ItemStack.EMPTY;
     }
 
     @Override
-    public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
-        if (isOutputSlot(slot)) {
-            return stack;
-        }
-        return millstone.insertInput(stack, simulate);
+    public @NotNull ItemStack insertItem(int slot, @NotNull ItemStack stack, boolean simulate) {
+        return millstone.capability != null ? millstone.capability.insertItem(slot, stack, simulate) : stack;
     }
 
     @Override
-    public ItemStack extractItem(int slot, int amount, boolean simulate) {
-        if (!isOutputSlot(slot)) {
-            return ItemStack.EMPTY;
-        }
-        return millstone.extractOutput(slot, amount, simulate);
+    public @NotNull ItemStack extractItem(int slot, int amount, boolean simulate) {
+        return millstone.capability != null ? millstone.capability.extractItem(slot, amount, simulate) : ItemStack.EMPTY;
     }
 
     @Override
     public int getSlotLimit(int slot) {
-        return 64;
+        return millstone.capability != null ? millstone.capability.getSlotLimit(slot) : 64;
     }
 
     @Override
-    public boolean isItemValid(int slot, ItemStack stack) {
-        return !isOutputSlot(slot) && millstone.acceptsItem(stack);
+    public boolean isItemValid(int slot, @NotNull ItemStack stack) {
+        return millstone.capability != null && millstone.capability.isItemValid(slot, stack);
     }
 }

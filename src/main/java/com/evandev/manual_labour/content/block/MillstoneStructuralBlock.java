@@ -10,6 +10,8 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
@@ -76,7 +78,7 @@ public class MillstoneStructuralBlock extends DirectionalBlock {
     }
 
     @Override
-    protected @NotNull VoxelShape getShape(BlockState state, @NotNull BlockGetter level, @NotNull BlockPos pos, @NotNull CollisionContext context) {
+    protected @NotNull VoxelShape getShape(@NotNull BlockState state, @NotNull BlockGetter level, @NotNull BlockPos pos, @NotNull CollisionContext context) {
         return Shapes.block();
     }
 
@@ -85,7 +87,7 @@ public class MillstoneStructuralBlock extends DirectionalBlock {
     }
 
     @Override
-    public @NotNull BlockState playerWillDestroy(Level level, @NotNull BlockPos pos, @NotNull BlockState state, @NotNull Player player) {
+    public @NotNull BlockState playerWillDestroy(@NotNull Level level, @NotNull BlockPos pos, @NotNull BlockState state, @NotNull Player player) {
         BlockPos master = getMaster(level, pos, state);
         if (master != null && !level.isClientSide) {
             level.destroyBlock(master, !player.isCreative());
@@ -105,7 +107,7 @@ public class MillstoneStructuralBlock extends DirectionalBlock {
     }
 
     @Override
-    protected @NotNull BlockState updateShape(BlockState state, @NotNull Direction direction, @NotNull BlockState neighborState, @NotNull LevelAccessor level, @NotNull BlockPos pos, @NotNull BlockPos neighborPos) {
+    protected @NotNull BlockState updateShape(@NotNull BlockState state, @NotNull Direction direction, @NotNull BlockState neighborState, @NotNull LevelAccessor level, @NotNull BlockPos pos, @NotNull BlockPos neighborPos) {
         if (!stillValid(level, pos, state) && !level.getBlockTicks().hasScheduledTick(pos, this)) {
             level.scheduleTick(pos, this, 1);
         }
@@ -120,16 +122,38 @@ public class MillstoneStructuralBlock extends DirectionalBlock {
     }
 
     @Override
-    protected @NotNull ItemInteractionResult useItemOn(@NotNull ItemStack stack, @NotNull BlockState state, Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull InteractionHand hand, @NotNull BlockHitResult hitResult) {
+    public void updateEntityAfterFallOn(@NotNull BlockGetter level, @NotNull Entity entity) {
+        super.updateEntityAfterFallOn(level, entity);
+        if (entity.level().isClientSide || !(entity instanceof ItemEntity itemEntity) || !entity.isAlive()) {
+            return;
+        }
+        BlockPos masterPos = getMaster(level, entity.blockPosition(), level.getBlockState(entity.blockPosition()));
+        if (masterPos == null) {
+            masterPos = getMaster(level, entity.blockPosition().below(), level.getBlockState(entity.blockPosition().below()));
+        }
+        if (masterPos != null && level.getBlockEntity(masterPos) instanceof MillstoneBlockEntity millstone) {
+            millstone.tryInsertItemEntity(itemEntity);
+        }
+    }
+
+    @Override
+    protected @NotNull ItemInteractionResult useItemOn(@NotNull ItemStack stack, @NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull InteractionHand hand, @NotNull BlockHitResult hitResult) {
         BlockPos master = getMaster(level, pos, state);
         if (master != null && level.getBlockEntity(master) instanceof MillstoneBlockEntity millstone) {
-            return millstone.insertByHand(player, hand, stack);
+            ItemInteractionResult res = millstone.insertByHand(player, hand, stack);
+            if (res.consumesAction()) {
+                return res;
+            }
+            InteractionResult extractRes = millstone.extractByHand(player);
+            if (extractRes.consumesAction()) {
+                return ItemInteractionResult.sidedSuccess(level.isClientSide);
+            }
         }
         return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
     }
 
     @Override
-    protected @NotNull InteractionResult useWithoutItem(@NotNull BlockState state, Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull BlockHitResult hitResult) {
+    protected @NotNull InteractionResult useWithoutItem(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull BlockHitResult hitResult) {
         BlockPos master = getMaster(level, pos, state);
         if (master != null && level.getBlockEntity(master) instanceof MillstoneBlockEntity millstone) {
             return millstone.extractByHand(player);
@@ -138,7 +162,7 @@ public class MillstoneStructuralBlock extends DirectionalBlock {
     }
 
     @Override
-    public @NotNull ItemStack getCloneItemStack(BlockState state, HitResult target, LevelReader level, BlockPos pos, Player player) {
+    public @NotNull ItemStack getCloneItemStack(@NotNull BlockState state, @NotNull HitResult target, @NotNull LevelReader level, @NotNull BlockPos pos, @NotNull Player player) {
         return new ItemStack(ModBlocks.MILLSTONE.get());
     }
 

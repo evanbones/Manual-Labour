@@ -10,15 +10,18 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.NonNullList;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
-import net.minecraft.world.*;
+import net.minecraft.world.Containers;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeHolder;
@@ -27,79 +30,100 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.items.ItemHandlerHelper;
+import net.neoforged.neoforge.items.ItemStackHandler;
+import net.neoforged.neoforge.items.wrapper.CombinedInvWrapper;
+import net.neoforged.neoforge.items.wrapper.RecipeWrapper;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Optional;
 
 public class MillstoneBlockEntity extends KineticBlockEntity {
-    public static final int SLOTS_PER_BUFFER = 9;
-    public static final int BUFFER_CAPACITY = 64;
     public static final float BASE_SPEED = 256.0F;
     public static final float SPEED_LIMIT = 64.0F;
     public static final float STRESS_IMPACT = 16.0F;
 
+    public ItemStackHandler inputInv;
+    public ItemStackHandler outputInv;
+    public IItemHandler capability;
+    public int timer;
+    private MillingRecipe lastRecipe;
+
     public float angle;
     public float prevAngle;
-
-    private NonNullList<ItemStack> input = NonNullList.withSize(SLOTS_PER_BUFFER, ItemStack.EMPTY);
-    private NonNullList<ItemStack> output = NonNullList.withSize(SLOTS_PER_BUFFER, ItemStack.EMPTY);
-    private float progress;
     private ItemStack grindingStack = ItemStack.EMPTY;
 
     public MillstoneBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.MILLSTONE.get(), pos, state);
+        inputInv = new ItemStackHandler(1);
+        outputInv = new ItemStackHandler(9);
+        capability = new MillstoneInventoryHandler();
     }
 
     public static void serverTick(Level level, BlockPos pos, BlockState state, MillstoneBlockEntity millstone) {
         float speed = millstone.rotorSpeed();
-        if (speed > 0.0F && !millstone.isOverspeed()) {
-            AABB topVolume = new AABB(pos).inflate(1.5, 0.5, 1.5).move(0.0, 0.5, 0.0);
-            for (Entity entity : level.getEntities((Entity) null, topVolume, e -> !(e instanceof Player))) {
+        AABB topVolume = new AABB(pos).inflate(1.5, 0.5, 1.5).move(0.0, 0.5, 0.0);
+        for (Entity entity : level.getEntities((Entity) null, topVolume, Entity::isAlive)) {
+            if (entity instanceof ItemEntity itemEntity) {
+                millstone.tryInsertItemEntity(itemEntity);
+            } else if (!(entity instanceof Player) && speed > 0.0F && !millstone.isOverspeed()) {
                 turnEntity(level, pos, pos, entity);
             }
         }
 
         if (speed <= 0.0F || millstone.isOverspeed()) {
             millstone.setGrindingStack(ItemStack.EMPTY);
-            if (millstone.progress != 0.0F) {
-                millstone.progress = 0.0F;
+            if (millstone.timer != 0) {
+                millstone.timer = 0;
                 millstone.setChanged();
             }
             return;
         }
 
-        int workSlot = -1;
-        RecipeHolder<MillingRecipe> recipe = null;
-        for (int slot = 0; slot < SLOTS_PER_BUFFER; slot++) {
-            ItemStack stack = millstone.input.get(slot);
-            if (stack.isEmpty()) {
-                continue;
-            }
-            Optional<RecipeHolder<MillingRecipe>> match = AllRecipeTypes.MILLING.find(new SingleRecipeInput(stack), level);
-            if (match.isPresent() && millstone.canFitResult(match.get().value())) {
-                workSlot = slot;
-                recipe = match.get();
+        boolean outputFull = true;
+        for (int slot = 0; slot < millstone.outputInv.getSlots(); slot++) {
+            if (millstone.outputInv.getStackInSlot(slot).getCount() < millstone.outputInv.getSlotLimit(slot)) {
+                outputFull = false;
                 break;
             }
         }
+        if (outputFull) {
+            return;
+        }
 
-        if (recipe == null) {
+        if (millstone.timer > 0) {
+            millstone.timer -= millstone.getProcessingSpeed();
+            millstone.setGrindingStack(millstone.inputInv.getStackInSlot(0).copyWithCount(1));
+            if (millstone.timer <= 0) {
+                millstone.process(level);
+            }
+            millstone.setChanged();
+            return;
+        }
+
+        if (millstone.inputInv.getStackInSlot(0).isEmpty()) {
             millstone.setGrindingStack(ItemStack.EMPTY);
-            if (millstone.progress != 0.0F) {
-                millstone.progress = 0.0F;
-                millstone.setChanged();
+            return;
+        }
+
+        RecipeWrapper inventoryIn = new RecipeWrapper(millstone.inputInv);
+        if (millstone.lastRecipe == null || !millstone.lastRecipe.matches(inventoryIn, level)) {
+            Optional<RecipeHolder<MillingRecipe>> recipe = AllRecipeTypes.MILLING.find(inventoryIn, level);
+            if (recipe.isEmpty()) {
+                millstone.timer = 100;
+                millstone.sendData();
+            } else {
+                millstone.lastRecipe = recipe.get().value();
+                millstone.timer = millstone.lastRecipe.getProcessingDuration();
+                millstone.sendData();
             }
             return;
         }
 
-        millstone.setGrindingStack(millstone.input.get(workSlot).copyWithCount(1));
-        millstone.progress += speed / BASE_SPEED;
-
-        if (millstone.progress >= recipe.value().getProcessingDuration()) {
-            millstone.complete(level, workSlot, recipe.value());
-            millstone.progress = 0.0F;
-        }
-        millstone.setChanged();
+        millstone.timer = millstone.lastRecipe.getProcessingDuration();
+        millstone.sendData();
     }
 
     public static void turnEntity(Level level, BlockPos masterPos, BlockPos standingPos, Entity entity) {
@@ -124,7 +148,7 @@ public class MillstoneBlockEntity extends KineticBlockEntity {
             Vec3 offset = entity.position().subtract(origin);
             offset = VecHelper.rotate(offset, Mth.clamp(speed, -16.0F, 16.0F), Direction.Axis.Y);
             Vec3 movement = origin.add(offset).subtract(entity.position());
-            entity.move(net.minecraft.world.entity.MoverType.SHULKER_BOX, movement);
+            entity.move(MoverType.SHULKER_BOX, movement);
             return;
         }
 
@@ -156,6 +180,10 @@ public class MillstoneBlockEntity extends KineticBlockEntity {
 
     public boolean isOverspeed() {
         return Math.abs(getSpeed()) > SPEED_LIMIT;
+    }
+
+    public int getProcessingSpeed() {
+        return Mth.clamp((int) Math.abs(getSpeed() / 16.0F), 1, 512);
     }
 
     @Override
@@ -228,7 +256,7 @@ public class MillstoneBlockEntity extends KineticBlockEntity {
     }
 
     public ItemStack getGrindingStack() {
-        return grindingStack;
+        return inputInv.getStackInSlot(0);
     }
 
     private void setGrindingStack(ItemStack stack) {
@@ -240,17 +268,31 @@ public class MillstoneBlockEntity extends KineticBlockEntity {
         sendData();
     }
 
-    private void complete(Level level, int slot, MillingRecipe recipe) {
-        ItemStack stackInSlot = input.get(slot);
-        ItemStack craftingRemainder = stackInSlot.getCraftingRemainingItem();
-        stackInSlot.shrink(1);
+    private void process(Level level) {
+        RecipeWrapper inventoryIn = new RecipeWrapper(inputInv);
 
-        for (ItemStack result : recipe.rollResults(level.random)) {
-            insertResult(result);
+        if (lastRecipe == null || !lastRecipe.matches(inventoryIn, level)) {
+            Optional<RecipeHolder<MillingRecipe>> recipe = AllRecipeTypes.MILLING.find(inventoryIn, level);
+            if (recipe.isEmpty()) {
+                return;
+            }
+            lastRecipe = recipe.get().value();
         }
-        if (!craftingRemainder.isEmpty()) {
-            insertResult(craftingRemainder);
+
+        ItemStack stackInSlot = inputInv.getStackInSlot(0);
+        ItemStack craftingRemainingItem = stackInSlot.getCraftingRemainingItem();
+        stackInSlot.shrink(1);
+        inputInv.setStackInSlot(0, stackInSlot);
+
+        for (ItemStack result : lastRecipe.rollResults(level.random)) {
+            ItemHandlerHelper.insertItemStacked(outputInv, result, false);
         }
+        if (!craftingRemainingItem.isEmpty()) {
+            ItemHandlerHelper.insertItemStacked(outputInv, craftingRemainingItem, false);
+        }
+
+        sendData();
+        setChanged();
     }
 
     private float rotorSpeed() {
@@ -261,144 +303,103 @@ public class MillstoneBlockEntity extends KineticBlockEntity {
         if (level == null || stack.isEmpty()) {
             return false;
         }
+        ItemStackHandler tester = new ItemStackHandler(1);
+        tester.setStackInSlot(0, stack);
+        RecipeWrapper inventoryIn = new RecipeWrapper(tester);
+        if (lastRecipe != null && lastRecipe.matches(inventoryIn, level)) {
+            return true;
+        }
         return AllRecipeTypes.MILLING.find(new SingleRecipeInput(stack), level).isPresent();
     }
 
-    public int totalCount(boolean isInput) {
-        NonNullList<ItemStack> buffer = isInput ? input : output;
-        int total = 0;
-        for (ItemStack stack : buffer) {
-            total += stack.getCount();
+    public void tryInsertItemEntity(ItemEntity itemEntity) {
+        if (level == null || level.isClientSide || !itemEntity.isAlive()) {
+            return;
         }
-        return total;
-    }
-
-    public ItemStack getBufferStack(boolean isInput, int slot) {
-        return (isInput ? input : output).get(slot);
-    }
-
-    public ItemStack insertInput(ItemStack stack, boolean simulate) {
-        if (!acceptsItem(stack)) {
-            return stack;
+        ItemStack stack = itemEntity.getItem();
+        if (stack.isEmpty() || !acceptsItem(stack)) {
+            return;
         }
-        int room = BUFFER_CAPACITY - totalCount(true);
-        if (room <= 0) {
-            return stack;
-        }
-        int toInsert = Math.min(stack.getCount(), room);
-        int remaining = toInsert;
-
-        for (int slot = 0; slot < SLOTS_PER_BUFFER && remaining > 0; slot++) {
-            ItemStack existing = input.get(slot);
-            if (existing.isEmpty() || !ItemStack.isSameItemSameComponents(existing, stack)) {
-                continue;
-            }
-            int space = Math.min(existing.getMaxStackSize(), BUFFER_CAPACITY) - existing.getCount();
-            int moved = Math.min(space, remaining);
-            if (moved > 0) {
-                if (!simulate) {
-                    existing.grow(moved);
-                }
-                remaining -= moved;
-            }
-        }
-
-        for (int slot = 0; slot < SLOTS_PER_BUFFER && remaining > 0; slot++) {
-            if (!input.get(slot).isEmpty()) {
-                continue;
-            }
-            int moved = Math.min(stack.getMaxStackSize(), remaining);
-            if (!simulate) {
-                input.set(slot, stack.copyWithCount(moved));
-            }
-            remaining -= moved;
-        }
-
-        int inserted = toInsert - remaining;
-        if (inserted <= 0) {
-            return stack;
-        }
-        if (!simulate) {
+        ItemStack remainder = ItemHandlerHelper.insertItemStacked(inputInv, stack, false);
+        if (remainder.isEmpty()) {
+            itemEntity.discard();
+            setChanged();
+            sendData();
+        } else if (remainder.getCount() < stack.getCount()) {
+            itemEntity.setItem(remainder);
             setChanged();
             sendData();
         }
-        return stack.copyWithCount(stack.getCount() - inserted);
-    }
-
-    public ItemStack extractOutput(int slot, int amount, boolean simulate) {
-        ItemStack existing = output.get(slot);
-        if (existing.isEmpty() || amount <= 0) {
-            return ItemStack.EMPTY;
-        }
-        int taken = Math.min(amount, existing.getCount());
-        ItemStack result = existing.copyWithCount(taken);
-        if (!simulate) {
-            existing.shrink(taken);
-            setChanged();
-            sendData();
-        }
-        return result;
-    }
-
-    private boolean canFitResult(MillingRecipe recipe) {
-        int amount = 0;
-        for (ItemStack possible : recipe.getRollableResultsAsItemStacks()) {
-            amount += possible.getCount();
-        }
-        return totalCount(false) + amount <= BUFFER_CAPACITY;
-    }
-
-    private void insertResult(ItemStack result) {
-        for (int slot = 0; slot < SLOTS_PER_BUFFER && !result.isEmpty(); slot++) {
-            ItemStack existing = output.get(slot);
-            if (existing.isEmpty()) {
-                output.set(slot, result.copy());
-                result.setCount(0);
-            } else if (ItemStack.isSameItemSameComponents(existing, result)) {
-                int moved = Math.min(existing.getMaxStackSize() - existing.getCount(), result.getCount());
-                existing.grow(moved);
-                result.shrink(moved);
-            }
-        }
-        setChanged();
-        sendData();
     }
 
     public ItemInteractionResult insertByHand(Player player, InteractionHand hand, ItemStack stack) {
-        if (level == null || !acceptsItem(stack)) {
+        if (level == null || stack.isEmpty() || !acceptsItem(stack)) {
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
         if (level.isClientSide) {
             return ItemInteractionResult.sidedSuccess(true);
         }
-        ItemStack leftover = insertInput(stack, false);
-        if (leftover.getCount() == stack.getCount()) {
-            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        ItemStack remainder = ItemHandlerHelper.insertItemStacked(inputInv, stack, false);
+        if (remainder.getCount() < stack.getCount()) {
+            player.setItemInHand(hand, remainder);
+            setChanged();
+            sendData();
+            return ItemInteractionResult.sidedSuccess(false);
         }
-        player.setItemInHand(hand, leftover);
-        return ItemInteractionResult.sidedSuccess(false);
+        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
     }
 
     public InteractionResult extractByHand(Player player) {
         if (level == null) {
             return InteractionResult.PASS;
         }
-        boolean hasOutput = totalCount(false) > 0;
+
+        boolean emptiedAnything = false;
         if (level.isClientSide) {
-            return hasOutput ? InteractionResult.SUCCESS : InteractionResult.PASS;
-        }
-        for (int slot = SLOTS_PER_BUFFER - 1; slot >= 0; slot--) {
-            ItemStack existing = output.get(slot);
-            if (existing.isEmpty()) {
-                continue;
+            boolean hasItems = false;
+            for (int slot = 0; slot < outputInv.getSlots(); slot++) {
+                if (!outputInv.getStackInSlot(slot).isEmpty()) {
+                    hasItems = true;
+                    break;
+                }
             }
-            ItemStack taken = existing.copy();
-            output.set(slot, ItemStack.EMPTY);
+            if (!hasItems) {
+                for (int slot = 0; slot < inputInv.getSlots(); slot++) {
+                    if (!inputInv.getStackInSlot(slot).isEmpty()) {
+                        hasItems = true;
+                        break;
+                    }
+                }
+            }
+            return hasItems ? InteractionResult.SUCCESS : InteractionResult.PASS;
+        }
+
+        for (int slot = 0; slot < outputInv.getSlots(); slot++) {
+            ItemStack stackInSlot = outputInv.getStackInSlot(slot);
+            if (!stackInSlot.isEmpty()) {
+                emptiedAnything = true;
+                player.getInventory().placeItemBackInInventory(stackInSlot);
+                outputInv.setStackInSlot(slot, ItemStack.EMPTY);
+            }
+        }
+
+        if (!emptiedAnything) {
+            for (int slot = 0; slot < inputInv.getSlots(); slot++) {
+                ItemStack stackInSlot = inputInv.getStackInSlot(slot);
+                if (!stackInSlot.isEmpty()) {
+                    emptiedAnything = true;
+                    player.getInventory().placeItemBackInInventory(stackInSlot);
+                    inputInv.setStackInSlot(slot, ItemStack.EMPTY);
+                }
+            }
+        }
+
+        if (emptiedAnything) {
             setChanged();
             sendData();
-            player.getInventory().placeItemBackInInventory(taken);
             return InteractionResult.CONSUME;
         }
+
         return InteractionResult.PASS;
     }
 
@@ -406,30 +407,28 @@ public class MillstoneBlockEntity extends KineticBlockEntity {
         if (level == null) {
             return;
         }
-        for (ItemStack stack : input) {
+        for (int i = 0; i < inputInv.getSlots(); i++) {
+            ItemStack stack = inputInv.getStackInSlot(i);
             if (!stack.isEmpty()) {
                 Containers.dropItemStack(level, worldPosition.getX() + 0.5, worldPosition.getY() + 1.0, worldPosition.getZ() + 0.5, stack);
             }
         }
-        for (ItemStack stack : output) {
+        for (int i = 0; i < outputInv.getSlots(); i++) {
+            ItemStack stack = outputInv.getStackInSlot(i);
             if (!stack.isEmpty()) {
                 Containers.dropItemStack(level, worldPosition.getX() + 0.5, worldPosition.getY() + 1.0, worldPosition.getZ() + 0.5, stack);
             }
         }
-        input = NonNullList.withSize(SLOTS_PER_BUFFER, ItemStack.EMPTY);
-        output = NonNullList.withSize(SLOTS_PER_BUFFER, ItemStack.EMPTY);
+        inputInv = new ItemStackHandler(1);
+        outputInv = new ItemStackHandler(9);
     }
 
     @Override
     protected void write(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
         super.write(tag, registries, clientPacket);
-        tag.putFloat("Progress", progress);
-        CompoundTag inputTag = new CompoundTag();
-        ContainerHelper.saveAllItems(inputTag, input, registries);
-        tag.put("Input", inputTag);
-        CompoundTag outputTag = new CompoundTag();
-        ContainerHelper.saveAllItems(outputTag, output, registries);
-        tag.put("Output", outputTag);
+        tag.putInt("Timer", timer);
+        tag.put("InputInventory", inputInv.serializeNBT(registries));
+        tag.put("OutputInventory", outputInv.serializeNBT(registries));
         if (!grindingStack.isEmpty()) {
             tag.put("Grinding", grindingStack.save(registries));
         }
@@ -438,11 +437,46 @@ public class MillstoneBlockEntity extends KineticBlockEntity {
     @Override
     protected void read(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
         super.read(tag, registries, clientPacket);
-        progress = tag.getFloat("Progress");
-        input = NonNullList.withSize(SLOTS_PER_BUFFER, ItemStack.EMPTY);
-        output = NonNullList.withSize(SLOTS_PER_BUFFER, ItemStack.EMPTY);
-        ContainerHelper.loadAllItems(tag.getCompound("Input"), input, registries);
-        ContainerHelper.loadAllItems(tag.getCompound("Output"), output, registries);
+        timer = tag.getInt("Timer");
+        if (tag.contains("InputInventory")) {
+            inputInv.deserializeNBT(registries, tag.getCompound("InputInventory"));
+        }
+        if (tag.contains("OutputInventory")) {
+            outputInv.deserializeNBT(registries, tag.getCompound("OutputInventory"));
+        }
         grindingStack = tag.contains("Grinding") ? ItemStack.parseOptional(registries, tag.getCompound("Grinding")) : ItemStack.EMPTY;
+    }
+
+    private class MillstoneInventoryHandler extends CombinedInvWrapper {
+        public MillstoneInventoryHandler() {
+            super(inputInv, outputInv);
+        }
+
+        @Override
+        public boolean isItemValid(int slot, @NotNull ItemStack stack) {
+            if (getHandlerFromIndex(getIndexForSlot(slot)) == outputInv) {
+                return false;
+            }
+            return acceptsItem(stack) && super.isItemValid(slot, stack);
+        }
+
+        @Override
+        public @NotNull ItemStack insertItem(int slot, @NotNull ItemStack stack, boolean simulate) {
+            if (getHandlerFromIndex(getIndexForSlot(slot)) == outputInv) {
+                return stack;
+            }
+            if (!isItemValid(slot, stack)) {
+                return stack;
+            }
+            return super.insertItem(slot, stack, simulate);
+        }
+
+        @Override
+        public @NotNull ItemStack extractItem(int slot, int amount, boolean simulate) {
+            if (getHandlerFromIndex(getIndexForSlot(slot)) == inputInv) {
+                return ItemStack.EMPTY;
+            }
+            return super.extractItem(slot, amount, simulate);
+        }
     }
 }

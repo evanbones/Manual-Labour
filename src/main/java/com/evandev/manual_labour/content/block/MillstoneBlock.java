@@ -13,6 +13,8 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -137,9 +139,29 @@ public class MillstoneBlock extends KineticBlock implements IBE<MillstoneBlockEn
     }
 
     @Override
+    public void updateEntityAfterFallOn(@NotNull BlockGetter level, @NotNull Entity entity) {
+        super.updateEntityAfterFallOn(level, entity);
+        if (entity.level().isClientSide || !(entity instanceof ItemEntity itemEntity) || !entity.isAlive()) {
+            return;
+        }
+        if (level.getBlockEntity(entity.blockPosition()) instanceof MillstoneBlockEntity millstone) {
+            millstone.tryInsertItemEntity(itemEntity);
+        } else if (level.getBlockEntity(entity.blockPosition().below()) instanceof MillstoneBlockEntity millstoneBelow) {
+            millstoneBelow.tryInsertItemEntity(itemEntity);
+        }
+    }
+
+    @Override
     protected @NotNull ItemInteractionResult useItemOn(@NotNull ItemStack stack, @NotNull BlockState state, Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull InteractionHand hand, @NotNull BlockHitResult hitResult) {
         if (level.getBlockEntity(pos) instanceof MillstoneBlockEntity millstone) {
-            return millstone.insertByHand(player, hand, stack);
+            ItemInteractionResult res = millstone.insertByHand(player, hand, stack);
+            if (res.consumesAction()) {
+                return res;
+            }
+            InteractionResult extractRes = millstone.extractByHand(player);
+            if (extractRes.consumesAction()) {
+                return ItemInteractionResult.sidedSuccess(level.isClientSide);
+            }
         }
         return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
     }
