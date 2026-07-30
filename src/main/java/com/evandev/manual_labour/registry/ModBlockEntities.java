@@ -2,7 +2,6 @@ package com.evandev.manual_labour.registry;
 
 import com.evandev.manual_labour.Constants;
 import com.evandev.manual_labour.content.block.entity.MillstoneBlockEntity;
-import com.evandev.manual_labour.content.block.entity.MillstoneRotorBlockEntity;
 import com.evandev.manual_labour.content.block.entity.MortarBlockEntity;
 import com.evandev.manual_labour.content.block.entity.WorkstoneBlockEntity;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -21,7 +20,4 @@ public class ModBlockEntities {
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<MillstoneBlockEntity>> MILLSTONE =
             BLOCK_ENTITIES.register("millstone", () -> BlockEntityType.Builder.of(MillstoneBlockEntity::new, ModBlocks.MILLSTONE.get()).build(null));
-
-    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<MillstoneRotorBlockEntity>> MILLSTONE_ROTOR =
-            BLOCK_ENTITIES.register("millstone_rotor", () -> BlockEntityType.Builder.of(MillstoneRotorBlockEntity::new, ModBlocks.MILLSTONE_ROTOR.get()).build(null));
 }

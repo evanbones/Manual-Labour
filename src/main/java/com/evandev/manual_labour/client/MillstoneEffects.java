@@ -42,7 +42,7 @@ public class MillstoneEffects {
         }
 
         if (random.nextFloat() < Math.min(speed / 300.0F, 0.24F)) {
-            level.playLocalSound(controllerPos.getX() + 0.5, controllerPos.getY() + 1.0, controllerPos.getZ() + 0.5,
+            level.playLocalSound(controllerPos.getX() + 0.5, controllerPos.getY() + 0.5, controllerPos.getZ() + 0.5,
                     ModSounds.MILLSTONE_USE.get(), SoundSource.BLOCKS,
                     Mth.clamp(0.5F + speed / 256.0F, 0.5F, 1.0F),
                     0.9F + random.nextFloat() * 0.2F + Math.min(speed / 1024.0F, 0.2F), false);
@@ -50,7 +50,7 @@ public class MillstoneEffects {
 
         double cx = controllerPos.getX() + 0.5;
         double cz = controllerPos.getZ() + 0.5;
-        double seamY = controllerPos.getY() + 1.03;
+        double seamY = controllerPos.getY() + 0.53;
 
         float dustPerTick = Mth.clamp(speed / 8.0F, 0.5F, 16.0F);
         int guaranteed = (int) dustPerTick;
@@ -63,7 +63,7 @@ public class MillstoneEffects {
         for (int i = 0; i < count; i++) {
             double angle = random.nextDouble() * Math.PI * 2.0;
             double radius = 1.35 + random.nextDouble() * 0.25;
-            double y = seamY - random.nextDouble() * random.nextDouble() * 0.5;
+            double y = seamY - random.nextDouble() * random.nextDouble() * 0.3;
             double x = cx + Math.cos(angle) * radius;
             double z = cz + Math.sin(angle) * radius;
             double outward = 0.12 + random.nextDouble() * 0.08;
@@ -76,7 +76,7 @@ public class MillstoneEffects {
             double angle = random.nextDouble() * Math.PI * 2.0;
             double radius = 1.35 + random.nextDouble() * 0.15;
             level.addParticle(new ItemParticleOption(ParticleTypes.ITEM, grinding),
-                    cx + Math.cos(angle) * radius, seamY - random.nextDouble() * 0.2, cz + Math.sin(angle) * radius,
+                    cx + Math.cos(angle) * radius, seamY - random.nextDouble() * 0.15, cz + Math.sin(angle) * radius,
                     Math.cos(angle) * 0.16, 0.06, Math.sin(angle) * 0.16);
         }
     }

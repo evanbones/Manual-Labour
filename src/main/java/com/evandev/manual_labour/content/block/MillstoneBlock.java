@@ -4,7 +4,10 @@ import com.evandev.manual_labour.content.block.entity.MillstoneBlockEntity;
 import com.evandev.manual_labour.registry.ModBlockEntities;
 import com.evandev.manual_labour.registry.ModBlocks;
 import com.mojang.serialization.MapCodec;
+import com.simibubi.create.content.kinetics.base.KineticBlock;
+import com.simibubi.create.foundation.block.IBE;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
@@ -13,20 +16,23 @@ import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RenderShape;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class MillstoneBlock extends BaseEntityBlock {
+public class MillstoneBlock extends KineticBlock implements IBE<MillstoneBlockEntity> {
     public static final MapCodec<MillstoneBlock> CODEC = simpleCodec(MillstoneBlock::new);
 
     public MillstoneBlock(Properties properties) {
@@ -34,8 +40,20 @@ public class MillstoneBlock extends BaseEntityBlock {
     }
 
     @Override
-    protected @NotNull MapCodec<? extends BaseEntityBlock> codec() {
+    protected @NotNull MapCodec<? extends Block> codec() {
         return CODEC;
+    }
+
+    private static final VoxelShape BASE_SHAPE = Block.box(0, 0, 0, 16, 8, 16);
+
+    @Override
+    protected @NotNull VoxelShape getOcclusionShape(@NotNull BlockState state, @NotNull BlockGetter level, @NotNull BlockPos pos) {
+        return BASE_SHAPE;
+    }
+
+    @Override
+    protected @NotNull VoxelShape getShape(@NotNull BlockState state, @NotNull BlockGetter level, @NotNull BlockPos pos, @NotNull CollisionContext context) {
+        return Shapes.block();
     }
 
     @Override
@@ -43,17 +61,24 @@ public class MillstoneBlock extends BaseEntityBlock {
         return RenderShape.MODEL;
     }
 
-    @Nullable
     @Override
-    public BlockEntity newBlockEntity(@NotNull BlockPos pos, @NotNull BlockState state) {
-        return new MillstoneBlockEntity(pos, state);
+    public boolean hasShaftTowards(@NotNull LevelReader level, @NotNull BlockPos pos, @NotNull BlockState state, @NotNull Direction face) {
+        return face == Direction.UP;
     }
 
-    @Nullable
     @Override
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(@NotNull Level level, @NotNull BlockState state, @NotNull BlockEntityType<T> type) {
-        return createTickerHelper(type, ModBlockEntities.MILLSTONE.get(),
-                level.isClientSide ? MillstoneBlockEntity::clientTick : MillstoneBlockEntity::serverTick);
+    public Direction.Axis getRotationAxis(@NotNull BlockState state) {
+        return Direction.Axis.Y;
+    }
+
+    @Override
+    public Class<MillstoneBlockEntity> getBlockEntityClass() {
+        return MillstoneBlockEntity.class;
+    }
+
+    @Override
+    public BlockEntityType<? extends MillstoneBlockEntity> getBlockEntityType() {
+        return ModBlockEntities.MILLSTONE.get();
     }
 
     @Nullable
@@ -70,7 +95,7 @@ public class MillstoneBlock extends BaseEntityBlock {
     }
 
     @Override
-    protected void onPlace(BlockState state, @NotNull Level level, @NotNull BlockPos pos, BlockState oldState, boolean movedByPiston) {
+    public void onPlace(BlockState state, @NotNull Level level, @NotNull BlockPos pos, BlockState oldState, boolean movedByPiston) {
         super.onPlace(state, level, pos, oldState, movedByPiston);
         if (!level.getBlockTicks().hasScheduledTick(pos, this)) {
             level.scheduleTick(pos, this, 1);
@@ -78,11 +103,11 @@ public class MillstoneBlock extends BaseEntityBlock {
     }
 
     @Override
-    protected @NotNull BlockState updateShape(BlockState state, @NotNull net.minecraft.core.Direction direction, @NotNull BlockState neighborState, @NotNull LevelAccessor level, @NotNull BlockPos pos, @NotNull BlockPos neighborPos) {
+    protected @NotNull BlockState updateShape(BlockState state, @NotNull Direction direction, @NotNull BlockState neighborState, @NotNull LevelAccessor level, @NotNull BlockPos pos, @NotNull BlockPos neighborPos) {
         if (level instanceof Level realLevel && !realLevel.isClientSide && !realLevel.getBlockTicks().hasScheduledTick(pos, this)) {
             realLevel.scheduleTick(pos, this, 1);
         }
-        return state;
+        return super.updateShape(state, direction, neighborState, level, pos, neighborPos);
     }
 
     @Override
@@ -91,25 +116,7 @@ public class MillstoneBlock extends BaseEntityBlock {
             BlockPos target = pos.offset(offset);
             BlockState expected = ModBlocks.MILLSTONE_STRUCTURAL.get().defaultBlockState()
                     .setValue(MillstoneStructuralBlock.FACING, MillstoneStructure.baseFacing(offset))
-                    .setValue(MillstoneStructuralBlock.TOP, false)
                     .setValue(MillstoneStructuralBlock.CORNER, MillstoneStructure.isCorner(offset));
-            if (!placePiece(level, pos, target, expected)) {
-                return;
-            }
-        }
-
-        BlockPos rotorPos = pos.offset(MillstoneStructure.ROTOR_OFFSET);
-        if (!placePiece(level, pos, rotorPos, ModBlocks.MILLSTONE_ROTOR.get().defaultBlockState())) {
-            return;
-        }
-
-        for (BlockPos offset : MillstoneStructure.TOP_OFFSETS) {
-            BlockPos target = pos.offset(offset);
-            BlockPos baseOffset = offset.below();
-            BlockState expected = ModBlocks.MILLSTONE_STRUCTURAL.get().defaultBlockState()
-                    .setValue(MillstoneStructuralBlock.FACING, MillstoneStructure.baseFacing(baseOffset))
-                    .setValue(MillstoneStructuralBlock.TOP, true)
-                    .setValue(MillstoneStructuralBlock.CORNER, MillstoneStructure.isCorner(baseOffset));
             if (!placePiece(level, pos, target, expected)) {
                 return;
             }
@@ -146,7 +153,7 @@ public class MillstoneBlock extends BaseEntityBlock {
     }
 
     @Override
-    protected void onRemove(BlockState state, @NotNull Level level, @NotNull BlockPos pos, BlockState newState, boolean movedByPiston) {
+    public void onRemove(BlockState state, @NotNull Level level, @NotNull BlockPos pos, BlockState newState, boolean movedByPiston) {
         if (!state.is(newState.getBlock())) {
             if (level.getBlockEntity(pos) instanceof MillstoneBlockEntity millstone) {
                 millstone.dropBuffers();
@@ -154,7 +161,7 @@ public class MillstoneBlock extends BaseEntityBlock {
             for (BlockPos offset : MillstoneStructure.ALL_OFFSETS) {
                 BlockPos target = pos.offset(offset);
                 BlockState piece = level.getBlockState(target);
-                if (piece.is(ModBlocks.MILLSTONE_STRUCTURAL.get()) || piece.is(ModBlocks.MILLSTONE_ROTOR.get())) {
+                if (piece.is(ModBlocks.MILLSTONE_STRUCTURAL.get())) {
                     level.setBlockAndUpdate(target, Blocks.AIR.defaultBlockState());
                 }
             }

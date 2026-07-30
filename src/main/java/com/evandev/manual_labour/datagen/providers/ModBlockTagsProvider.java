@@ -24,14 +24,12 @@ public class ModBlockTagsProvider extends BlockTagsProvider {
                 .add(ModBlocks.WORKSTONE.get())
                 .add(ModBlocks.MORTAR.get())
                 .add(ModBlocks.MILLSTONE.get())
-                .add(ModBlocks.MILLSTONE_STRUCTURAL.get())
-                .add(ModBlocks.MILLSTONE_ROTOR.get());
+                .add(ModBlocks.MILLSTONE_STRUCTURAL.get());
 
         this.tag(BlockTags.NEEDS_STONE_TOOL)
                 .add(ModBlocks.WORKSTONE.get())
                 .add(ModBlocks.MORTAR.get())
                 .add(ModBlocks.MILLSTONE.get())
-                .add(ModBlocks.MILLSTONE_STRUCTURAL.get())
-                .add(ModBlocks.MILLSTONE_ROTOR.get());
+                .add(ModBlocks.MILLSTONE_STRUCTURAL.get());
     }
 }

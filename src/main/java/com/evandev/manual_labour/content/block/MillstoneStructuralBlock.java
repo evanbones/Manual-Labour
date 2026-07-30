@@ -10,7 +10,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.ItemInteractionResult;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
@@ -33,17 +32,14 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class MillstoneStructuralBlock extends DirectionalBlock {
-    public static final BooleanProperty TOP = BooleanProperty.create("top");
     public static final BooleanProperty CORNER = BooleanProperty.create("corner");
     public static final MapCodec<MillstoneStructuralBlock> CODEC = simpleCodec(MillstoneStructuralBlock::new);
-
-    private static final VoxelShape SLAB = Block.box(0.0, 0.0, 0.0, 16.0, 8.0, 16.0);
+    private static final VoxelShape BASE_SHAPE = Block.box(0, 0, 0, 16, 8, 16);
 
     public MillstoneStructuralBlock(Properties properties) {
         super(properties);
         registerDefaultState(this.stateDefinition.any()
                 .setValue(FACING, Direction.NORTH)
-                .setValue(TOP, false)
                 .setValue(CORNER, false));
     }
 
@@ -51,10 +47,6 @@ public class MillstoneStructuralBlock extends DirectionalBlock {
     public static BlockPos getMaster(BlockGetter level, BlockPos pos, BlockState state) {
         BlockPos cursor = pos;
         BlockState cursorState = state;
-        if (cursorState.getBlock() instanceof MillstoneStructuralBlock && cursorState.getValue(TOP)) {
-            cursor = cursor.below();
-            cursorState = level.getBlockState(cursor);
-        }
         for (int i = 0; i < 4; i++) {
             if (cursorState.getBlock() instanceof MillstoneBlock) {
                 return cursor;
@@ -75,15 +67,17 @@ public class MillstoneStructuralBlock extends DirectionalBlock {
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(FACING, TOP, CORNER);
+        builder.add(FACING, CORNER);
+    }
+
+    @Override
+    protected @NotNull VoxelShape getOcclusionShape(@NotNull BlockState state, @NotNull BlockGetter level, @NotNull BlockPos pos) {
+        return BASE_SHAPE;
     }
 
     @Override
     protected @NotNull VoxelShape getShape(BlockState state, @NotNull BlockGetter level, @NotNull BlockPos pos, @NotNull CollisionContext context) {
-        if (!state.getValue(TOP)) {
-            return Shapes.block();
-        }
-        return SLAB;
+        return Shapes.block();
     }
 
     public boolean stillValid(BlockGetter level, BlockPos pos, BlockState state) {
@@ -127,9 +121,6 @@ public class MillstoneStructuralBlock extends DirectionalBlock {
 
     @Override
     protected @NotNull ItemInteractionResult useItemOn(@NotNull ItemStack stack, @NotNull BlockState state, Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull InteractionHand hand, @NotNull BlockHitResult hitResult) {
-        if (state.getValue(TOP)) {
-            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
-        }
         BlockPos master = getMaster(level, pos, state);
         if (master != null && level.getBlockEntity(master) instanceof MillstoneBlockEntity millstone) {
             return millstone.insertByHand(player, hand, stack);
@@ -139,9 +130,6 @@ public class MillstoneStructuralBlock extends DirectionalBlock {
 
     @Override
     protected @NotNull InteractionResult useWithoutItem(@NotNull BlockState state, Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull BlockHitResult hitResult) {
-        if (state.getValue(TOP)) {
-            return InteractionResult.PASS;
-        }
         BlockPos master = getMaster(level, pos, state);
         if (master != null && level.getBlockEntity(master) instanceof MillstoneBlockEntity millstone) {
             return millstone.extractByHand(player);
@@ -152,17 +140,6 @@ public class MillstoneStructuralBlock extends DirectionalBlock {
     @Override
     public @NotNull ItemStack getCloneItemStack(BlockState state, HitResult target, LevelReader level, BlockPos pos, Player player) {
         return new ItemStack(ModBlocks.MILLSTONE.get());
-    }
-
-    @Override
-    protected void entityInside(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull Entity entity) {
-        if (!state.getValue(TOP)) {
-            return;
-        }
-        BlockPos master = getMaster(level, pos, state);
-        if (master != null) {
-            MillstoneRotorBlock.turnEntity(level, master.offset(MillstoneStructure.ROTOR_OFFSET), pos, entity);
-        }
     }
 
     @Override

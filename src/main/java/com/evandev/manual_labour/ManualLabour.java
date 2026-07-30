@@ -76,9 +76,6 @@ public class ManualLabour {
         if (state.getBlock() instanceof MillstoneBlock) {
             master = pos;
         } else if (state.getBlock() instanceof MillstoneStructuralBlock) {
-            if (state.getValue(MillstoneStructuralBlock.TOP)) {
-                return null;
-            }
             master = MillstoneStructuralBlock.getMaster(level, pos, state);
         } else {
             return null;
@@ -110,9 +107,9 @@ public class ManualLabour {
     private void commonSetup(final FMLCommonSetupEvent event) {
         ModConfig.load();
         event.enqueueWork(() -> {
-            Block rotor = ModBlocks.MILLSTONE_ROTOR.get();
-            BlockStressValues.IMPACTS.register(rotor, () -> (double) com.evandev.manual_labour.content.block.entity.MillstoneRotorBlockEntity.STRESS_IMPACT);
-            TooltipModifier.REGISTRY.register(ModBlocks.MILLSTONE.get().asItem(), new KineticStats(rotor));
+            Block millstone = ModBlocks.MILLSTONE.get();
+            BlockStressValues.IMPACTS.register(millstone, () -> (double) MillstoneBlockEntity.STRESS_IMPACT);
+            TooltipModifier.REGISTRY.register(millstone.asItem(), new KineticStats(millstone));
         });
     }
 }

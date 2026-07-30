@@ -2,7 +2,6 @@ package com.evandev.manual_labour.registry;
 
 import com.evandev.manual_labour.Constants;
 import com.evandev.manual_labour.content.block.MillstoneBlock;
-import com.evandev.manual_labour.content.block.MillstoneRotorBlock;
 import com.evandev.manual_labour.content.block.MillstoneStructuralBlock;
 import com.evandev.manual_labour.content.block.MortarBlock;
 import com.evandev.manual_labour.content.block.WorkstoneBlock;
@@ -25,13 +24,9 @@ public class ModBlocks {
 
     public static final DeferredBlock<MillstoneBlock> MILLSTONE = BLOCKS.register("millstone",
             () -> new MillstoneBlock(BlockBehaviour.Properties.of().mapColor(MapColor.STONE).sound(SoundType.STONE)
-                    .strength(3.0F).pushReaction(PushReaction.BLOCK)));
+                    .strength(3.0F).pushReaction(PushReaction.BLOCK).noOcclusion()));
 
     public static final DeferredBlock<MillstoneStructuralBlock> MILLSTONE_STRUCTURAL = BLOCKS.register("millstone_structural",
             () -> new MillstoneStructuralBlock(BlockBehaviour.Properties.of().mapColor(MapColor.STONE).sound(SoundType.STONE)
-                    .strength(3.0F).pushReaction(PushReaction.BLOCK).noLootTable()));
-
-    public static final DeferredBlock<MillstoneRotorBlock> MILLSTONE_ROTOR = BLOCKS.register("millstone_rotor",
-            () -> new MillstoneRotorBlock(BlockBehaviour.Properties.of().mapColor(MapColor.STONE).sound(SoundType.STONE)
-                    .strength(3.0F).noOcclusion().pushReaction(PushReaction.BLOCK).noLootTable()));
+                    .strength(3.0F).pushReaction(PushReaction.BLOCK).noOcclusion().noLootTable()));
 }

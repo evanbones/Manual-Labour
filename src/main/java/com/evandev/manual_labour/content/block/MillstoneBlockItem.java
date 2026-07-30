@@ -41,7 +41,7 @@ public class MillstoneBlockItem extends BlockItem {
 
     private static void showBounds(BlockPlaceContext context) {
         BlockPos pos = context.getClickedPos();
-        AABB bounds = new AABB(pos).inflate(1.0, 0.0, 1.0).expandTowards(0.0, 1.0, 0.0);
+        AABB bounds = new AABB(pos).inflate(1.0, 0.0, 1.0);
         Outliner.getInstance().showAABB(Pair.of("millstone", pos), bounds).colored(OUTLINE_COLOR);
         Player player = context.getPlayer();
         if (player != null) {

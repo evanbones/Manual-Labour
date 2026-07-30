@@ -1,13 +1,11 @@
 package com.evandev.manual_labour.datagen.providers;
 
 import com.evandev.manual_labour.Constants;
-import com.evandev.manual_labour.content.block.MillstoneStructuralBlock;
 import com.evandev.manual_labour.registry.ModBlocks;
 import net.minecraft.core.Direction;
 import net.minecraft.data.PackOutput;
 import net.neoforged.neoforge.client.model.generators.BlockStateProvider;
 import net.neoforged.neoforge.client.model.generators.ModelFile;
-import net.neoforged.neoforge.client.model.generators.MultiPartBlockStateBuilder;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
 
 public class ModBlockStateProvider extends BlockStateProvider {
@@ -45,38 +43,7 @@ public class ModBlockStateProvider extends BlockStateProvider {
     }
 
     private void registerMillstone() {
-        simpleBlock(ModBlocks.MILLSTONE.get(), models().getExistingFile(modLoc("block/millstone/base_center")));
-        simpleBlock(ModBlocks.MILLSTONE_ROTOR.get(), models().getExistingFile(modLoc("block/millstone/rotor_static")));
-
-        ModelFile topInvisible = models().getExistingFile(modLoc("block/millstone/top_invisible"));
-        ModelFile baseN = models().getExistingFile(modLoc("block/millstone/base_n"));
-        ModelFile baseS = models().getExistingFile(modLoc("block/millstone/base_s"));
-        ModelFile baseE = models().getExistingFile(modLoc("block/millstone/base_e"));
-        ModelFile baseW = models().getExistingFile(modLoc("block/millstone/base_w"));
-        ModelFile baseNe = models().getExistingFile(modLoc("block/millstone/base_ne"));
-        ModelFile baseNw = models().getExistingFile(modLoc("block/millstone/base_nw"));
-        ModelFile baseSe = models().getExistingFile(modLoc("block/millstone/base_se"));
-        ModelFile baseSw = models().getExistingFile(modLoc("block/millstone/base_sw"));
-
-        MultiPartBlockStateBuilder builder = getMultipartBuilder(ModBlocks.MILLSTONE_STRUCTURAL.get());
-        builder.part().modelFile(topInvisible).addModel().condition(MillstoneStructuralBlock.TOP, true).end();
-
-        builder.part().modelFile(baseN).addModel()
-                .condition(MillstoneStructuralBlock.TOP, false).condition(MillstoneStructuralBlock.CORNER, false).condition(MillstoneStructuralBlock.FACING, Direction.SOUTH).end();
-        builder.part().modelFile(baseS).addModel()
-                .condition(MillstoneStructuralBlock.TOP, false).condition(MillstoneStructuralBlock.CORNER, false).condition(MillstoneStructuralBlock.FACING, Direction.NORTH).end();
-        builder.part().modelFile(baseE).addModel()
-                .condition(MillstoneStructuralBlock.TOP, false).condition(MillstoneStructuralBlock.CORNER, false).condition(MillstoneStructuralBlock.FACING, Direction.WEST).end();
-        builder.part().modelFile(baseW).addModel()
-                .condition(MillstoneStructuralBlock.TOP, false).condition(MillstoneStructuralBlock.CORNER, false).condition(MillstoneStructuralBlock.FACING, Direction.EAST).end();
-
-        builder.part().modelFile(baseNe).addModel()
-                .condition(MillstoneStructuralBlock.TOP, false).condition(MillstoneStructuralBlock.CORNER, true).condition(MillstoneStructuralBlock.FACING, Direction.SOUTH).end();
-        builder.part().modelFile(baseNw).addModel()
-                .condition(MillstoneStructuralBlock.TOP, false).condition(MillstoneStructuralBlock.CORNER, true).condition(MillstoneStructuralBlock.FACING, Direction.EAST).end();
-        builder.part().modelFile(baseSe).addModel()
-                .condition(MillstoneStructuralBlock.TOP, false).condition(MillstoneStructuralBlock.CORNER, true).condition(MillstoneStructuralBlock.FACING, Direction.WEST).end();
-        builder.part().modelFile(baseSw).addModel()
-                .condition(MillstoneStructuralBlock.TOP, false).condition(MillstoneStructuralBlock.CORNER, true).condition(MillstoneStructuralBlock.FACING, Direction.NORTH).end();
+        simpleBlock(ModBlocks.MILLSTONE.get(), models().getExistingFile(modLoc("block/millstone/base")));
+        simpleBlock(ModBlocks.MILLSTONE_STRUCTURAL.get(), models().getExistingFile(modLoc("block/millstone/invisible")));
     }
 }

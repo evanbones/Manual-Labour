@@ -2,18 +2,15 @@ package com.evandev.manual_labour.content.block;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public final class MillstoneStructure {
-    public static final BlockPos ROTOR_OFFSET = new BlockPos(0, 1, 0);
     public static final List<BlockPos> BASE_OFFSETS = baseOffsets();
-    public static final List<BlockPos> TOP_OFFSETS = topOffsets();
-    public static final List<BlockPos> ALL_OFFSETS = allOffsets();
-
-    private MillstoneStructure() {
-    }
+    public static final List<BlockPos> ALL_OFFSETS = BASE_OFFSETS;
 
     private static List<BlockPos> baseOffsets() {
         List<BlockPos> offsets = new ArrayList<>();
@@ -24,21 +21,6 @@ public final class MillstoneStructure {
                 }
             }
         }
-        return List.copyOf(offsets);
-    }
-
-    private static List<BlockPos> topOffsets() {
-        List<BlockPos> offsets = new ArrayList<>();
-        for (BlockPos base : baseOffsets()) {
-            offsets.add(base.above());
-        }
-        return List.copyOf(offsets);
-    }
-
-    private static List<BlockPos> allOffsets() {
-        List<BlockPos> offsets = new ArrayList<>(BASE_OFFSETS);
-        offsets.add(ROTOR_OFFSET);
-        offsets.addAll(TOP_OFFSETS);
         return List.copyOf(offsets);
     }
 

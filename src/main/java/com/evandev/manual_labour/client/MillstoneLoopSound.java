@@ -1,13 +1,10 @@
 package com.evandev.manual_labour.client;
 
-import com.evandev.manual_labour.content.block.MillstoneStructure;
 import com.evandev.manual_labour.content.block.entity.MillstoneBlockEntity;
-import com.evandev.manual_labour.content.block.entity.MillstoneRotorBlockEntity;
 import com.evandev.manual_labour.registry.ModSounds;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.AbstractTickableSoundInstance;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Vec3i;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -21,7 +18,7 @@ public class MillstoneLoopSound extends AbstractTickableSoundInstance {
         this.looping = true;
         this.delay = 0;
         this.x = controllerPos.getX() + 0.5;
-        this.y = controllerPos.getY() + 1.0;
+        this.y = controllerPos.getY() + 0.5;
         this.z = controllerPos.getZ() + 0.5;
         this.pitch = 1.0F;
         this.volume = volumeFor(currentSpeed());
@@ -36,17 +33,13 @@ public class MillstoneLoopSound extends AbstractTickableSoundInstance {
         if (minecraft.level == null) {
             return 0.0F;
         }
-        if (!(minecraft.level.getBlockEntity(controllerPos) instanceof MillstoneBlockEntity)) {
+        if (!(minecraft.level.getBlockEntity(controllerPos) instanceof MillstoneBlockEntity millstone)) {
             return 0.0F;
         }
-        BlockPos rotorPos = controllerPos.offset((Vec3i) MillstoneStructure.ROTOR_OFFSET);
-        if (!(minecraft.level.getBlockEntity(rotorPos) instanceof MillstoneRotorBlockEntity rotor)) {
+        if (millstone.isOverspeed()) {
             return 0.0F;
         }
-        if (rotor.isOverspeed()) {
-            return 0.0F;
-        }
-        return Math.abs(rotor.getSpeed());
+        return Math.abs(millstone.getSpeed());
     }
 
     @Override

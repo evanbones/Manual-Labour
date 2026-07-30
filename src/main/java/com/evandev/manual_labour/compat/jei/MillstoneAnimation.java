@@ -1,6 +1,6 @@
 package com.evandev.manual_labour.compat.jei;
 
-import com.evandev.manual_labour.content.block.entity.MillstoneRotorBlockEntity;
+import com.evandev.manual_labour.content.block.entity.MillstoneBlockEntity;
 import com.evandev.manual_labour.registry.ModBlocks;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.simibubi.create.foundation.gui.CustomLightingSettings;
@@ -19,8 +19,8 @@ public class MillstoneAnimation implements IDrawable {
     private static final float SPIN_SPEED = 4.0F;
     private static final int SCALE = 22;
 
-    private final MillstoneRotorBlockEntity rotor =
-            new MillstoneRotorBlockEntity(BlockPos.ZERO, ModBlocks.MILLSTONE_ROTOR.get().defaultBlockState());
+    private final MillstoneBlockEntity millstone =
+            new MillstoneBlockEntity(BlockPos.ZERO, ModBlocks.MILLSTONE.get().defaultBlockState());
 
     @Override
     public int getWidth() {
@@ -35,23 +35,16 @@ public class MillstoneAnimation implements IDrawable {
     @Override
     public void draw(GuiGraphics graphics, int xOffset, int yOffset) {
         float angle = (AnimationTickHolder.getRenderTime() * SPIN_SPEED) % 360.0F;
-        rotor.angle = angle;
-        rotor.prevAngle = angle;
+        millstone.angle = angle;
+        millstone.prevAngle = angle;
 
         PoseStack poseStack = graphics.pose();
         poseStack.pushPose();
         poseStack.translate(xOffset, yOffset, 100);
 
-        GuiGameElement.of(ModBlocks.MILLSTONE.get().defaultBlockState())
+        GuiGameElement.of(ModBlocks.MILLSTONE.get().defaultBlockState(), millstone)
                 .lighting(LIGHTING)
                 .rotateBlock(22.5, 22.5, 0)
-                .scale(SCALE)
-                .render(graphics);
-
-        GuiGameElement.of(ModBlocks.MILLSTONE_ROTOR.get().defaultBlockState(), rotor)
-                .lighting(LIGHTING)
-                .rotateBlock(22.5, 22.5, 0)
-                .atLocal(0, -1, 0)
                 .scale(SCALE)
                 .render(graphics);
 
