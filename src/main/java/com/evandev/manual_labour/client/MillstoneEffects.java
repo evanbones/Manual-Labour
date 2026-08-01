@@ -1,6 +1,6 @@
 package com.evandev.manual_labour.client;
 
-import com.evandev.manual_labour.registry.ModSounds;
+import com.simibubi.create.AllSoundEvents;
 import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -9,6 +9,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -42,8 +43,11 @@ public class MillstoneEffects {
         }
 
         if (random.nextFloat() < Math.min(speed / 300.0F, 0.24F)) {
+            SoundEvent sound = random.nextFloat() < 0.78F
+                    ? AllSoundEvents.CRUSHING_1.getMainEvent()
+                    : AllSoundEvents.CRUSHING_2.getMainEvent();
             level.playLocalSound(controllerPos.getX() + 0.5, controllerPos.getY() + 0.5, controllerPos.getZ() + 0.5,
-                    ModSounds.MILLSTONE_USE.get(), SoundSource.BLOCKS,
+                    sound, SoundSource.BLOCKS,
                     Mth.clamp(0.5F + speed / 256.0F, 0.5F, 1.0F),
                     0.9F + random.nextFloat() * 0.2F + Math.min(speed / 1024.0F, 0.2F), false);
         }

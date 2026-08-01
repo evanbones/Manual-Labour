@@ -8,6 +8,7 @@ import com.evandev.manual_labour.recipe.MortarProcess;
 import com.evandev.manual_labour.registry.ModBlockEntities;
 import com.evandev.manual_labour.registry.ModRecipeTypes;
 import com.simibubi.create.AllRecipeTypes;
+import com.simibubi.create.AllSoundEvents;
 import com.simibubi.create.content.kinetics.crusher.CrushingRecipe;
 import com.simibubi.create.content.kinetics.millstone.MillingRecipe;
 import com.simibubi.create.content.kinetics.mixer.MixingRecipe;
@@ -22,7 +23,6 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
@@ -171,7 +171,6 @@ public class MortarBlockEntity extends BlockEntity {
         MortarProcess process = activeProcess;
         ItemStack tool = activeTool;
         Player player = activePlayer;
-        boolean wasGrinding = processingIsGrinding;
 
         if (!consumeIngredients(process, true)) {
             cancelHold();
@@ -192,7 +191,6 @@ public class MortarBlockEntity extends BlockEntity {
             });
         }
 
-        playCompletionSound(wasGrinding);
         cancelHold();
     }
 
@@ -226,7 +224,7 @@ public class MortarBlockEntity extends BlockEntity {
         }
 
         List<RecipeHolder<MixingRecipe>> mixingRecipes =
-                level.getRecipeManager().getAllRecipesFor(AllRecipeTypes.MIXING.<RecipeInput, MixingRecipe>getType());
+                level.getRecipeManager().getAllRecipesFor(AllRecipeTypes.MIXING.getType());
         for (RecipeHolder<MixingRecipe> holder : mixingRecipes) {
             MixingRecipe recipe = holder.value();
             if (!recipe.getRequiredHeat().testBlazeBurner(HeatLevel.NONE)) continue;
@@ -316,21 +314,22 @@ public class MortarBlockEntity extends BlockEntity {
                     worldPosition.getX() + 0.5, worldPosition.getY() + 0.85, worldPosition.getZ() + 0.5,
                     2, 0.15, 0.05, 0.15, 0.0);
         }
+
+        playProcessingSound(serverLevel);
     }
 
-    private void playCompletionSound(boolean grinding) {
-        if (level == null) return;
+    private void playProcessingSound(ServerLevel serverLevel) {
         double x = worldPosition.getX() + 0.5;
         double y = worldPosition.getY() + 0.5;
         double z = worldPosition.getZ() + 0.5;
+        float pitch = 0.85F + serverLevel.random.nextFloat() * 0.3F;
 
-        if (grinding) {
-            SoundEvent[] options = {SoundEvents.NETHERRACK_HIT, SoundEvents.GRAVEL_PLACE, SoundEvents.NETHERITE_BLOCK_BREAK};
-            SoundEvent sound = options[level.random.nextInt(options.length)];
-            level.playSound(null, x, y, z, sound, SoundSource.BLOCKS, 0.8F, 1.0F);
+        if (processingIsGrinding) {
+            boolean primary = serverLevel.random.nextFloat() < 0.78F;
+            (primary ? AllSoundEvents.CRUSHING_1 : AllSoundEvents.CRUSHING_2)
+                    .play(serverLevel, null, x, y, z, 0.5F, pitch);
         } else {
-            level.playSound(null, x, y, z, SoundEvents.GILDED_BLACKSTONE_BREAK, SoundSource.BLOCKS, 0.8F, 1.0F);
-            level.playSound(null, x, y, z, SoundEvents.NETHERRACK_BREAK, SoundSource.BLOCKS, 0.6F, 0.8F);
+            AllSoundEvents.MIXING.play(serverLevel, null, x, y, z, 0.6F, pitch);
         }
     }
 

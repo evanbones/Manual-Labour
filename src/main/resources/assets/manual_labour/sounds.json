@@ -13,14 +13,5 @@
     "category": "block",
     "subtitle": "subtitles.manual_labour.block.millstone.loop",
     "sounds": ["manual_labour:block/millstone/loop"]
-  },
-  "block.millstone.use": {
-    "category": "block",
-    "subtitle": "subtitles.manual_labour.block.millstone.use",
-    "sounds": [
-      "manual_labour:block/millstone/use1",
-      "manual_labour:block/millstone/use2",
-      "manual_labour:block/millstone/use3"
-    ]
   }
 }
