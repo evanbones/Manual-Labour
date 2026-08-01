@@ -397,7 +397,7 @@ public class MortarBlockEntity extends BlockEntity {
     }
 
     public boolean placeDecorativeTool(ItemStack stack, boolean creative) {
-        if (level == null || level.isClientSide || !decorativeTool.isEmpty()) return false;
+        if (level == null || level.isClientSide || !decorativeTool.isEmpty() || isProcessing()) return false;
 
         decorativeTool = stack.copyWithCount(1);
         if (!creative) stack.shrink(1);

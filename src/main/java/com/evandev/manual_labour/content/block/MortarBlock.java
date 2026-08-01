@@ -90,11 +90,11 @@ public class MortarBlock extends BaseEntityBlock implements SimpleWaterloggedBlo
 
             if (stack.is(ModTags.Items.PESTLES)) {
                 boolean started = mortar.startOrContinueGrind(player, stack);
-                return started ? ItemInteractionResult.sidedSuccess(level.isClientSide) : ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+                return started ? ItemInteractionResult.sidedSuccess(level.isClientSide) : ItemInteractionResult.CONSUME;
             }
 
             boolean started = mortar.startOrContinueMix(player, stack);
-            return started ? ItemInteractionResult.sidedSuccess(level.isClientSide) : ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+            return started ? ItemInteractionResult.sidedSuccess(level.isClientSide) : ItemInteractionResult.CONSUME;
         }
 
         if (!stack.isEmpty()) {
