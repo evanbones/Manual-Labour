@@ -171,6 +171,7 @@ public class MortarBlockEntity extends BlockEntity {
         MortarProcess process = activeProcess;
         ItemStack tool = activeTool;
         Player player = activePlayer;
+        boolean grinding = processingIsGrinding;
 
         if (!consumeIngredients(process, true)) {
             cancelHold();
@@ -189,6 +190,20 @@ public class MortarBlockEntity extends BlockEntity {
         if (!level.isClientSide && player != null && !tool.isEmpty() && level instanceof ServerLevel serverLevel) {
             tool.hurtAndBreak(1, serverLevel, player, item -> {
             });
+        }
+
+        Optional<MortarProcess> next = tool.isEmpty() ? Optional.empty()
+                : (grinding ? findGrindingProcess() : findMixingProcess());
+
+        if (next.isPresent()) {
+            activeProcess = next.get();
+            heldDurationTicks = 0;
+            processingStartGameTime = level.getGameTime();
+            processingDuration = Math.max(1, activeProcess.processingTime());
+            holdGraceTicks = HOLD_GRACE_TICKS;
+            setChanged();
+            syncToClients();
+            return;
         }
 
         cancelHold();
