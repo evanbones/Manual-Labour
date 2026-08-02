@@ -44,6 +44,10 @@ public class MortarRenderer implements BlockEntityRenderer<MortarBlockEntity> {
     private static final float FLUID_MAX_Y = 14.0F / 16.0F;
     private static final int FLUID_ALPHA = 204;
 
+    private static final int CROWDED_PILE_COUNT = 4;
+    private static final float CROWDED_PILE_SCALE = 0.6F;
+    private static final float CROWDED_RING_SPREAD = 1.25F;
+
     private static final float TOOL_PIVOT_X = 8.0F / 16.0F;
     private static final float TOOL_PIVOT_Y = 5.5F / 16.0F;
     private static final float TOOL_PIVOT_Z = 10.5F / 16.0F;
@@ -61,13 +65,20 @@ public class MortarRenderer implements BlockEntityRenderer<MortarBlockEntity> {
         }
 
         int count = stacks.size();
+        boolean crowded = count > CROWDED_PILE_COUNT;
+        float ringRadius = ModConfig.get().itemPileRadius * (crowded ? CROWDED_RING_SPREAD : 1.0F);
+
         for (int i = 0; i < count; i++) {
             poseStack.pushPose();
             poseStack.translate(0.5D, ModConfig.get().itemPileY, 0.5D);
 
             if (count > 1) {
                 poseStack.mulPose(Axis.YP.rotationDegrees(360.0F / count * i));
-                poseStack.translate(ModConfig.get().itemPileRadius, 0.0D, 0.0D);
+                poseStack.translate(ringRadius, 0.0D, 0.0D);
+            }
+
+            if (crowded) {
+                poseStack.scale(CROWDED_PILE_SCALE, CROWDED_PILE_SCALE, CROWDED_PILE_SCALE);
             }
 
             renderItemPile(poseStack, buffer, packedLight, packedOverlay, stacks.get(i), i);
@@ -77,12 +88,13 @@ public class MortarRenderer implements BlockEntityRenderer<MortarBlockEntity> {
 
         ItemStack decorativeTool = mortar.getDecorativeTool();
         ItemStack activeTool = mortar.getActiveTool();
-        boolean decorativeToolInUse = mortar.isProcessing() && mortar.isActiveToolDecorative();
-        if (!decorativeTool.isEmpty() && !decorativeToolInUse) {
+        boolean processing = mortar.isProcessing();
+
+        if (!decorativeTool.isEmpty() && !processing) {
             renderDecorativeTool(mortar, decorativeTool, poseStack, buffer, packedLight, packedOverlay);
         }
 
-        if (mortar.isProcessing() && !activeTool.isEmpty()) {
+        if (processing && !activeTool.isEmpty()) {
             float time = mortar.getLevel() != null ? mortar.getLevel().getGameTime() + partialTicks : partialTicks;
 
             if (activeTool.is(ModTags.Items.LADLES)) {

@@ -222,7 +222,7 @@ public class MillstoneBlockEntity extends KineticBlockEntity {
             }
 
             if (speed > 0.0F) {
-                MillstoneEffects.tick(level, worldPosition, grindingStack, speed);
+                MillstoneEffects.tick(level, worldPosition, grindingStack, getSpeed());
                 AABB topVolume = new AABB(worldPosition).inflate(1.5, 0.5, 1.5).move(0.0, 0.5, 0.0);
                 for (Entity entity : level.getEntities((Entity) null, topVolume, e -> e instanceof Player)) {
                     turnEntity(level, worldPosition, worldPosition, entity);
