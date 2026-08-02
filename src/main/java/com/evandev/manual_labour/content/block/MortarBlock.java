@@ -4,12 +4,16 @@ import com.evandev.manual_labour.content.block.entity.MortarBlockEntity;
 import com.evandev.manual_labour.registry.ModBlockEntities;
 import com.evandev.manual_labour.registry.ModTags;
 import com.mojang.serialization.MapCodec;
+import com.simibubi.create.foundation.item.ItemHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -35,6 +39,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -104,11 +109,11 @@ public class MortarBlock extends BaseEntityBlock implements SimpleWaterloggedBlo
 
             if (level.isClientSide) return ItemInteractionResult.SUCCESS;
 
-            ItemStack previous = mortar.setPrimaryItem(stack.copy());
-            if (!previous.isEmpty()) {
-                player.getInventory().placeItemBackInInventory(previous);
+            ItemStack remainder = mortar.insertFromPlayer(stack.copy());
+            if (remainder.getCount() == stack.getCount()) {
+                return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
             }
-            player.setItemInHand(hand, ItemStack.EMPTY);
+            player.setItemInHand(hand, remainder);
 
             Vec3 centerPos = pos.getCenter();
             level.playSound(null, centerPos.x(), centerPos.y(), centerPos.z(), SoundEvents.STONE_PLACE, SoundSource.BLOCKS, 1.0F, 0.8F);
@@ -135,11 +140,20 @@ public class MortarBlock extends BaseEntityBlock implements SimpleWaterloggedBlo
         if (!mortar.hasItem()) return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         if (level.isClientSide) return ItemInteractionResult.CONSUME;
 
-        ItemStack removedStack = mortar.removeItem();
-        player.getInventory().placeItemBackInInventory(removedStack);
+        mortar.removeAllItems(player);
         Vec3 centerPos = pos.getCenter();
         level.playSound(null, centerPos.x(), centerPos.y(), centerPos.z(), SoundEvents.STONE_PLACE, SoundSource.BLOCKS, 0.25F, 0.5F);
         return ItemInteractionResult.SUCCESS;
+    }
+
+    @Override
+    public void updateEntityAfterFallOn(@NotNull BlockGetter level, @NotNull Entity entity) {
+        super.updateEntityAfterFallOn(level, entity);
+        if (!(entity instanceof ItemEntity itemEntity) || !entity.isAlive()) return;
+        if (!level.getBlockState(entity.blockPosition()).is(this)) return;
+        if (level.getBlockEntity(entity.blockPosition()) instanceof MortarBlockEntity mortar) {
+            mortar.tryInsertItemEntity(itemEntity);
+        }
     }
 
     @Override
@@ -200,6 +214,13 @@ public class MortarBlock extends BaseEntityBlock implements SimpleWaterloggedBlo
         if (!(level.getBlockEntity(pos) instanceof MortarBlockEntity mortar)) {
             return 0;
         }
-        return mortar.isEmpty() ? 0 : 15;
+
+        int itemSignal = ItemHelper.calcRedstoneFromInventory(mortar.getItemHandler());
+
+        FluidStack fluid = mortar.getFluidHandler().getFluidInTank(0);
+        int fluidSignal = fluid.isEmpty() ? 0
+                : Math.max(1, Mth.floor((float) fluid.getAmount() / MortarBlockEntity.TANK_CAPACITY * 14.0F) + 1);
+
+        return Math.max(itemSignal, fluidSignal);
     }
 }

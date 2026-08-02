@@ -13,15 +13,14 @@ import com.simibubi.create.content.kinetics.crusher.CrushingRecipe;
 import com.simibubi.create.content.kinetics.millstone.MillingRecipe;
 import com.simibubi.create.content.kinetics.mixer.MixingRecipe;
 import com.simibubi.create.content.processing.burner.BlazeBurnerBlock.HeatLevel;
+import com.simibubi.create.foundation.blockEntity.SyncedBlockEntity;
+import com.simibubi.create.foundation.item.ItemHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientGamePacketListener;
-import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -30,42 +29,36 @@ import net.minecraft.world.Containers;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.*;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
 import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
 import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.ItemStackHandler;
+import net.neoforged.neoforge.items.ItemHandlerHelper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
 
-public class MortarBlockEntity extends BlockEntity {
-    public static final int SLOT_COUNT = 1;
+public class MortarBlockEntity extends SyncedBlockEntity {
+    public static final int SLOT_COUNT = 9;
     public static final int TANK_CAPACITY = 1000;
     private static final int HOLD_GRACE_TICKS = 10;
     private static final int PARTICLE_INTERVAL = 5;
 
-    private final ItemStackHandler inventory = new ItemStackHandler(SLOT_COUNT) {
-        @Override
-        protected void onContentsChanged(int slot) {
-            setChanged();
-            syncToClients();
-        }
-    };
+    private final MortarInventory inventory = new MortarInventory(SLOT_COUNT, this);
 
     private final FluidTank fluidTank = new FluidTank(TANK_CAPACITY) {
         @Override
         protected void onContentsChanged() {
-            setChanged();
-            syncToClients();
+            notifyUpdate();
         }
     };
 
@@ -80,7 +73,6 @@ public class MortarBlockEntity extends BlockEntity {
     private Player activePlayer;
 
     private ItemStack activeTool = ItemStack.EMPTY;
-    private boolean activeToolIsDecorative = false;
     private long processingStartGameTime = -1L;
     private int processingDuration = 0;
 
@@ -127,7 +119,6 @@ public class MortarBlockEntity extends BlockEntity {
             holdGraceTicks = HOLD_GRACE_TICKS;
             activePlayer = player;
             activeTool = toolStack;
-            activeToolIsDecorative = !decorativeTool.isEmpty() && toolStack == decorativeTool;
             return true;
         }
 
@@ -138,14 +129,12 @@ public class MortarBlockEntity extends BlockEntity {
         activeProcess = found.get();
         processingIsGrinding = grinding;
         activeTool = toolStack;
-        activeToolIsDecorative = !decorativeTool.isEmpty() && toolStack == decorativeTool;
         activePlayer = player;
         holdGraceTicks = HOLD_GRACE_TICKS;
         heldDurationTicks = 0;
         processingStartGameTime = level.getGameTime();
         processingDuration = Math.max(1, activeProcess.processingTime());
-        setChanged();
-        syncToClients();
+        notifyUpdate();
         return true;
     }
 
@@ -155,11 +144,9 @@ public class MortarBlockEntity extends BlockEntity {
         heldDurationTicks = 0;
         holdGraceTicks = 0;
         activeTool = ItemStack.EMPTY;
-        activeToolIsDecorative = false;
         processingStartGameTime = -1L;
         processingDuration = 0;
-        setChanged();
-        syncToClients();
+        notifyUpdate();
     }
 
     private void completeProcess() {
@@ -201,8 +188,7 @@ public class MortarBlockEntity extends BlockEntity {
             processingStartGameTime = level.getGameTime();
             processingDuration = Math.max(1, activeProcess.processingTime());
             holdGraceTicks = HOLD_GRACE_TICKS;
-            setChanged();
-            syncToClients();
+            notifyUpdate();
             return;
         }
 
@@ -211,15 +197,25 @@ public class MortarBlockEntity extends BlockEntity {
 
     private Optional<MortarProcess> findGrindingProcess() {
         if (level == null) return Optional.empty();
-        ItemStack primary = getPrimaryItem();
-        if (primary.isEmpty()) return Optional.empty();
 
-        Optional<RecipeHolder<MortarGrindingRecipe>> own = grindingCheck.getRecipeFor(new MortarGrindingRecipeInput(primary), level);
+        for (int i = 0; i < inventory.getSlots(); i++) {
+            ItemStack candidate = inventory.getStackInSlot(i);
+            if (candidate.isEmpty()) continue;
+
+            Optional<MortarProcess> process = findGrindingProcessFor(candidate);
+            if (process.isPresent()) return process;
+        }
+
+        return Optional.empty();
+    }
+
+    private Optional<MortarProcess> findGrindingProcessFor(ItemStack candidate) {
+        Optional<RecipeHolder<MortarGrindingRecipe>> own = grindingCheck.getRecipeFor(new MortarGrindingRecipeInput(candidate), level);
         if (own.isPresent()) {
             return Optional.of(new MortarProcess.OwnGrindingProcess(own.get().value()));
         }
 
-        SingleRecipeInput createInput = new SingleRecipeInput(primary);
+        SingleRecipeInput createInput = new SingleRecipeInput(candidate);
 
         Optional<RecipeHolder<MillingRecipe>> milling = AllRecipeTypes.MILLING.find(createInput, level);
         if (milling.isPresent()) {
@@ -348,20 +344,41 @@ public class MortarBlockEntity extends BlockEntity {
         }
     }
 
-    public ItemStack setPrimaryItem(ItemStack stack) {
-        ItemStack previous = inventory.getStackInSlot(0);
-        inventory.setStackInSlot(0, stack);
-        return previous;
+    /**
+     * Inserts as much of the held stack as the mortar will take, returning the remainder.
+     */
+    public ItemStack insertFromPlayer(ItemStack held) {
+        return ItemHandlerHelper.insertItemStacked(inventory, held, false);
     }
 
-    public ItemStack removeItem() {
+    /**
+     * Hands every slot back to the player at once.
+     */
+    public boolean removeAllItems(Player player) {
+        boolean removedAny = false;
         for (int i = 0; i < inventory.getSlots(); i++) {
             ItemStack stack = inventory.getStackInSlot(i);
-            if (!stack.isEmpty()) {
-                return inventory.extractItem(i, stack.getCount(), false);
-            }
+            if (stack.isEmpty()) continue;
+            player.getInventory().placeItemBackInInventory(stack);
+            inventory.setStackInSlot(i, ItemStack.EMPTY);
+            removedAny = true;
         }
-        return ItemStack.EMPTY;
+        return removedAny;
+    }
+
+    /**
+     * Swallows an item entity that landed in the bowl, leaving any remainder on the entity.
+     */
+    public boolean tryInsertItemEntity(ItemEntity entity) {
+        ItemStack remainder = ItemHandlerHelper.insertItem(inventory, entity.getItem().copy(), false);
+        if (remainder.getCount() == entity.getItem().getCount()) return false;
+
+        if (remainder.isEmpty()) {
+            entity.discard();
+        } else {
+            entity.setItem(remainder);
+        }
+        return true;
     }
 
     public boolean hasItem() {
@@ -387,9 +404,7 @@ public class MortarBlockEntity extends BlockEntity {
     }
 
     public void dropContents(Level level, BlockPos pos) {
-        for (int i = 0; i < inventory.getSlots(); i++) {
-            Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), inventory.getStackInSlot(i));
-        }
+        ItemHelper.dropContents(level, pos, inventory);
         if (!decorativeTool.isEmpty()) {
             Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), decorativeTool);
         }
@@ -403,10 +418,6 @@ public class MortarBlockEntity extends BlockEntity {
         return activeTool;
     }
 
-    public boolean isActiveToolDecorative() {
-        return activeToolIsDecorative;
-    }
-
     public ItemStack getDecorativeTool() {
         return decorativeTool;
     }
@@ -416,8 +427,7 @@ public class MortarBlockEntity extends BlockEntity {
 
         decorativeTool = stack.copyWithCount(1);
         if (!creative) stack.shrink(1);
-        setChanged();
-        syncToClients();
+        notifyUpdate();
 
         level.playSound(null, worldPosition, SoundEvents.STONE_HIT, SoundSource.BLOCKS, 0.5F, 1.2F);
         return true;
@@ -426,8 +436,7 @@ public class MortarBlockEntity extends BlockEntity {
     public ItemStack removeDecorativeTool() {
         ItemStack result = decorativeTool;
         decorativeTool = ItemStack.EMPTY;
-        setChanged();
-        syncToClients();
+        notifyUpdate();
 
         if (level != null) {
             level.playSound(null, worldPosition, SoundEvents.STONE_HIT, SoundSource.BLOCKS, 0.5F, 0.8F);
@@ -448,37 +457,20 @@ public class MortarBlockEntity extends BlockEntity {
             processingStartGameTime = -1L;
             processingDuration = 0;
             activeTool = ItemStack.EMPTY;
-            activeToolIsDecorative = false;
             setChanged();
         }
-    }
-
-    private void syncToClients() {
-        if (level != null && !level.isClientSide) {
-            level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), Block.UPDATE_ALL);
-        }
-    }
-
-    @Override
-    public @NotNull CompoundTag getUpdateTag(HolderLookup.@NotNull Provider registries) {
-        CompoundTag tag = new CompoundTag();
-        saveAdditional(tag, registries);
-        return tag;
-    }
-
-    @Nullable
-    @Override
-    public Packet<ClientGamePacketListener> getUpdatePacket() {
-        return ClientboundBlockEntityDataPacket.create(this);
     }
 
     @Override
     protected void loadAdditional(@NotNull CompoundTag tag, HolderLookup.@NotNull Provider registries) {
         super.loadAdditional(tag, registries);
-        inventory.deserializeNBT(registries, tag.getCompound("Inventory"));
+        CompoundTag inventoryTag = tag.getCompound("Inventory").copy();
+        if (!inventoryTag.isEmpty()) {
+            inventoryTag.putInt("Size", SLOT_COUNT);
+        }
+        inventory.deserializeNBT(registries, inventoryTag);
         fluidTank.readFromNBT(registries, tag.getCompound("FluidTank"));
         activeTool = tag.contains("ActiveTool") ? ItemStack.parseOptional(registries, tag.getCompound("ActiveTool")) : ItemStack.EMPTY;
-        activeToolIsDecorative = tag.getBoolean("ActiveToolIsDecorative");
         processingStartGameTime = tag.getLong("ProcessingStart");
         processingDuration = tag.getInt("ProcessingDuration");
         decorativeTool = tag.contains("DecorativeTool") ? ItemStack.parseOptional(registries, tag.getCompound("DecorativeTool")) : ItemStack.EMPTY;
@@ -492,7 +484,6 @@ public class MortarBlockEntity extends BlockEntity {
         if (!activeTool.isEmpty()) {
             tag.put("ActiveTool", activeTool.save(registries));
         }
-        tag.putBoolean("ActiveToolIsDecorative", activeToolIsDecorative);
         tag.putLong("ProcessingStart", processingStartGameTime);
         tag.putInt("ProcessingDuration", processingDuration);
         if (!decorativeTool.isEmpty()) {
