@@ -22,6 +22,9 @@ public class ModConfig {
     @SerializedName("item_pile_radius")
     public float itemPileRadius = 0.18F;
 
+    @SerializedName("item_float_sink_depth")
+    public float itemFloatSinkDepth = 0.15F;
+
     @SerializedName("pestle_tip_contact_offset")
     public float pestleTipContactOffset = 0.50F;
 

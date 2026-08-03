@@ -1,9 +1,12 @@
 package com.evandev.manual_labour.content.block;
 
 import com.evandev.manual_labour.content.block.entity.MortarBlockEntity;
+import com.evandev.manual_labour.content.block.entity.MortarFluidTransfer;
 import com.evandev.manual_labour.registry.ModBlockEntities;
 import com.evandev.manual_labour.registry.ModTags;
 import com.mojang.serialization.MapCodec;
+import com.simibubi.create.content.fluids.transfer.GenericItemEmptying;
+import com.simibubi.create.content.fluids.transfer.GenericItemFilling;
 import com.simibubi.create.foundation.item.ItemHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -40,7 +43,6 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.FluidUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -103,8 +105,16 @@ public class MortarBlock extends BaseEntityBlock implements SimpleWaterloggedBlo
         }
 
         if (!stack.isEmpty()) {
-            if (FluidUtil.interactWithFluidHandler(player, hand, level, pos, hit.getDirection())) {
+            if (MortarFluidTransfer.tryEmptyItemIntoTank(level, pos, player, hand, stack, mortar.getFluidHandler())) {
                 return ItemInteractionResult.sidedSuccess(level.isClientSide);
+            }
+            if (MortarFluidTransfer.tryFillItemFromTank(level, pos, player, hand, stack, mortar.getFluidHandler())) {
+                return ItemInteractionResult.sidedSuccess(level.isClientSide);
+            }
+
+            // Swallow the click so a container the mortar can't take right now is never dropped in as an ingredient
+            if (GenericItemEmptying.canItemBeEmptied(level, stack) || GenericItemFilling.canItemBeFilled(level, stack)) {
+                return ItemInteractionResult.SUCCESS;
             }
 
             if (level.isClientSide) return ItemInteractionResult.SUCCESS;
@@ -201,7 +211,8 @@ public class MortarBlock extends BaseEntityBlock implements SimpleWaterloggedBlo
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(@NotNull Level level, @NotNull BlockState state, @NotNull BlockEntityType<T> type) {
-        return level.isClientSide ? null : createTickerHelper(type, ModBlockEntities.MORTAR.get(), MortarBlockEntity::serverTick);
+        return createTickerHelper(type, ModBlockEntities.MORTAR.get(),
+                level.isClientSide ? MortarBlockEntity::clientTick : MortarBlockEntity::serverTick);
     }
 
     @Override

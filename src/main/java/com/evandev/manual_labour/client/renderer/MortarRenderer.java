@@ -4,28 +4,24 @@ import com.evandev.manual_labour.client.ModToolModels;
 import com.evandev.manual_labour.config.ModConfig;
 import com.evandev.manual_labour.content.block.MortarBlock;
 import com.evandev.manual_labour.content.block.entity.MortarBlockEntity;
+import com.evandev.manual_labour.content.block.entity.MortarFluidTank;
 import com.evandev.manual_labour.registry.ModTags;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
-import net.createmod.catnip.render.FluidRenderHelper;
-import net.createmod.catnip.render.PonderRenderTypes;
+import net.createmod.catnip.animation.AnimationTickHolder;
+import net.createmod.catnip.platform.NeoForgeCatnipServices;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.entity.ItemRenderer;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
-import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
-import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.items.IItemHandler;
 import org.jetbrains.annotations.NotNull;
 
@@ -42,7 +38,6 @@ public class MortarRenderer implements BlockEntityRenderer<MortarBlockEntity> {
     private static final float FLUID_MAX_X = 14.0F / 16.0F;
     private static final float FLUID_MIN_Y = 5.0F / 16.0F;
     private static final float FLUID_MAX_Y = 14.0F / 16.0F;
-    private static final int FLUID_ALPHA = 204;
 
     private static final int CROWDED_PILE_COUNT = 4;
     private static final float CROWDED_PILE_SCALE = 0.6F;
@@ -57,6 +52,8 @@ public class MortarRenderer implements BlockEntityRenderer<MortarBlockEntity> {
 
     @Override
     public void render(MortarBlockEntity mortar, float partialTicks, @NotNull PoseStack poseStack, @NotNull MultiBufferSource buffer, int packedLight, int packedOverlay) {
+        float fluidSurfaceY = renderFluid(mortar, partialTicks, poseStack, buffer, packedLight);
+
         List<ItemStack> stacks = new ArrayList<>();
         IItemHandler inventory = mortar.getItemHandler();
         for (int i = 0; i < inventory.getSlots(); i++) {
@@ -64,16 +61,31 @@ public class MortarRenderer implements BlockEntityRenderer<MortarBlockEntity> {
             if (!stack.isEmpty()) stacks.add(stack);
         }
 
+        ModConfig config = ModConfig.get();
         int count = stacks.size();
         boolean crowded = count > CROWDED_PILE_COUNT;
-        float ringRadius = ModConfig.get().itemPileRadius * (crowded ? CROWDED_RING_SPREAD : 1.0F);
+        float ringRadius = config.itemPileRadius * (crowded ? CROWDED_RING_SPREAD : 1.0F);
+
+        float basePileY = fluidSurfaceY > 0.0F
+                ? Math.max(config.itemPileY, fluidSurfaceY - config.itemFloatSinkDepth)
+                : config.itemPileY;
+        float renderTime = AnimationTickHolder.getRenderTime(mortar.getLevel());
+        float anglePartition = count > 0 ? 360.0F / count : 0.0F;
+
+        float firstPileY = basePileY;
 
         for (int i = 0; i < count; i++) {
+            float pileY = basePileY;
+            if (fluidSurfaceY > 0.0F) {
+                pileY += (Mth.sin(renderTime / 12.0F + anglePartition * i) + 1.5F) / 32.0F;
+            }
+            if (i == 0) firstPileY = pileY;
+
             poseStack.pushPose();
-            poseStack.translate(0.5D, ModConfig.get().itemPileY, 0.5D);
+            poseStack.translate(0.5D, pileY, 0.5D);
 
             if (count > 1) {
-                poseStack.mulPose(Axis.YP.rotationDegrees(360.0F / count * i));
+                poseStack.mulPose(Axis.YP.rotationDegrees(anglePartition * i));
                 poseStack.translate(ringRadius, 0.0D, 0.0D);
             }
 
@@ -101,7 +113,7 @@ public class MortarRenderer implements BlockEntityRenderer<MortarBlockEntity> {
                 renderLadleStirring(activeTool, time, poseStack, buffer, packedLight, packedOverlay);
             } else if (activeTool.is(ModTags.Items.PESTLES)) {
                 ItemStack primary = stacks.isEmpty() ? ItemStack.EMPTY : stacks.getFirst();
-                renderPestleGrinding(activeTool, primary, time, poseStack, buffer, packedLight, packedOverlay);
+                renderPestleGrinding(activeTool, primary, firstPileY, time, poseStack, buffer, packedLight, packedOverlay);
             }
         }
 
@@ -109,8 +121,6 @@ public class MortarRenderer implements BlockEntityRenderer<MortarBlockEntity> {
             bufferSource.endBatch(Sheets.translucentCullBlockSheet());
             bufferSource.endBatch(Sheets.cutoutBlockSheet());
         }
-
-        renderFluid(mortar, poseStack, buffer, packedLight);
     }
 
     private void renderDecorativeTool(MortarBlockEntity mortar, ItemStack tool, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay) {
@@ -149,10 +159,10 @@ public class MortarRenderer implements BlockEntityRenderer<MortarBlockEntity> {
         poseStack.popPose();
     }
 
-    private void renderPestleGrinding(ItemStack tool, ItemStack primary, float time, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay) {
+    private void renderPestleGrinding(ItemStack tool, ItemStack primary, float pileY, float time, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay) {
         int maxStackSize = primary.isEmpty() ? 64 : primary.getMaxStackSize();
         boolean thumping = primary.getCount() > maxStackSize / 2;
-        float contactY = getPileTopY(primary) + ModConfig.get().pestleTipContactOffset;
+        float contactY = getPileTopY(primary, pileY) + ModConfig.get().pestleTipContactOffset;
 
         poseStack.pushPose();
 
@@ -172,15 +182,14 @@ public class MortarRenderer implements BlockEntityRenderer<MortarBlockEntity> {
         poseStack.popPose();
     }
 
-    private float getPileTopY(ItemStack stack) {
-        float itemPileY = ModConfig.get().itemPileY;
-        if (stack.isEmpty()) return itemPileY;
+    private float getPileTopY(ItemStack stack, float pileY) {
+        if (stack.isEmpty()) return pileY;
 
         BakedModel bakedModel = Minecraft.getInstance().getItemRenderer().getModel(stack, null, null, 0);
         boolean blockItem = bakedModel.isGui3d();
         int layers = Mth.log2(stack.getCount()) / 2;
         float layerHeight = blockItem ? 1.0F / 64.0F : 1.0F / 16.0F;
-        return itemPileY + (layers + 1) * layerHeight;
+        return pileY + (layers + 1) * layerHeight;
     }
 
     private void renderItemPile(PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay, ItemStack stack, int seed) {
@@ -227,24 +236,19 @@ public class MortarRenderer implements BlockEntityRenderer<MortarBlockEntity> {
         );
     }
 
-    private void renderFluid(MortarBlockEntity mortar, PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
-        FluidStack fluidStack = mortar.getFluidHandler().getFluidInTank(0);
-        if (fluidStack.isEmpty()) return;
+    private float renderFluid(MortarBlockEntity mortar, float partialTicks, PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
+        MortarFluidTank tank = mortar.getFluidTank();
+        if (tank.isEmpty(partialTicks)) return 0.0F;
 
-        IClientFluidTypeExtensions extensions = IClientFluidTypeExtensions.of(fluidStack.getFluid());
-        TextureAtlasSprite sprite = Minecraft.getInstance()
-                .getTextureAtlas(InventoryMenu.BLOCK_ATLAS)
-                .apply(extensions.getStillTexture(fluidStack));
-        int color = (FLUID_ALPHA << 24) | (extensions.getTintColor(fluidStack) & 0x00FFFFFF);
+        float fill = Mth.clamp(tank.getFluidLevel().getValue(partialTicks), 0.0F, 1.0F);
+        fill = 1.0F - ((1.0F - fill) * (1.0F - fill));
 
-        float fillRatio = Mth.clamp((float) fluidStack.getAmount() / MortarBlockEntity.TANK_CAPACITY, 0.0F, 1.0F);
-        float fluidY = Mth.lerp(fillRatio, FLUID_MIN_Y, FLUID_MAX_Y);
+        float fluidY = Mth.lerp(fill, FLUID_MIN_Y, FLUID_MAX_Y);
 
-        VertexConsumer consumer = buffer.getBuffer(PonderRenderTypes.fluid());
+        NeoForgeCatnipServices.FLUID_RENDERER.renderFluidBox(tank.getRenderedFluid(),
+                FLUID_MIN_X, FLUID_MIN_Y, FLUID_MIN_X, FLUID_MAX_X, fluidY, FLUID_MAX_X,
+                buffer, poseStack, packedLight, false, false);
 
-        FluidRenderHelper.renderStillTiledFace(Direction.UP, FLUID_MIN_X, FLUID_MIN_X, FLUID_MAX_X, FLUID_MAX_X,
-                fluidY, consumer, poseStack, packedLight, color, sprite);
-        FluidRenderHelper.renderStillTiledFace(Direction.DOWN, FLUID_MIN_X, FLUID_MIN_X, FLUID_MAX_X, FLUID_MAX_X,
-                fluidY, consumer, poseStack, packedLight, color, sprite);
+        return fluidY;
     }
 }

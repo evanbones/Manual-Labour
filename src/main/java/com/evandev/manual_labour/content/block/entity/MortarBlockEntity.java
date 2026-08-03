@@ -37,7 +37,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
 import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
 import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
@@ -54,13 +53,7 @@ public class MortarBlockEntity extends SyncedBlockEntity {
     private static final int PARTICLE_INTERVAL = 5;
 
     private final MortarInventory inventory = new MortarInventory(SLOT_COUNT, this);
-
-    private final FluidTank fluidTank = new FluidTank(TANK_CAPACITY) {
-        @Override
-        protected void onContentsChanged() {
-            notifyUpdate();
-        }
-    };
+    private final MortarFluidTank fluidTank = new MortarFluidTank(TANK_CAPACITY, this);
 
     private final RecipeManager.CachedCheck<MortarGrindingRecipeInput, MortarGrindingRecipe> grindingCheck;
 
@@ -83,7 +76,13 @@ public class MortarBlockEntity extends SyncedBlockEntity {
         grindingCheck = RecipeManager.createCheck(ModRecipeTypes.MORTAR_GRINDING.get());
     }
 
+    public static void clientTick(Level level, BlockPos pos, BlockState state, MortarBlockEntity be) {
+        be.fluidTank.tick();
+    }
+
     public static void serverTick(Level level, BlockPos pos, BlockState state, MortarBlockEntity be) {
+        be.fluidTank.tick();
+
         if (be.activeProcess == null) return;
 
         if (be.holdGraceTicks <= 0) {
@@ -170,7 +169,7 @@ public class MortarBlockEntity extends SyncedBlockEntity {
 
         for (FluidStack fluidResult : process.fluidResults()) {
             if (!fluidResult.isEmpty()) {
-                fluidTank.fill(fluidResult.copy(), IFluidHandler.FluidAction.EXECUTE);
+                fluidTank.getTank().fill(fluidResult.copy(), IFluidHandler.FluidAction.EXECUTE);
             }
         }
 
@@ -270,7 +269,7 @@ public class MortarBlockEntity extends SyncedBlockEntity {
         }
 
         for (SizedFluidIngredient fluidIngredient : process.fluidIngredients()) {
-            if (!fluidIngredient.test(fluidTank.getFluid())) return false;
+            if (!fluidIngredient.test(fluidTank.getTank().getFluid())) return false;
         }
 
         if (!simulate) {
@@ -278,7 +277,7 @@ public class MortarBlockEntity extends SyncedBlockEntity {
                 if (toExtract[i] > 0) inventory.extractItem(i, toExtract[i], false);
             }
             for (SizedFluidIngredient fluidIngredient : process.fluidIngredients()) {
-                fluidTank.drain(fluidIngredient.amount(), IFluidHandler.FluidAction.EXECUTE);
+                fluidTank.getTank().drain(fluidIngredient.amount(), IFluidHandler.FluidAction.EXECUTE);
             }
         }
 
@@ -344,16 +343,10 @@ public class MortarBlockEntity extends SyncedBlockEntity {
         }
     }
 
-    /**
-     * Inserts as much of the held stack as the mortar will take, returning the remainder.
-     */
     public ItemStack insertFromPlayer(ItemStack held) {
         return ItemHandlerHelper.insertItemStacked(inventory, held, false);
     }
 
-    /**
-     * Hands every slot back to the player at once.
-     */
     public boolean removeAllItems(Player player) {
         boolean removedAny = false;
         for (int i = 0; i < inventory.getSlots(); i++) {
@@ -366,9 +359,6 @@ public class MortarBlockEntity extends SyncedBlockEntity {
         return removedAny;
     }
 
-    /**
-     * Swallows an item entity that landed in the bowl, leaving any remainder on the entity.
-     */
     public boolean tryInsertItemEntity(ItemEntity entity) {
         ItemStack remainder = ItemHandlerHelper.insertItem(inventory, entity.getItem().copy(), false);
         if (remainder.getCount() == entity.getItem().getCount()) return false;
@@ -392,7 +382,7 @@ public class MortarBlockEntity extends SyncedBlockEntity {
         for (int i = 0; i < inventory.getSlots(); i++) {
             if (!inventory.getStackInSlot(i).isEmpty()) return false;
         }
-        return fluidTank.isEmpty();
+        return fluidTank.getTank().isEmpty();
     }
 
     public IItemHandler getItemHandler() {
@@ -400,6 +390,10 @@ public class MortarBlockEntity extends SyncedBlockEntity {
     }
 
     public IFluidHandler getFluidHandler() {
+        return fluidTank.getTank();
+    }
+
+    public MortarFluidTank getFluidTank() {
         return fluidTank;
     }
 
@@ -453,34 +447,58 @@ public class MortarBlockEntity extends SyncedBlockEntity {
     @Override
     public void onLoad() {
         super.onLoad();
-        if (level != null && !level.isClientSide && activeProcess == null && processingStartGameTime >= 0L) {
-            processingStartGameTime = -1L;
-            processingDuration = 0;
-            activeTool = ItemStack.EMPTY;
-            setChanged();
+        if (level != null && !level.isClientSide) {
+            if (activeProcess == null && processingStartGameTime >= 0L) {
+                processingStartGameTime = -1L;
+                processingDuration = 0;
+                activeTool = ItemStack.EMPTY;
+                setChanged();
+            }
+
+            fluidTank.getFluidLevel().forceNextSync();
+            fluidTank.syncLevelToContents();
         }
     }
 
     @Override
+    public void readClient(@NotNull CompoundTag tag, HolderLookup.@NotNull Provider registries) {
+        read(tag, registries, true);
+    }
+
+    @Override
+    public @NotNull CompoundTag writeClient(@NotNull CompoundTag tag, HolderLookup.@NotNull Provider registries) {
+        write(tag, registries, true);
+        return tag;
+    }
+
+    @Override
     protected void loadAdditional(@NotNull CompoundTag tag, HolderLookup.@NotNull Provider registries) {
+        read(tag, registries, false);
+    }
+
+    @Override
+    protected void saveAdditional(@NotNull CompoundTag tag, HolderLookup.@NotNull Provider registries) {
+        write(tag, registries, false);
+    }
+
+    protected void read(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
         super.loadAdditional(tag, registries);
         CompoundTag inventoryTag = tag.getCompound("Inventory").copy();
         if (!inventoryTag.isEmpty()) {
             inventoryTag.putInt("Size", SLOT_COUNT);
         }
         inventory.deserializeNBT(registries, inventoryTag);
-        fluidTank.readFromNBT(registries, tag.getCompound("FluidTank"));
+        fluidTank.readNBT(tag.getCompound("FluidTank"), registries, clientPacket);
         activeTool = tag.contains("ActiveTool") ? ItemStack.parseOptional(registries, tag.getCompound("ActiveTool")) : ItemStack.EMPTY;
         processingStartGameTime = tag.getLong("ProcessingStart");
         processingDuration = tag.getInt("ProcessingDuration");
         decorativeTool = tag.contains("DecorativeTool") ? ItemStack.parseOptional(registries, tag.getCompound("DecorativeTool")) : ItemStack.EMPTY;
     }
 
-    @Override
-    protected void saveAdditional(@NotNull CompoundTag tag, HolderLookup.@NotNull Provider registries) {
+    protected void write(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
         super.saveAdditional(tag, registries);
         tag.put("Inventory", inventory.serializeNBT(registries));
-        tag.put("FluidTank", fluidTank.writeToNBT(registries, new CompoundTag()));
+        tag.put("FluidTank", fluidTank.writeNBT(registries));
         if (!activeTool.isEmpty()) {
             tag.put("ActiveTool", activeTool.save(registries));
         }
