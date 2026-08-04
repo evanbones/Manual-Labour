@@ -2,6 +2,7 @@ plugins {
     id 'java-library'
     id 'net.neoforged.moddev' version '2.0.137'
     id 'me.modmuss50.mod-publish-plugin' version '2.1.1'
+    id 'org.moddedmc.wiki.toolkit' version '0.4.1'
 }
 
 version = project.version
@@ -13,6 +14,13 @@ base {
 
 java {
     toolchain.languageVersion = JavaLanguageVersion.of(java_version)
+}
+
+wiki {
+    wikiAccessToken = System.getenv("WIKI_ACCESS_TOKEN")
+    docs.create("manual-labour") {
+        root = file("docs/")
+    }
 }
 
 repositories {

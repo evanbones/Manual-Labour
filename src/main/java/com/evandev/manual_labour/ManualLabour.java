@@ -1,6 +1,8 @@
 package com.evandev.manual_labour;
 
 import com.evandev.manual_labour.client.ClientConfigSetup;
+import com.evandev.manual_labour.compat.create.BasinStirClientState;
+import com.evandev.manual_labour.compat.create.BasinStirPayload;
 import com.evandev.manual_labour.config.ModConfig;
 import com.evandev.manual_labour.content.block.MillstoneBlock;
 import com.evandev.manual_labour.content.block.MillstoneItemHandler;
@@ -25,6 +27,8 @@ import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import org.jetbrains.annotations.Nullable;
 
 @Mod(Constants.MOD_ID)
@@ -32,6 +36,7 @@ import org.jetbrains.annotations.Nullable;
 public class ManualLabour {
     public ManualLabour(IEventBus modEventBus, ModContainer modContainer) {
         modEventBus.addListener(this::commonSetup);
+        modEventBus.addListener(this::registerPayloads);
 
         ModBlocks.BLOCKS.register(modEventBus);
         ModItems.ITEMS.register(modEventBus);
@@ -84,6 +89,15 @@ public class ManualLabour {
             return new MillstoneItemHandler(millstone);
         }
         return null;
+    }
+
+    private void registerPayloads(final RegisterPayloadHandlersEvent event) {
+        PayloadRegistrar registrar = event.registrar("1");
+        registrar.playToClient(
+                BasinStirPayload.TYPE,
+                BasinStirPayload.STREAM_CODEC,
+                (payload, context) -> BasinStirClientState.set(payload.pos(), payload.tool())
+        );
     }
 
     @SubscribeEvent

@@ -1,0 +1,97 @@
+# Custom Recipes
+
+Manual Labour adds a few new ways to craft items. These are all plain datapack JSON, meaning they work from any datapack or mod. The best part is you do not even need to have the Create mod installed for them to work.
+
+If you are using Create, each of our recipe types has an equivalent Create recipe it can fall back to. If there is ever a conflict, the Manual Labour recipes are always prioritized.
+
+## Workstone
+**Type:** `manual_labour:workstone`
+
+This takes two ingredients (the item to process, then the tool that must hit it) and an array of chance-weighted results. 
+
+For Create users, this falls back to Deployer steps in Sequenced Assembly, or the Mechanical Press. You can toggle this behavior with `use_create_deploying_recipes` and `use_create_pressing_recipes`.
+
+```json
+{
+  "type": "manual_labour:workstone",
+  "ingredients": [
+    {
+      "item": "minecraft:cobblestone"
+    },
+    {
+      "tag": "manual_labour:hammers"
+    }
+  ],
+  "results": [
+    {
+      "id": "minecraft:gravel",
+      "chance": 1.0
+    },
+    {
+      "id": "minecraft:flint",
+      "count": 1,
+      "chance": 0.25
+    }
+  ]
+}
+```
+
+## Mortar Grinding
+**Type:** `manual_labour:mortar_grinding`
+
+This recipe takes a single ingredient. It does not need a tool slot because any Pestle will work just fine. You can also add an optional `processing_time` in ticks (the default is 100).
+
+For Create users, this falls back to the Millstone or Crushing Wheels (though the crushing wheel fallback is disabled by default). You can toggle these with `use_create_milling_recipes` and `use_create_crushing_recipes`.
+
+```json
+{
+  "type": "manual_labour:mortar_grinding",
+  "ingredient": {
+    "item": "minecraft:wheat"
+  },
+  "processing_time": 100,
+  "results": [
+    {
+      "result": {
+        "id": "minecraft:wheat_seeds",
+        "count": 2
+      },
+      "chance": 1.0
+    }
+  ]
+}
+```
+
+## Mortar Mixing
+**Type:** `manual_labour:mortar_mixing`
+
+This takes a list of item ingredients plus an optional sized fluid ingredient. You can also specify an optional `processing_time`.
+
+If you have Create installed, this falls back to the Mechanical Mixer (unheated only). This can be toggled using `use_create_mixing_recipes`.
+
+```json
+{
+  "type": "manual_labour:mortar_mixing",
+  "ingredients": [
+    {
+      "item": "minecraft:sand"
+    },
+    {
+      "item": "minecraft:gravel"
+    }
+  ],
+  "fluid_ingredient": {
+    "fluid": "minecraft:water",
+    "amount": 250
+  },
+  "processing_time": 100,
+  "results": [
+    {
+      "result": {
+        "id": "minecraft:clay_ball"
+      },
+      "chance": 1.0
+    }
+  ]
+}
+```

@@ -10,8 +10,6 @@ import com.simibubi.create.content.fluids.transfer.GenericItemFilling;
 import com.simibubi.create.foundation.item.ItemHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.ItemInteractionResult;
@@ -38,7 +36,6 @@ import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -112,7 +109,6 @@ public class MortarBlock extends BaseEntityBlock implements SimpleWaterloggedBlo
                 return ItemInteractionResult.sidedSuccess(level.isClientSide);
             }
 
-            // Swallow the click so a container the mortar can't take right now is never dropped in as an ingredient
             if (GenericItemEmptying.canItemBeEmptied(level, stack) || GenericItemFilling.canItemBeFilled(level, stack)) {
                 return ItemInteractionResult.SUCCESS;
             }
@@ -125,8 +121,6 @@ public class MortarBlock extends BaseEntityBlock implements SimpleWaterloggedBlo
             }
             player.setItemInHand(hand, remainder);
 
-            Vec3 centerPos = pos.getCenter();
-            level.playSound(null, centerPos.x(), centerPos.y(), centerPos.z(), SoundEvents.STONE_PLACE, SoundSource.BLOCKS, 1.0F, 0.8F);
             return ItemInteractionResult.SUCCESS;
         }
 
@@ -151,8 +145,6 @@ public class MortarBlock extends BaseEntityBlock implements SimpleWaterloggedBlo
         if (level.isClientSide) return ItemInteractionResult.CONSUME;
 
         mortar.removeAllItems(player);
-        Vec3 centerPos = pos.getCenter();
-        level.playSound(null, centerPos.x(), centerPos.y(), centerPos.z(), SoundEvents.STONE_PLACE, SoundSource.BLOCKS, 0.25F, 0.5F);
         return ItemInteractionResult.SUCCESS;
     }
 

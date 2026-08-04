@@ -4,10 +4,13 @@ import com.evandev.manual_labour.Constants;
 import com.evandev.manual_labour.client.renderer.MillstoneRenderer;
 import com.evandev.manual_labour.client.renderer.MortarRenderer;
 import com.evandev.manual_labour.client.renderer.WorkstoneRenderer;
+import com.evandev.manual_labour.compat.ponder.ManualLabourPonderPlugin;
 import com.evandev.manual_labour.registry.ModBlockEntities;
+import net.createmod.ponder.foundation.PonderIndex;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.client.event.RenderFrameEvent;
@@ -19,6 +22,11 @@ public class ClientModEvents {
         event.registerBlockEntityRenderer(ModBlockEntities.WORKSTONE.get(), WorkstoneRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.MORTAR.get(), MortarRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.MILLSTONE.get(), MillstoneRenderer::new);
+    }
+
+    @SubscribeEvent
+    public static void onClientSetup(FMLClientSetupEvent event) {
+        PonderIndex.addPlugin(new ManualLabourPonderPlugin());
     }
 
     @SubscribeEvent

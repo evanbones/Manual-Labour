@@ -1,13 +1,16 @@
 package com.evandev.manual_labour.content.block.entity;
 
+import com.evandev.manual_labour.config.ModConfig;
 import com.evandev.manual_labour.content.block.WorkstoneBlock;
 import com.evandev.manual_labour.recipe.WorkstoneRecipe;
 import com.evandev.manual_labour.registry.ModBlockEntities;
 import com.evandev.manual_labour.registry.ModRecipeTypes;
 import com.evandev.manual_labour.registry.ModSounds;
+import com.evandev.manual_labour.registry.ModTags;
 import com.simibubi.create.AllDataComponents;
 import com.simibubi.create.AllRecipeTypes;
 import com.simibubi.create.content.kinetics.deployer.DeployerApplicationRecipe;
+import com.simibubi.create.content.kinetics.press.PressingRecipe;
 import com.simibubi.create.content.processing.recipe.ProcessingRecipe;
 import com.simibubi.create.content.processing.sequenced.SequencedAssemblyRecipe;
 import net.minecraft.core.BlockPos;
@@ -27,6 +30,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -62,7 +66,7 @@ public class WorkstoneBlockEntity extends BlockEntity {
     public boolean processStoredItemUsingTool(ItemStack toolStack, Player player) {
         if (level == null) return false;
 
-        Optional<RecipeHolder<? extends ProcessingRecipe<RecipeWrapper, ?>>> matchingRecipe = getMatchingRecipe(toolStack);
+        Optional<RecipeHolder<? extends ProcessingRecipe<?, ?>>> matchingRecipe = getMatchingRecipe(toolStack);
 
         matchingRecipe.ifPresent(recipe -> {
             Direction direction = getBlockState().getValue(WorkstoneBlock.FACING).getCounterClockWise();
@@ -118,7 +122,7 @@ public class WorkstoneBlockEntity extends BlockEntity {
         return matchingRecipe.isPresent();
     }
 
-    private Optional<RecipeHolder<? extends ProcessingRecipe<RecipeWrapper, ?>>> getMatchingRecipe(ItemStack toolStack) {
+    private Optional<RecipeHolder<? extends ProcessingRecipe<?, ?>>> getMatchingRecipe(ItemStack toolStack) {
         if (level == null) return Optional.empty();
 
         recipeInv.setStackInSlot(0, getStoredItem());
@@ -131,14 +135,28 @@ public class WorkstoneBlockEntity extends BlockEntity {
             return Optional.of(workstoneStep.get());
         }
 
-        Optional<RecipeHolder<DeployerApplicationRecipe>> deployingStep = SequencedAssemblyRecipe.getRecipe(
-                level, wrapper, AllRecipeTypes.DEPLOYING.<RecipeWrapper, DeployerApplicationRecipe>getType(), DeployerApplicationRecipe.class);
-        if (deployingStep.isPresent()) {
-            return Optional.of(deployingStep.get());
+        if (ModConfig.get().useCreateDeployingRecipes) {
+            Optional<RecipeHolder<DeployerApplicationRecipe>> deployingStep = SequencedAssemblyRecipe.getRecipe(
+                    level, wrapper, AllRecipeTypes.DEPLOYING.<RecipeWrapper, DeployerApplicationRecipe>getType(), DeployerApplicationRecipe.class);
+            if (deployingStep.isPresent()) {
+                return Optional.of(deployingStep.get());
+            }
         }
 
         Optional<RecipeHolder<WorkstoneRecipe>> standalone = quickCheck.getRecipeFor(wrapper, level);
-        return standalone.map(h -> h);
+        if (standalone.isPresent()) {
+            return Optional.of(standalone.get());
+        }
+
+        if (ModConfig.get().useCreatePressingRecipes && toolStack.is(ModTags.Items.HAMMERS)) {
+            SingleRecipeInput pressingInput = new SingleRecipeInput(getStoredItem());
+            Optional<RecipeHolder<PressingRecipe>> pressing = AllRecipeTypes.PRESSING.find(pressingInput, level);
+            if (pressing.isPresent()) {
+                return Optional.of(pressing.get());
+            }
+        }
+
+        return Optional.empty();
     }
 
     public boolean canAddItem(ItemStack addedStack) {

@@ -37,6 +37,21 @@ public class ModConfig {
     @SerializedName("decorative_tool_tilt")
     public float decorativeToolTilt = 30.0F;
 
+    @SerializedName("use_create_milling_recipes")
+    public boolean useCreateMillingRecipes = true;
+
+    @SerializedName("use_create_crushing_recipes")
+    public boolean useCreateCrushingRecipes = false;
+
+    @SerializedName("use_create_mixing_recipes")
+    public boolean useCreateMixingRecipes = true;
+
+    @SerializedName("use_create_deploying_recipes")
+    public boolean useCreateDeployingRecipes = true;
+
+    @SerializedName("use_create_pressing_recipes")
+    public boolean useCreatePressingRecipes = true;
+
     public static ModConfig get() {
         if (INSTANCE == null) {
             load();

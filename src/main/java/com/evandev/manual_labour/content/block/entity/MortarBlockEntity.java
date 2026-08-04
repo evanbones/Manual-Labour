@@ -1,5 +1,6 @@
 package com.evandev.manual_labour.content.block.entity;
 
+import com.evandev.manual_labour.config.ModConfig;
 import com.evandev.manual_labour.content.block.MortarBlock;
 import com.evandev.manual_labour.recipe.MortarGrindingRecipe;
 import com.evandev.manual_labour.recipe.MortarGrindingRecipeInput;
@@ -22,8 +23,6 @@ import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Containers;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -216,13 +215,21 @@ public class MortarBlockEntity extends SyncedBlockEntity {
 
         SingleRecipeInput createInput = new SingleRecipeInput(candidate);
 
-        Optional<RecipeHolder<MillingRecipe>> milling = AllRecipeTypes.MILLING.find(createInput, level);
-        if (milling.isPresent()) {
-            return Optional.of(new MortarProcess.CreateProcess(milling.get().value()));
+        if (ModConfig.get().useCreateMillingRecipes) {
+            Optional<RecipeHolder<MillingRecipe>> milling = AllRecipeTypes.MILLING.find(createInput, level);
+            if (milling.isPresent()) {
+                return Optional.of(new MortarProcess.CreateProcess(milling.get().value()));
+            }
         }
 
-        Optional<RecipeHolder<CrushingRecipe>> crushing = AllRecipeTypes.CRUSHING.find(createInput, level);
-        return crushing.map(holder -> new MortarProcess.CreateProcess(holder.value()));
+        if (ModConfig.get().useCreateCrushingRecipes) {
+            Optional<RecipeHolder<CrushingRecipe>> crushing = AllRecipeTypes.CRUSHING.find(createInput, level);
+            if (crushing.isPresent()) {
+                return Optional.of(new MortarProcess.CreateProcess(crushing.get().value()));
+            }
+        }
+
+        return Optional.empty();
     }
 
     private Optional<MortarProcess> findMixingProcess() {
@@ -233,13 +240,15 @@ public class MortarBlockEntity extends SyncedBlockEntity {
             if (consumeIngredients(process, true)) return Optional.of(process);
         }
 
-        List<RecipeHolder<MixingRecipe>> mixingRecipes =
-                level.getRecipeManager().getAllRecipesFor(AllRecipeTypes.MIXING.getType());
-        for (RecipeHolder<MixingRecipe> holder : mixingRecipes) {
-            MixingRecipe recipe = holder.value();
-            if (!recipe.getRequiredHeat().testBlazeBurner(HeatLevel.NONE)) continue;
-            MortarProcess process = new MortarProcess.CreateProcess(recipe);
-            if (consumeIngredients(process, true)) return Optional.of(process);
+        if (ModConfig.get().useCreateMixingRecipes) {
+            List<RecipeHolder<MixingRecipe>> mixingRecipes =
+                    level.getRecipeManager().getAllRecipesFor(AllRecipeTypes.MIXING.getType());
+            for (RecipeHolder<MixingRecipe> holder : mixingRecipes) {
+                MixingRecipe recipe = holder.value();
+                if (!recipe.getRequiredHeat().testBlazeBurner(HeatLevel.NONE)) continue;
+                MortarProcess process = new MortarProcess.CreateProcess(recipe);
+                if (consumeIngredients(process, true)) return Optional.of(process);
+            }
         }
 
         return Optional.empty();
@@ -423,7 +432,6 @@ public class MortarBlockEntity extends SyncedBlockEntity {
         if (!creative) stack.shrink(1);
         notifyUpdate();
 
-        level.playSound(null, worldPosition, SoundEvents.STONE_HIT, SoundSource.BLOCKS, 0.5F, 1.2F);
         return true;
     }
 
@@ -432,9 +440,6 @@ public class MortarBlockEntity extends SyncedBlockEntity {
         decorativeTool = ItemStack.EMPTY;
         notifyUpdate();
 
-        if (level != null) {
-            level.playSound(null, worldPosition, SoundEvents.STONE_HIT, SoundSource.BLOCKS, 0.5F, 0.8F);
-        }
         return result;
     }
 

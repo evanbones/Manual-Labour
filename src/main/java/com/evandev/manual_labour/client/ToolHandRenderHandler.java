@@ -1,10 +1,12 @@
 package com.evandev.manual_labour.client;
 
 import com.evandev.manual_labour.Constants;
+import com.evandev.manual_labour.compat.create.BasinStirClientState;
 import com.evandev.manual_labour.content.block.entity.MortarBlockEntity;
 import com.evandev.manual_labour.registry.ModTags;
 import com.simibubi.create.content.processing.basin.BasinBlockEntity;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -30,13 +32,16 @@ public class ToolHandRenderHandler {
         if (!(hitResult instanceof BlockHitResult blockHit) || hitResult.getType() != HitResult.Type.BLOCK) return;
 
         Level level = mc.level;
-        BlockEntity blockEntity = level.getBlockEntity(blockHit.getBlockPos());
+        BlockPos pos = blockHit.getBlockPos();
+        BlockEntity blockEntity = level.getBlockEntity(pos);
         if (blockEntity instanceof MortarBlockEntity mortar) {
             if (mortar.isProcessing()) {
                 event.setCanceled(true);
             }
         } else if (blockEntity instanceof BasinBlockEntity) {
-            event.setCanceled(true);
+            if (BasinStirClientState.activeStirs().containsKey(pos)) {
+                event.setCanceled(true);
+            }
         }
     }
 }

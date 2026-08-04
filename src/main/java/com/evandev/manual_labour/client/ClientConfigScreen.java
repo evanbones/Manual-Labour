@@ -3,6 +3,7 @@ package com.evandev.manual_labour.client;
 import com.evandev.manual_labour.config.ModConfig;
 import dev.isxander.yacl3.api.ConfigCategory;
 import dev.isxander.yacl3.api.Option;
+import dev.isxander.yacl3.api.OptionDescription;
 import dev.isxander.yacl3.api.YetAnotherConfigLib;
 import dev.isxander.yacl3.api.controller.FloatSliderControllerBuilder;
 import dev.isxander.yacl3.api.controller.TickBoxControllerBuilder;
@@ -33,12 +34,26 @@ public class ClientConfigScreen {
                 .option(createFloatOption("decorative_tool_tilt", 30.0F, 0.0F, 90.0F, 0.5F,
                         () -> ModConfig.get().decorativeToolTilt, val -> ModConfig.get().decorativeToolTilt = val));
 
-        return builder.category(mortar.build()).build().generateScreen(parent);
+        ConfigCategory.Builder create = ConfigCategory.createBuilder()
+                .name(Component.translatable("config.manual_labour.category.create"))
+                .option(createBoolOption("use_create_milling_recipes", true,
+                        () -> ModConfig.get().useCreateMillingRecipes, val -> ModConfig.get().useCreateMillingRecipes = val))
+                .option(createBoolOption("use_create_crushing_recipes", false,
+                        () -> ModConfig.get().useCreateCrushingRecipes, val -> ModConfig.get().useCreateCrushingRecipes = val))
+                .option(createBoolOption("use_create_mixing_recipes", true,
+                        () -> ModConfig.get().useCreateMixingRecipes, val -> ModConfig.get().useCreateMixingRecipes = val))
+                .option(createBoolOption("use_create_deploying_recipes", true,
+                        () -> ModConfig.get().useCreateDeployingRecipes, val -> ModConfig.get().useCreateDeployingRecipes = val))
+                .option(createBoolOption("use_create_pressing_recipes", true,
+                        () -> ModConfig.get().useCreatePressingRecipes, val -> ModConfig.get().useCreatePressingRecipes = val));
+
+        return builder.category(mortar.build()).category(create.build()).build().generateScreen(parent);
     }
 
     private static Option<Boolean> createBoolOption(String name, boolean defaultValue, Supplier<Boolean> getter, Consumer<Boolean> setter) {
         return Option.<Boolean>createBuilder()
                 .name(Component.translatable("config.manual_labour.option." + name))
+                .description(OptionDescription.of(Component.translatable("config.manual_labour.option." + name + ".tooltip")))
                 .binding(defaultValue, getter, setter)
                 .controller(TickBoxControllerBuilder::create)
                 .build();
@@ -47,6 +62,7 @@ public class ClientConfigScreen {
     private static Option<Float> createFloatOption(String name, float defaultValue, float min, float max, float step, Supplier<Float> getter, Consumer<Float> setter) {
         return Option.<Float>createBuilder()
                 .name(Component.translatable("config.manual_labour.option." + name))
+                .description(OptionDescription.of(Component.translatable("config.manual_labour.option." + name + ".tooltip")))
                 .binding(defaultValue, getter, setter)
                 .controller(opt -> FloatSliderControllerBuilder.create(opt).range(min, max).step(step))
                 .build();

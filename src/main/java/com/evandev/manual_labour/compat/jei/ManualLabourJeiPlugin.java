@@ -1,6 +1,7 @@
 package com.evandev.manual_labour.compat.jei;
 
 import com.evandev.manual_labour.Constants;
+import com.evandev.manual_labour.config.ModConfig;
 import com.evandev.manual_labour.recipe.WorkstoneRecipe;
 import com.evandev.manual_labour.registry.ModBlocks;
 import com.evandev.manual_labour.registry.ModItems;
@@ -11,10 +12,12 @@ import com.simibubi.create.compat.jei.EmptyBackground;
 import com.simibubi.create.compat.jei.category.CreateRecipeCategory;
 import com.simibubi.create.content.kinetics.crusher.AbstractCrushingRecipe;
 import com.simibubi.create.content.kinetics.crusher.CrushingRecipe;
+import com.simibubi.create.content.kinetics.deployer.DeployerApplicationRecipe;
 import com.simibubi.create.content.kinetics.millstone.MillingRecipe;
 import com.simibubi.create.content.kinetics.mixer.MixingRecipe;
 import com.simibubi.create.content.processing.burner.BlazeBurnerBlock.HeatLevel;
 import com.simibubi.create.content.processing.sequenced.SequencedAssemblyRecipe;
+import com.simibubi.create.content.processing.sequenced.SequencedRecipe;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.recipe.RecipeType;
@@ -61,10 +64,14 @@ public class ManualLabourJeiPlugin implements IModPlugin {
         List<RecipeHolder<Recipe<?>>> recipes = new ArrayList<>();
         manager.getAllRecipesFor(ModRecipeTypes.MORTAR_GRINDING.get())
                 .forEach(r -> recipes.add(new RecipeHolder<>(r.id(), r.value())));
-        manager.getAllRecipesFor(AllRecipeTypes.MILLING.<RecipeInput, MillingRecipe>getType())
-                .forEach(r -> recipes.add(new RecipeHolder<>(r.id(), r.value())));
-        manager.getAllRecipesFor(AllRecipeTypes.CRUSHING.<RecipeInput, CrushingRecipe>getType())
-                .forEach(r -> recipes.add(new RecipeHolder<>(r.id(), r.value())));
+        if (ModConfig.get().useCreateMillingRecipes) {
+            manager.getAllRecipesFor(AllRecipeTypes.MILLING.<RecipeInput, MillingRecipe>getType())
+                    .forEach(r -> recipes.add(new RecipeHolder<>(r.id(), r.value())));
+        }
+        if (ModConfig.get().useCreateCrushingRecipes) {
+            manager.getAllRecipesFor(AllRecipeTypes.CRUSHING.<RecipeInput, CrushingRecipe>getType())
+                    .forEach(r -> recipes.add(new RecipeHolder<>(r.id(), r.value())));
+        }
         return recipes;
     }
 
@@ -75,14 +82,27 @@ public class ManualLabourJeiPlugin implements IModPlugin {
         List<RecipeHolder<Recipe<?>>> recipes = new ArrayList<>();
         manager.getAllRecipesFor(ModRecipeTypes.MORTAR_MIXING.get())
                 .forEach(r -> recipes.add(new RecipeHolder<>(r.id(), r.value())));
-        manager.getAllRecipesFor(AllRecipeTypes.MIXING.<RecipeInput, MixingRecipe>getType())
-                .forEach(r -> {
-                    MixingRecipe recipe = r.value();
-                    if (!recipe.getRequiredHeat().testBlazeBurner(HeatLevel.NONE)) return;
-                    if (recipe.getFluidIngredients().size() > 1) return;
-                    recipes.add(new RecipeHolder<>(r.id(), recipe));
-                });
+        if (ModConfig.get().useCreateMixingRecipes) {
+            manager.getAllRecipesFor(AllRecipeTypes.MIXING.<RecipeInput, MixingRecipe>getType())
+                    .forEach(r -> {
+                        MixingRecipe recipe = r.value();
+                        if (!recipe.getRequiredHeat().testBlazeBurner(HeatLevel.NONE)) return;
+                        if (recipe.getFluidIngredients().size() > 1) return;
+                        recipes.add(new RecipeHolder<>(r.id(), recipe));
+                    });
+        }
         return recipes;
+    }
+
+    private static boolean usesWorkstone(RecipeHolder<?> holder) {
+        if (!(holder.value() instanceof SequencedAssemblyRecipe recipe)) return false;
+        boolean allowDeploying = ModConfig.get().useCreateDeployingRecipes;
+        for (SequencedRecipe<?> step : recipe.getSequence()) {
+            Object stepRecipe = step.getRecipe();
+            if (stepRecipe instanceof WorkstoneRecipe) return true;
+            if (allowDeploying && stepRecipe instanceof DeployerApplicationRecipe) return true;
+        }
+        return false;
     }
 
     @Override
@@ -118,7 +138,7 @@ public class ManualLabourJeiPlugin implements IModPlugin {
         ));
 
         manualAssembly = new CreateRecipeCategory.Builder<>(SequencedAssemblyRecipe.class)
-                .addTypedRecipes(AllRecipeTypes.SEQUENCED_ASSEMBLY)
+                .addTypedRecipesIf(AllRecipeTypes.SEQUENCED_ASSEMBLY::getType, ManualLabourJeiPlugin::usesWorkstone)
                 .itemIcon(ModBlocks.WORKSTONE.get())
                 .catalyst(ModBlocks.WORKSTONE::get)
                 .emptyBackground(180, 115)
@@ -150,5 +170,10 @@ public class ManualLabourJeiPlugin implements IModPlugin {
         mortarMixing.registerCatalysts(registration);
         manualAssembly.registerCatalysts(registration);
         millstone.registerCatalysts(registration);
+
+        if (ModConfig.get().useCreatePressingRecipes) {
+            registration.addRecipeCatalyst(new ItemStack(ModBlocks.WORKSTONE.get()),
+                    RecipeType.createRecipeHolderType(ResourceLocation.fromNamespaceAndPath("create", "pressing")));
+        }
     }
 }

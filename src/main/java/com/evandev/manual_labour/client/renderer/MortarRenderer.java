@@ -32,7 +32,6 @@ import java.util.Random;
 public class MortarRenderer implements BlockEntityRenderer<MortarBlockEntity> {
     private static final float PESTLE_THUMP_SPEED = 18.0F;
     private static final float PESTLE_GRIND_SPEED = 10.0F;
-    private static final float LADLE_STIR_SPEED = 6.0F;
 
     private static final float FLUID_MIN_X = 2.0F / 16.0F;
     private static final float FLUID_MAX_X = 14.0F / 16.0F;
@@ -110,7 +109,7 @@ public class MortarRenderer implements BlockEntityRenderer<MortarBlockEntity> {
             float time = mortar.getLevel() != null ? mortar.getLevel().getGameTime() + partialTicks : partialTicks;
 
             if (activeTool.is(ModTags.Items.LADLES)) {
-                renderLadleStirring(activeTool, time, poseStack, buffer, packedLight, packedOverlay);
+                ToolAnimations.renderLadleStirring(activeTool, time, poseStack, buffer, packedLight, packedOverlay);
             } else if (activeTool.is(ModTags.Items.PESTLES)) {
                 ItemStack primary = stacks.isEmpty() ? ItemStack.EMPTY : stacks.getFirst();
                 renderPestleGrinding(activeTool, primary, firstPileY, time, poseStack, buffer, packedLight, packedOverlay);
@@ -137,24 +136,7 @@ public class MortarRenderer implements BlockEntityRenderer<MortarBlockEntity> {
         poseStack.translate(-TOOL_PIVOT_X, -TOOL_PIVOT_Y, -TOOL_PIVOT_Z);
 
         BakedModel model = tool.is(ModTags.Items.LADLES) ? ModToolModels.ladle() : ModToolModels.pestle();
-        renderToolModel(tool, model, poseStack, buffer, packedLight, packedOverlay);
-
-        poseStack.popPose();
-    }
-
-    private void renderLadleStirring(ItemStack tool, float time, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay) {
-        float angle = time * LADLE_STIR_SPEED;
-        Vec3 offset = new Vec3(0.12D, 0.0D, 0.0D).yRot((float) Math.toRadians(angle));
-
-        poseStack.pushPose();
-        poseStack.translate(0.5D + offset.x(), 0.95D, 0.5D + offset.z());
-        poseStack.mulPose(Axis.YP.rotationDegrees(-angle));
-        poseStack.scale(1.1F, 1.1F, 1.1F);
-        poseStack.translate(TOOL_PIVOT_X, TOOL_PIVOT_Y, TOOL_PIVOT_Z);
-        poseStack.mulPose(Axis.XP.rotationDegrees(20.0F));
-        poseStack.translate(-TOOL_PIVOT_X, -TOOL_PIVOT_Y, -TOOL_PIVOT_Z);
-
-        renderToolModel(tool, ModToolModels.ladle(), poseStack, buffer, packedLight, packedOverlay);
+        ToolAnimations.renderToolModel(tool, model, poseStack, buffer, packedLight, packedOverlay);
 
         poseStack.popPose();
     }
@@ -177,7 +159,7 @@ public class MortarRenderer implements BlockEntityRenderer<MortarBlockEntity> {
         }
 
         poseStack.scale(1.1F, 1.1F, 1.1F);
-        renderToolModel(tool, ModToolModels.pestle(), poseStack, buffer, packedLight, packedOverlay);
+        ToolAnimations.renderToolModel(tool, ModToolModels.pestle(), poseStack, buffer, packedLight, packedOverlay);
 
         poseStack.popPose();
     }
@@ -227,13 +209,6 @@ public class MortarRenderer implements BlockEntityRenderer<MortarBlockEntity> {
         }
 
         poseStack.popPose();
-    }
-
-    private void renderToolModel(ItemStack tool, BakedModel model, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay) {
-        Minecraft.getInstance().getItemRenderer().render(
-                tool, ItemDisplayContext.NONE, false,
-                poseStack, buffer, packedLight, packedOverlay, model
-        );
     }
 
     private float renderFluid(MortarBlockEntity mortar, float partialTicks, PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
