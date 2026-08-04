@@ -20,19 +20,19 @@ public class ModConfig {
     public float itemPileY = 0.65F;
 
     @SerializedName("item_pile_radius")
-    public float itemPileRadius = 0.18F;
+    public float itemPileRadius = 0.3F;
 
     @SerializedName("item_float_sink_depth")
     public float itemFloatSinkDepth = 0.15F;
 
     @SerializedName("pestle_tip_contact_offset")
-    public float pestleTipContactOffset = 0.50F;
+    public float pestleTipContactOffset = 0.3F;
 
     @SerializedName("decorative_tool_y")
-    public float decorativeToolY = 0.83F;
+    public float decorativeToolY = 0.7F;
 
     @SerializedName("decorative_tool_side_offset")
-    public float decorativeToolSideOffset = 0.30F;
+    public float decorativeToolSideOffset = 0.2F;
 
     @SerializedName("decorative_tool_tilt")
     public float decorativeToolTilt = 30.0F;
