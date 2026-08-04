@@ -62,6 +62,6 @@ public class MortarGrindingCategory extends CreateRecipeCategory<Recipe<?>> {
     @Override
     public void draw(Recipe<?> recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics graphics, double mouseX, double mouseY) {
         AllGuiTextures.JEI_DOWN_ARROW.render(graphics, 72, 7);
-        JeiBlockIcon.draw(graphics, ModBlocks.MORTAR.get().defaultBlockState(), 62, 45, 20);
+        JeiBlockIcon.draw(graphics, ModBlocks.MORTAR.get().defaultBlockState(), getBackground().getWidth() / 2 - 13, 55, 20);
     }
 }

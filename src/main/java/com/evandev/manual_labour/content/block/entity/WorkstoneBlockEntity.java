@@ -149,6 +149,12 @@ public class WorkstoneBlockEntity extends BlockEntity {
         }
 
         if (ModConfig.get().useCreatePressingRecipes && toolStack.is(ModTags.Items.HAMMERS)) {
+            Optional<RecipeHolder<PressingRecipe>> pressingStep = SequencedAssemblyRecipe.getRecipe(
+                    level, getStoredItem(), AllRecipeTypes.PRESSING.getType(), PressingRecipe.class);
+            if (pressingStep.isPresent()) {
+                return Optional.of(pressingStep.get());
+            }
+
             SingleRecipeInput pressingInput = new SingleRecipeInput(getStoredItem());
             Optional<RecipeHolder<PressingRecipe>> pressing = AllRecipeTypes.PRESSING.find(pressingInput, level);
             if (pressing.isPresent()) {

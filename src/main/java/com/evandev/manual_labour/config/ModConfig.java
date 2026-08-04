@@ -52,6 +52,24 @@ public class ModConfig {
     @SerializedName("use_create_pressing_recipes")
     public boolean useCreatePressingRecipes = true;
 
+    @SerializedName("enable_workstone_jei")
+    public boolean enableWorkstoneJei = true;
+
+    @SerializedName("enable_mortar_grinding_jei")
+    public boolean enableMortarGrindingJei = true;
+
+    @SerializedName("enable_mortar_mixing_jei")
+    public boolean enableMortarMixingJei = true;
+
+    @SerializedName("enable_manual_assembly_jei")
+    public boolean enableManualAssemblyJei = true;
+
+    @SerializedName("enable_millstone_jei")
+    public boolean enableMillstoneJei = true;
+
+    @SerializedName("enable_manual_pressing_jei")
+    public boolean enableManualPressingJei = true;
+
     public static ModConfig get() {
         if (INSTANCE == null) {
             load();

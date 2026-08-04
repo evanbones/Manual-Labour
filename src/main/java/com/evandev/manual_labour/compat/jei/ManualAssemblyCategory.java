@@ -1,10 +1,12 @@
 package com.evandev.manual_labour.compat.jei;
 
+import com.evandev.manual_labour.config.ModConfig;
 import com.evandev.manual_labour.recipe.WorkstoneRecipe;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.simibubi.create.compat.jei.category.CreateRecipeCategory;
 import com.simibubi.create.compat.jei.category.sequencedAssembly.SequencedAssemblySubCategory;
 import com.simibubi.create.content.kinetics.deployer.DeployerApplicationRecipe;
+import com.simibubi.create.content.kinetics.press.PressingRecipe;
 import com.simibubi.create.content.processing.sequenced.SequencedAssemblyRecipe;
 import com.simibubi.create.content.processing.sequenced.SequencedRecipe;
 import com.simibubi.create.foundation.gui.AllGuiTextures;
@@ -43,7 +45,9 @@ public class ManualAssemblyCategory extends CreateRecipeCategory<SequencedAssemb
 
     private SequencedAssemblySubCategory getSubCategory(SequencedRecipe<?> sequencedRecipe) {
         Object stepRecipe = sequencedRecipe.getRecipe();
-        if (stepRecipe instanceof WorkstoneRecipe || stepRecipe instanceof DeployerApplicationRecipe) {
+        if (stepRecipe instanceof WorkstoneRecipe
+                || (ModConfig.get().useCreateDeployingRecipes && stepRecipe instanceof DeployerApplicationRecipe)
+                || (ModConfig.get().useCreatePressingRecipes && stepRecipe instanceof PressingRecipe)) {
             return workstoneSubCategory;
         }
         return subCategories.computeIfAbsent(RegisteredObjectsHelper.getKeyOrThrow(sequencedRecipe.getRecipe()

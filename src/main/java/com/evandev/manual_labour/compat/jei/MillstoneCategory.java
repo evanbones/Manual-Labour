@@ -47,6 +47,6 @@ public class MillstoneCategory extends CreateRecipeCategory<AbstractCrushingReci
     @Override
     public void draw(AbstractCrushingRecipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics graphics, double mouseX, double mouseY) {
         AllGuiTextures.JEI_DOWN_ARROW.render(graphics, 72, 7);
-        millstone.draw(graphics, getBackground().getWidth() / 2, 68);
+        millstone.draw(graphics, getBackground().getWidth() / 2, 60);
     }
 }

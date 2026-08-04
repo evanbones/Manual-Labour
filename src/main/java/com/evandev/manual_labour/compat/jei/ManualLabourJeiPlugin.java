@@ -38,6 +38,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.simibubi.create.content.kinetics.press.PressingRecipe;
+
 @JeiPlugin
 public class ManualLabourJeiPlugin implements IModPlugin {
     private static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "jei_plugin");
@@ -47,6 +49,7 @@ public class ManualLabourJeiPlugin implements IModPlugin {
     private CreateRecipeCategory<Recipe<?>> mortarMixing;
     private CreateRecipeCategory<SequencedAssemblyRecipe> manualAssembly;
     private CreateRecipeCategory<AbstractCrushingRecipe> millstone;
+    private CreateRecipeCategory<PressingRecipe> manualPressing;
 
     private static ResourceLocation id(String path) {
         return ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, path);
@@ -97,10 +100,12 @@ public class ManualLabourJeiPlugin implements IModPlugin {
     private static boolean usesWorkstone(RecipeHolder<?> holder) {
         if (!(holder.value() instanceof SequencedAssemblyRecipe recipe)) return false;
         boolean allowDeploying = ModConfig.get().useCreateDeployingRecipes;
+        boolean allowPressing = ModConfig.get().useCreatePressingRecipes;
         for (SequencedRecipe<?> step : recipe.getSequence()) {
             Object stepRecipe = step.getRecipe();
             if (stepRecipe instanceof WorkstoneRecipe) return true;
             if (allowDeploying && stepRecipe instanceof DeployerApplicationRecipe) return true;
+            if (allowPressing && stepRecipe instanceof PressingRecipe) return true;
         }
         return false;
     }
@@ -112,68 +117,88 @@ public class ManualLabourJeiPlugin implements IModPlugin {
 
     @Override
     public void registerCategories(IRecipeCategoryRegistration registration) {
-        workstone = new CreateRecipeCategory.Builder<>(WorkstoneRecipe.class)
-                .addTypedRecipes(ModRecipeTypes.WORKSTONE_INFO)
-                .catalyst(ModBlocks.WORKSTONE::get)
-                .itemIcon(ModBlocks.WORKSTONE.get())
-                .emptyBackground(177, 70)
-                .build(id("workstone"), WorkstoneCategory::new);
+        if (ModConfig.get().enableWorkstoneJei) {
+            workstone = new CreateRecipeCategory.Builder<>(WorkstoneRecipe.class)
+                    .addTypedRecipes(ModRecipeTypes.WORKSTONE_INFO)
+                    .catalyst(ModBlocks.WORKSTONE::get)
+                    .itemIcon(ModBlocks.WORKSTONE.get())
+                    .emptyBackground(177, 70)
+                    .build(id("workstone"), WorkstoneCategory::new);
+            registration.addRecipeCategories(workstone);
+        }
 
-        mortarGrinding = new MortarGrindingCategory(new CreateRecipeCategory.Info<>(
-                RecipeType.createRecipeHolderType(id("mortar_grinding")),
-                Component.translatable("manual_labour.recipe.mortar_grinding"),
-                new EmptyBackground(177, 100),
-                new DoubleItemIcon(() -> new ItemStack(ModItems.PESTLE.get()), () -> new ItemStack(ModItems.MORTAR_ITEM.get())),
-                ManualLabourJeiPlugin::gatherMortarGrindingRecipes,
-                List.of(() -> new ItemStack(ModItems.PESTLE.get()), () -> new ItemStack(ModBlocks.MORTAR.get()))
-        ));
+        if (ModConfig.get().enableMortarGrindingJei) {
+            mortarGrinding = new MortarGrindingCategory(new CreateRecipeCategory.Info<>(
+                    RecipeType.createRecipeHolderType(id("mortar_grinding")),
+                    Component.translatable("manual_labour.recipe.mortar_grinding"),
+                    new EmptyBackground(177, 100),
+                    new DoubleItemIcon(() -> new ItemStack(ModItems.PESTLE.get()), () -> new ItemStack(ModItems.MORTAR_ITEM.get())),
+                    ManualLabourJeiPlugin::gatherMortarGrindingRecipes,
+                    List.of(() -> new ItemStack(ModItems.PESTLE.get()), () -> new ItemStack(ModBlocks.MORTAR.get()))
+            ));
+            registration.addRecipeCategories(mortarGrinding);
+        }
 
-        mortarMixing = new MortarMixingCategory(new CreateRecipeCategory.Info<>(
-                RecipeType.createRecipeHolderType(id("mortar_mixing")),
-                Component.translatable("manual_labour.recipe.mortar_mixing"),
-                new EmptyBackground(177, 100),
-                new DoubleItemIcon(() -> new ItemStack(ModItems.LADLE.get()), () -> new ItemStack(ModItems.MORTAR_ITEM.get())),
-                ManualLabourJeiPlugin::gatherMortarMixingRecipes,
-                List.of(() -> new ItemStack(ModItems.LADLE.get()), () -> new ItemStack(ModBlocks.MORTAR.get()))
-        ));
+        if (ModConfig.get().enableMortarMixingJei) {
+            mortarMixing = new MortarMixingCategory(new CreateRecipeCategory.Info<>(
+                    RecipeType.createRecipeHolderType(id("mortar_mixing")),
+                    Component.translatable("manual_labour.recipe.mortar_mixing"),
+                    new EmptyBackground(177, 100),
+                    new DoubleItemIcon(() -> new ItemStack(ModItems.LADLE.get()), () -> new ItemStack(ModItems.MORTAR_ITEM.get())),
+                    ManualLabourJeiPlugin::gatherMortarMixingRecipes,
+                    List.of(() -> new ItemStack(ModItems.LADLE.get()), () -> new ItemStack(ModBlocks.MORTAR.get()))
+            ));
+            registration.addRecipeCategories(mortarMixing);
+        }
 
-        manualAssembly = new CreateRecipeCategory.Builder<>(SequencedAssemblyRecipe.class)
-                .addTypedRecipesIf(AllRecipeTypes.SEQUENCED_ASSEMBLY::getType, ManualLabourJeiPlugin::usesWorkstone)
-                .itemIcon(ModBlocks.WORKSTONE.get())
-                .catalyst(ModBlocks.WORKSTONE::get)
-                .emptyBackground(180, 115)
-                .build(id("manual_assembly"), ManualAssemblyCategory::new);
+        if (ModConfig.get().enableManualAssemblyJei) {
+            manualAssembly = new CreateRecipeCategory.Builder<>(SequencedAssemblyRecipe.class)
+                    .addTypedRecipesIf(AllRecipeTypes.SEQUENCED_ASSEMBLY::getType, ManualLabourJeiPlugin::usesWorkstone)
+                    .itemIcon(ModBlocks.WORKSTONE.get())
+                    .catalyst(ModBlocks.WORKSTONE::get)
+                    .emptyBackground(180, 115)
+                    .build(id("manual_assembly"), ManualAssemblyCategory::new);
+            registration.addRecipeCategories(manualAssembly);
+        }
 
-        millstone = new CreateRecipeCategory.Builder<>(AbstractCrushingRecipe.class)
-                .addTypedRecipes(AllRecipeTypes.MILLING)
-                .itemIcon(ModBlocks.MILLSTONE.get())
-                .catalyst(ModBlocks.MILLSTONE::get)
-                .emptyBackground(177, 100)
-                .build(id("millstone"), MillstoneCategory::new);
+        if (ModConfig.get().enableMillstoneJei) {
+            millstone = new CreateRecipeCategory.Builder<>(AbstractCrushingRecipe.class)
+                    .addTypedRecipes(AllRecipeTypes.MILLING)
+                    .itemIcon(ModBlocks.MILLSTONE.get())
+                    .catalyst(ModBlocks.MILLSTONE::get)
+                    .emptyBackground(177, 100)
+                    .build(id("millstone"), MillstoneCategory::new);
+            registration.addRecipeCategories(millstone);
+        }
 
-        registration.addRecipeCategories(workstone, mortarGrinding, mortarMixing, manualAssembly, millstone);
+        if (ModConfig.get().enableManualPressingJei && ModConfig.get().useCreatePressingRecipes) {
+            manualPressing = new CreateRecipeCategory.Builder<>(PressingRecipe.class)
+                    .addTypedRecipes(AllRecipeTypes.PRESSING)
+                    .itemIcon(ModBlocks.WORKSTONE.get())
+                    .catalyst(ModBlocks.WORKSTONE::get)
+                    .emptyBackground(177, 70)
+                    .build(id("manual_pressing"), ManualPressingCategory::new);
+            registration.addRecipeCategories(manualPressing);
+        }
     }
 
     @Override
     public void registerRecipes(IRecipeRegistration registration) {
-        workstone.registerRecipes(registration);
-        mortarGrinding.registerRecipes(registration);
-        mortarMixing.registerRecipes(registration);
-        manualAssembly.registerRecipes(registration);
-        millstone.registerRecipes(registration);
+        if (workstone != null) workstone.registerRecipes(registration);
+        if (mortarGrinding != null) mortarGrinding.registerRecipes(registration);
+        if (mortarMixing != null) mortarMixing.registerRecipes(registration);
+        if (manualAssembly != null) manualAssembly.registerRecipes(registration);
+        if (millstone != null) millstone.registerRecipes(registration);
+        if (manualPressing != null) manualPressing.registerRecipes(registration);
     }
 
     @Override
     public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
-        workstone.registerCatalysts(registration);
-        mortarGrinding.registerCatalysts(registration);
-        mortarMixing.registerCatalysts(registration);
-        manualAssembly.registerCatalysts(registration);
-        millstone.registerCatalysts(registration);
-
-        if (ModConfig.get().useCreatePressingRecipes) {
-            registration.addRecipeCatalyst(new ItemStack(ModBlocks.WORKSTONE.get()),
-                    RecipeType.createRecipeHolderType(ResourceLocation.fromNamespaceAndPath("create", "pressing")));
-        }
+        if (workstone != null) workstone.registerCatalysts(registration);
+        if (mortarGrinding != null) mortarGrinding.registerCatalysts(registration);
+        if (mortarMixing != null) mortarMixing.registerCatalysts(registration);
+        if (manualAssembly != null) manualAssembly.registerCatalysts(registration);
+        if (millstone != null) millstone.registerCatalysts(registration);
+        if (manualPressing != null) manualPressing.registerCatalysts(registration);
     }
 }

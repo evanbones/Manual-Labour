@@ -43,7 +43,21 @@ public class ModLanguageProvider extends LanguageProvider {
         add("config.manual_labour.option.use_create_deploying_recipes", "Use Create Deploying Recipes");
         add("config.manual_labour.option.use_create_deploying_recipes.tooltip", "Let the Workstone complete Create's Deployer steps within Sequenced Assembly recipes as a fallback when no Manual Labour workstone recipe matches.");
         add("config.manual_labour.option.use_create_pressing_recipes", "Use Create Pressing Recipes");
-        add("config.manual_labour.option.use_create_pressing_recipes.tooltip", "Let the Workstone press items with a Hammer using Create's Mechanical Press recipes. Also controls whether the Workstone is shown as a pressing station in JEI.");
+        add("config.manual_labour.option.use_create_pressing_recipes.tooltip", "Let the Workstone press items with a Hammer using Create's Mechanical Press recipes, including steps in Sequenced Assembly recipes.");
+
+        add("config.manual_labour.category.jei", "JEI Integration");
+        add("config.manual_labour.option.enable_workstone_jei", "Enable Workstone JEI Category");
+        add("config.manual_labour.option.enable_workstone_jei.tooltip", "Show the Workstone category in JEI.");
+        add("config.manual_labour.option.enable_mortar_grinding_jei", "Enable Mortar Grinding JEI Category");
+        add("config.manual_labour.option.enable_mortar_grinding_jei.tooltip", "Show the Mortar Grinding category in JEI.");
+        add("config.manual_labour.option.enable_mortar_mixing_jei", "Enable Mortar Mixing JEI Category");
+        add("config.manual_labour.option.enable_mortar_mixing_jei.tooltip", "Show the Mortar Mixing category in JEI.");
+        add("config.manual_labour.option.enable_manual_assembly_jei", "Enable Manual Assembly JEI Category");
+        add("config.manual_labour.option.enable_manual_assembly_jei.tooltip", "Show the Manual Assembly category in JEI.");
+        add("config.manual_labour.option.enable_millstone_jei", "Enable Millstone JEI Category");
+        add("config.manual_labour.option.enable_millstone_jei.tooltip", "Show the Millstone category in JEI.");
+        add("config.manual_labour.option.enable_manual_pressing_jei", "Enable Manual Pressing JEI Category");
+        add("config.manual_labour.option.enable_manual_pressing_jei.tooltip", "Show the Manual Pressing category in JEI.");
 
         addBlock(ModBlocks.WORKSTONE, "Workstone");
         addBlock(ModBlocks.MORTAR, "Mortar");
@@ -65,6 +79,7 @@ public class ModLanguageProvider extends LanguageProvider {
         add("manual_labour.recipe.mortar_mixing", "Mortar Mixing");
         add("manual_labour.recipe.manual_assembly", "Manual Assembly");
         add("manual_labour.recipe.millstone", "Milling");
+        add("manual_labour.recipe.manual_pressing", "Manual Pressing");
 
         add("message.manual_labour.millstone_space", "Clear Blocks for Placement");
         add("subtitles.manual_labour.block.millstone.loop", "Millstone turns");

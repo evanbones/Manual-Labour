@@ -52,12 +52,12 @@ public class MortarMixingCategory extends CreateRecipeCategory<Recipe<?>> {
         LayoutHelper inputLayout = LayoutHelper.centeredHorizontal(inputCount, 1, 18, 18, 1);
 
         for (Ingredient ingredient : inputs) {
-            builder.addSlot(RecipeIngredientRole.INPUT, xOffset + inputLayout.getX() + 1, 2 + inputLayout.getY() + 1)
+            builder.addSlot(RecipeIngredientRole.INPUT, xOffset + inputLayout.getX() + 1, 10 + inputLayout.getY() + 1)
                     .setBackground(getRenderedSlot(), -1, -1)
                     .addIngredients(ingredient);
             inputLayout.next();
         }
-        fluidInput.ifPresent(sizedFluidIngredient -> addFluidSlot(builder, xOffset + inputLayout.getX() + 1, 2 + inputLayout.getY() + 1, sizedFluidIngredient));
+        fluidInput.ifPresent(sizedFluidIngredient -> addFluidSlot(builder, xOffset + inputLayout.getX() + 1, 10 + inputLayout.getY() + 1, sizedFluidIngredient));
 
         int yOffset = 86;
         LayoutHelper outputLayout = LayoutHelper.centeredHorizontal(outputs.size(), 1, 18, 18, 1);
@@ -73,6 +73,6 @@ public class MortarMixingCategory extends CreateRecipeCategory<Recipe<?>> {
     @Override
     public void draw(Recipe<?> recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics graphics, double mouseX, double mouseY) {
         AllGuiTextures.JEI_DOWN_ARROW.render(graphics, 72, 30);
-        JeiBlockIcon.draw(graphics, ModBlocks.MORTAR.get().defaultBlockState(), 62, 65, 20);
+        JeiBlockIcon.draw(graphics, ModBlocks.MORTAR.get().defaultBlockState(), getBackground().getWidth() / 2 - 13, 66, 20);
     }
 }

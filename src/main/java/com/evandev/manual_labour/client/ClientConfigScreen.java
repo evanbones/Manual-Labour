@@ -47,7 +47,22 @@ public class ClientConfigScreen {
                 .option(createBoolOption("use_create_pressing_recipes", true,
                         () -> ModConfig.get().useCreatePressingRecipes, val -> ModConfig.get().useCreatePressingRecipes = val));
 
-        return builder.category(mortar.build()).category(create.build()).build().generateScreen(parent);
+        ConfigCategory.Builder jei = ConfigCategory.createBuilder()
+                .name(Component.translatable("config.manual_labour.category.jei"))
+                .option(createBoolOption("enable_workstone_jei", true,
+                        () -> ModConfig.get().enableWorkstoneJei, val -> ModConfig.get().enableWorkstoneJei = val))
+                .option(createBoolOption("enable_mortar_grinding_jei", true,
+                        () -> ModConfig.get().enableMortarGrindingJei, val -> ModConfig.get().enableMortarGrindingJei = val))
+                .option(createBoolOption("enable_mortar_mixing_jei", true,
+                        () -> ModConfig.get().enableMortarMixingJei, val -> ModConfig.get().enableMortarMixingJei = val))
+                .option(createBoolOption("enable_manual_assembly_jei", true,
+                        () -> ModConfig.get().enableManualAssemblyJei, val -> ModConfig.get().enableManualAssemblyJei = val))
+                .option(createBoolOption("enable_millstone_jei", true,
+                        () -> ModConfig.get().enableMillstoneJei, val -> ModConfig.get().enableMillstoneJei = val))
+                .option(createBoolOption("enable_manual_pressing_jei", true,
+                        () -> ModConfig.get().enableManualPressingJei, val -> ModConfig.get().enableManualPressingJei = val));
+
+        return builder.category(mortar.build()).category(create.build()).category(jei.build()).build().generateScreen(parent);
     }
 
     private static Option<Boolean> createBoolOption(String name, boolean defaultValue, Supplier<Boolean> getter, Consumer<Boolean> setter) {

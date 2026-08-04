@@ -1,6 +1,7 @@
 package com.evandev.manual_labour.compat.jei;
 
 import com.evandev.manual_labour.registry.ModBlocks;
+import com.evandev.manual_labour.registry.ModTags;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.simibubi.create.compat.jei.category.CreateRecipeCategory;
 import com.simibubi.create.compat.jei.category.sequencedAssembly.SequencedAssemblySubCategory;
@@ -9,6 +10,7 @@ import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.world.item.crafting.Ingredient;
 
 public class WorkstoneAssemblySubCategory extends SequencedAssemblySubCategory {
 
@@ -18,9 +20,13 @@ public class WorkstoneAssemblySubCategory extends SequencedAssemblySubCategory {
 
     @Override
     public void setRecipe(IRecipeLayoutBuilder builder, SequencedRecipe<?> recipe, IFocusGroup focuses, int x) {
+        var ingredients = recipe.getRecipe().getIngredients();
+        Ingredient ingredient = ingredients.size() > 1
+                ? ingredients.get(1)
+                : Ingredient.of(ModTags.Items.HAMMERS);
         builder.addSlot(RecipeIngredientRole.INPUT, x + 4, 15)
                 .setBackground(CreateRecipeCategory.getRenderedSlot(), -1, -1)
-                .addIngredients(recipe.getRecipe().getIngredients().get(1));
+                .addIngredients(ingredient);
     }
 
     @Override

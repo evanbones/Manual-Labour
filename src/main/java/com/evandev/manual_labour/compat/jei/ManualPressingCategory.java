@@ -1,8 +1,9 @@
 package com.evandev.manual_labour.compat.jei;
 
-import com.evandev.manual_labour.recipe.WorkstoneRecipe;
 import com.evandev.manual_labour.registry.ModBlocks;
+import com.evandev.manual_labour.registry.ModTags;
 import com.simibubi.create.compat.jei.category.CreateRecipeCategory;
+import com.simibubi.create.content.kinetics.press.PressingRecipe;
 import com.simibubi.create.content.processing.recipe.ProcessingOutput;
 import com.simibubi.create.foundation.gui.AllGuiTextures;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
@@ -10,27 +11,28 @@ import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.world.item.crafting.Ingredient;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.List;
 
 @ParametersAreNonnullByDefault
-public class WorkstoneCategory extends CreateRecipeCategory<WorkstoneRecipe> {
+public class ManualPressingCategory extends CreateRecipeCategory<PressingRecipe> {
 
-    public WorkstoneCategory(Info<WorkstoneRecipe> info) {
+    public ManualPressingCategory(Info<PressingRecipe> info) {
         super(info);
     }
 
     @Override
-    public void setRecipe(IRecipeLayoutBuilder builder, WorkstoneRecipe recipe, IFocusGroup focuses) {
+    public void setRecipe(IRecipeLayoutBuilder builder, PressingRecipe recipe, IFocusGroup focuses) {
         builder
                 .addSlot(RecipeIngredientRole.INPUT, 27, 51)
                 .setBackground(getRenderedSlot(), -1, -1)
-                .addIngredients(recipe.getInputIngredient());
+                .addIngredients(recipe.getIngredients().getFirst());
         builder
                 .addSlot(RecipeIngredientRole.INPUT, 51, 5)
                 .setBackground(getRenderedSlot(), -1, -1)
-                .addIngredients(recipe.getToolIngredient());
+                .addIngredients(Ingredient.of(ModTags.Items.HAMMERS));
 
         List<ProcessingOutput> results = recipe.getRollableResults();
         boolean single = results.size() == 1;
@@ -46,7 +48,7 @@ public class WorkstoneCategory extends CreateRecipeCategory<WorkstoneRecipe> {
     }
 
     @Override
-    public void draw(WorkstoneRecipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics graphics, double mouseX, double mouseY) {
+    public void draw(PressingRecipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics graphics, double mouseX, double mouseY) {
         AllGuiTextures.JEI_SHADOW.render(graphics, 62, 57);
         AllGuiTextures.JEI_DOWN_ARROW.render(graphics, 126, 29 + (recipe.getRollableResults().size() > 2 ? -19 : 0));
         JeiBlockIcon.draw(graphics, ModBlocks.WORKSTONE.get().defaultBlockState(), getBackground().getWidth() / 2 - 13, 56, 20);
