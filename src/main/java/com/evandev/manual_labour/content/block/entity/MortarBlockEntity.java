@@ -10,6 +10,7 @@ import com.evandev.manual_labour.registry.ModBlockEntities;
 import com.evandev.manual_labour.registry.ModRecipeTypes;
 import com.simibubi.create.AllRecipeTypes;
 import com.simibubi.create.AllSoundEvents;
+import com.simibubi.create.content.fluids.FluidFX;
 import com.simibubi.create.content.kinetics.crusher.CrushingRecipe;
 import com.simibubi.create.content.kinetics.millstone.MillingRecipe;
 import com.simibubi.create.content.kinetics.mixer.MixingRecipe;
@@ -329,9 +330,12 @@ public class MortarBlockEntity extends SyncedBlockEntity {
         }
 
         if (!processingIsGrinding) {
-            serverLevel.sendParticles(ParticleTypes.SPLASH,
-                    worldPosition.getX() + 0.5, worldPosition.getY() + 0.85, worldPosition.getZ() + 0.5,
-                    2, 0.15, 0.05, 0.15, 0.0);
+            FluidStack fluid = fluidTank.getTank().getFluid();
+            if (!fluid.isEmpty() && fluid.getAmount() > 0) {
+                serverLevel.sendParticles(FluidFX.getFluidParticle(fluid),
+                        worldPosition.getX() + 0.5, worldPosition.getY() + 0.85, worldPosition.getZ() + 0.5,
+                        2, 0.15, 0.05, 0.15, 0.0);
+            }
         }
 
         playProcessingSound(serverLevel);
