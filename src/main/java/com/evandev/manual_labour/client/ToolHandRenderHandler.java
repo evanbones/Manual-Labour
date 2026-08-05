@@ -39,7 +39,7 @@ public class ToolHandRenderHandler {
                 event.setCanceled(true);
             }
         } else if (blockEntity instanceof BasinBlockEntity) {
-            if (BasinStirClientState.activeStirs().containsKey(pos)) {
+            if (BasinStirClientState.isStirring(pos)) {
                 event.setCanceled(true);
             }
         }

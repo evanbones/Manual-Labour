@@ -14,7 +14,7 @@ It's perfect for early-game, when you don't want to bother setting up your big m
 just enjoy doing things the old-fashioned way. Plus, with Create installed, Manual Labour tools play nicely as manual
 alternatives to their mechanical counterparts!
 
-Be sure to check out the wiki for full details on all the items, blocks, and custom recipes.
+Check out the wiki for full details on all the items, blocks, and custom recipes.
 
 ## License
 

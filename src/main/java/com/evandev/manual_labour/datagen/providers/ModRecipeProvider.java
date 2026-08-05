@@ -2,6 +2,7 @@ package com.evandev.manual_labour.datagen.providers;
 
 import com.evandev.manual_labour.registry.ModBlocks;
 import com.evandev.manual_labour.registry.ModItems;
+import com.simibubi.create.AllBlocks;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.*;
@@ -101,6 +102,16 @@ public class ModRecipeProvider extends RecipeProvider {
                 .define('X', ItemTags.PLANKS)
                 .define('H', Items.HONEYCOMB)
                 .unlockedBy("has_honeycomb", has(Items.HONEYCOMB))
+                .save(output);
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModItems.MILLSTONE_ITEM.get())
+                .pattern(" | ")
+                .pattern("SSS")
+                .pattern("BBB")
+                .define('|', AllBlocks.SHAFT.get())
+                .define('S', Tags.Items.STONES)
+                .define('B', Blocks.STONE_BRICKS)
+                .unlockedBy("has_shaft", has(AllBlocks.SHAFT.get()))
                 .save(output);
 
         WorkstoneRecipeProvider.buildRecipes(output);

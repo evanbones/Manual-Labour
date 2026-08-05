@@ -11,7 +11,6 @@ import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -37,17 +36,21 @@ public final class BasinStirRenderer {
         PoseStack poseStack = event.getPoseStack();
         Vec3 camPos = event.getCamera().getPosition();
         MultiBufferSource.BufferSource buffer = mc.renderBuffers().bufferSource();
-        float time = level.getGameTime() + event.getPartialTick().getGameTimeDeltaPartialTick(false);
+        float partialTick = event.getPartialTick().getGameTimeDeltaPartialTick(false);
 
-        for (Map.Entry<BlockPos, ItemStack> entry : BasinStirClientState.activeStirs().entrySet()) {
+        for (Map.Entry<BlockPos, BasinStirClientState.StirState> entry : BasinStirClientState.stirStates().entrySet()) {
             BlockPos pos = entry.getKey();
             if (!(level.getBlockEntity(pos) instanceof BasinBlockEntity)) continue;
 
+            BasinStirClientState.StirState state = entry.getValue();
+            if (state.tool.isEmpty()) continue;
+
             int packedLight = LevelRenderer.getLightColor(level, pos);
+            float interpolatedAngle = state.getInterpolatedAngle(partialTick);
 
             poseStack.pushPose();
             poseStack.translate(pos.getX() - camPos.x, pos.getY() - camPos.y, pos.getZ() - camPos.z);
-            ToolAnimations.renderLadleStirring(entry.getValue(), time, poseStack, buffer, packedLight, OverlayTexture.NO_OVERLAY);
+            ToolAnimations.renderLadleStirring(state.tool, interpolatedAngle, poseStack, buffer, packedLight, OverlayTexture.NO_OVERLAY);
             poseStack.popPose();
         }
 

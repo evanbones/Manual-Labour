@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": {
+      "item": "minecraft:stone_bricks"
+    },
+    "S": {
+      "tag": "c:stones"
+    },
+    "|": {
+      "item": "create:shaft"
+    }
+  },
+  "pattern": [
+    " | ",
+    "SSS",
+    "BBB"
+  ],
+  "result": {
+    "count": 1,
+    "id": "manual_labour:millstone"
+  }
+}

@@ -11,7 +11,6 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 
 public final class ToolAnimations {
-    private static final float LADLE_STIR_SPEED = 6.0F;
     private static final float TOOL_PIVOT_X = 8.0F / 16.0F;
     private static final float TOOL_PIVOT_Y = 5.5F / 16.0F;
     private static final float TOOL_PIVOT_Z = 10.5F / 16.0F;
@@ -19,8 +18,7 @@ public final class ToolAnimations {
     private ToolAnimations() {
     }
 
-    public static void renderLadleStirring(ItemStack tool, float time, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay) {
-        float angle = time * LADLE_STIR_SPEED;
+    public static void renderLadleStirring(ItemStack tool, float angle, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay) {
         float rad = (float) Math.toRadians(angle);
 
         float dipY = Mth.sin(rad) * 0.025F;

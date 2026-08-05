@@ -19,10 +19,12 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -116,6 +118,19 @@ public class WorkstoneBlockEntity extends BlockEntity {
                 inventory.setStackInSlot(0, rolledResults.getFirst());
             } else {
                 inventory.extractItem(0, 1, false);
+            }
+
+            if (player != null && ModConfig.get().workstoneHammerCooldownTicks > 0) {
+                player.getCooldowns().addCooldown(toolStack.getItem(), ModConfig.get().workstoneHammerCooldownTicks);
+            }
+
+            if (player instanceof ServerPlayer serverPlayer) {
+                ItemStack remaining = getStoredItem();
+                if (!remaining.isEmpty()) {
+                    serverPlayer.displayClientMessage(Component.translatable("manual_labour.workstone.remaining_items", remaining.getCount()), true);
+                } else {
+                    serverPlayer.displayClientMessage(Component.empty(), true);
+                }
             }
         });
 

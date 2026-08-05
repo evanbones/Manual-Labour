@@ -37,6 +37,9 @@ public class ModConfig {
     @SerializedName("decorative_tool_tilt")
     public float decorativeToolTilt = 30.0F;
 
+    @SerializedName("ladle_stir_speed")
+    public float ladleStirSpeed = 12.0F;
+
     @SerializedName("use_create_milling_recipes")
     public boolean useCreateMillingRecipes = true;
 
@@ -51,6 +54,9 @@ public class ModConfig {
 
     @SerializedName("use_create_pressing_recipes")
     public boolean useCreatePressingRecipes = true;
+
+    @SerializedName("workstone_hammer_cooldown_ticks")
+    public int workstoneHammerCooldownTicks = 10;
 
     @SerializedName("enable_workstone_jei")
     public boolean enableWorkstoneJei = true;
@@ -99,5 +105,4 @@ public class ModConfig {
             Constants.LOG.error("Failed to save " + Constants.MOD_ID + ".json", e);
         }
     }
-
 }

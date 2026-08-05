@@ -9,6 +9,7 @@ import com.evandev.manual_labour.content.block.MillstoneItemHandler;
 import com.evandev.manual_labour.content.block.MillstoneStructuralBlock;
 import com.evandev.manual_labour.content.block.entity.MillstoneBlockEntity;
 import com.evandev.manual_labour.registry.*;
+import com.simibubi.create.AllCreativeModeTabs;
 import com.simibubi.create.api.stress.BlockStressValues;
 import com.simibubi.create.foundation.item.KineticStats;
 import com.simibubi.create.foundation.item.TooltipModifier;
@@ -91,20 +92,13 @@ public class ManualLabour {
         return null;
     }
 
-    private void registerPayloads(final RegisterPayloadHandlersEvent event) {
-        PayloadRegistrar registrar = event.registrar("1");
-        registrar.playToClient(
-                BasinStirPayload.TYPE,
-                BasinStirPayload.STREAM_CODEC,
-                (payload, context) -> BasinStirClientState.set(payload.pos(), payload.tool())
-        );
-    }
-
     @SubscribeEvent
     public static void buildContents(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey() == CreativeModeTabs.FUNCTIONAL_BLOCKS) {
             event.accept(ModItems.WORKSTONE_ITEM);
             event.accept(ModItems.MORTAR_ITEM);
+        }
+        if (event.getTabKey() == AllCreativeModeTabs.BASE_CREATIVE_TAB.getKey()) {
             event.accept(ModItems.MILLSTONE_ITEM);
         }
         if (event.getTabKey() == CreativeModeTabs.TOOLS_AND_UTILITIES) {
@@ -116,6 +110,15 @@ public class ManualLabour {
             event.accept(ModItems.PESTLE);
             event.accept(ModItems.LADLE);
         }
+    }
+
+    private void registerPayloads(final RegisterPayloadHandlersEvent event) {
+        PayloadRegistrar registrar = event.registrar("1");
+        registrar.playToClient(
+                BasinStirPayload.TYPE,
+                BasinStirPayload.STREAM_CODEC,
+                (payload, context) -> BasinStirClientState.set(payload.pos(), payload.tool())
+        );
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {

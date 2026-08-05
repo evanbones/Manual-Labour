@@ -70,6 +70,10 @@ public class WorkstoneBlock extends BaseEntityBlock implements SimpleWaterlogged
 
         ItemStack mainHandStack = player.getMainHandItem();
 
+        if (!mainHandStack.isEmpty() && player.getCooldowns().isOnCooldown(mainHandStack.getItem())) {
+            return ItemInteractionResult.CONSUME;
+        }
+
         if (mainHandStack.isEmpty()) {
             if (workstone.isEmpty() || level.isClientSide) return ItemInteractionResult.CONSUME;
             ItemStack removedStack = workstone.removeItem();

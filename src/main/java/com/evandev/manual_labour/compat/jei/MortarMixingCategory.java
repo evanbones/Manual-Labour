@@ -14,6 +14,7 @@ import net.createmod.catnip.layout.LayoutHelper;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
+import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
 
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -32,6 +33,7 @@ public class MortarMixingCategory extends CreateRecipeCategory<Recipe<?>> {
         List<Ingredient> inputs;
         Optional<SizedFluidIngredient> fluidInput;
         List<ProcessingOutput> outputs;
+        List<FluidStack> fluidOutputs = List.of();
 
         if (recipe instanceof MortarMixingRecipe mortarRecipe) {
             inputs = mortarRecipe.getIngredients();
@@ -43,6 +45,7 @@ public class MortarMixingCategory extends CreateRecipeCategory<Recipe<?>> {
             inputs = mixingRecipe.getIngredients();
             fluidInput = mixingRecipe.getFluidIngredients().stream().findFirst();
             outputs = mixingRecipe.getRollableResults();
+            fluidOutputs = mixingRecipe.getFluidResults();
         } else {
             return;
         }
@@ -60,12 +63,17 @@ public class MortarMixingCategory extends CreateRecipeCategory<Recipe<?>> {
         fluidInput.ifPresent(sizedFluidIngredient -> addFluidSlot(builder, xOffset + inputLayout.getX() + 1, 10 + inputLayout.getY() + 1, sizedFluidIngredient));
 
         int yOffset = 86;
-        LayoutHelper outputLayout = LayoutHelper.centeredHorizontal(outputs.size(), 1, 18, 18, 1);
+        int totalOutputs = outputs.size() + fluidOutputs.size();
+        LayoutHelper outputLayout = LayoutHelper.centeredHorizontal(totalOutputs, 1, 18, 18, 1);
         for (ProcessingOutput output : outputs) {
             builder.addSlot(RecipeIngredientRole.OUTPUT, xOffset + outputLayout.getX() + 1, yOffset + outputLayout.getY() + 1)
                     .setBackground(getRenderedSlot(output), -1, -1)
                     .addItemStack(output.getStack())
                     .addRichTooltipCallback(addStochasticTooltip(output));
+            outputLayout.next();
+        }
+        for (FluidStack fluidOutput : fluidOutputs) {
+            addFluidSlot(builder, xOffset + outputLayout.getX() + 1, yOffset + outputLayout.getY() + 1, fluidOutput);
             outputLayout.next();
         }
     }

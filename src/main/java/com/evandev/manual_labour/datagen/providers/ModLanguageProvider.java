@@ -17,13 +17,17 @@ public class ModLanguageProvider extends LanguageProvider {
     @Override
     protected void addTranslations() {
         add("config.manual_labour.title", "Manual Labour Config");
-        add("config.manual_labour.category.general", "General");
-        add("config.manual_labour.option.enabled", "Enabled");
+        add("config.manual_labour.category.workstone", "Workstone");
+        add("config.manual_labour.option.workstone_hammer_cooldown_ticks", "Workstone Hammer Cooldown (Ticks)");
+        add("config.manual_labour.option.workstone_hammer_cooldown_ticks.tooltip", "Cooldown in ticks applied to tools when processing items on the Workstone. Set to 0 to disable.");
+        add("manual_labour.workstone.remaining_items", "%s left...");
         add("config.manual_labour.category.mortar", "Mortar Tools");
         add("config.manual_labour.option.item_pile_y", "Item Pile Height");
         add("config.manual_labour.option.item_pile_y.tooltip", "Vertical position of items piled inside the Mortar, relative to the block's base.");
         add("config.manual_labour.option.item_pile_radius", "Item Pile Spread Radius");
         add("config.manual_labour.option.item_pile_radius.tooltip", "How far from the center items scatter when piled inside the Mortar.");
+        add("config.manual_labour.option.item_float_sink_depth", "Item Float Sink Depth");
+        add("config.manual_labour.option.item_float_sink_depth.tooltip", "How deep floating items sink into fluids inside the Mortar.");
         add("config.manual_labour.option.pestle_tip_contact_offset", "Pestle Contact Offset");
         add("config.manual_labour.option.pestle_tip_contact_offset.tooltip", "Vertical offset for where the Pestle's tip appears to touch the contents of the Mortar while grinding.");
         add("config.manual_labour.option.decorative_tool_y", "Placed Tool Height");
@@ -32,6 +36,8 @@ public class ModLanguageProvider extends LanguageProvider {
         add("config.manual_labour.option.decorative_tool_side_offset.tooltip", "How far to the side a rested Pestle or Ladle is offset from the Mortar's center.");
         add("config.manual_labour.option.decorative_tool_tilt", "Placed Tool Tilt");
         add("config.manual_labour.option.decorative_tool_tilt.tooltip", "Tilt angle, in degrees, of a Pestle or Ladle rested decoratively on the Mortar.");
+        add("config.manual_labour.option.ladle_stir_speed", "Ladle Stirring Speed");
+        add("config.manual_labour.option.ladle_stir_speed.tooltip", "Speed in degrees per tick at which the Ladle rotates while stirring in a Basin or Mortar.");
 
         add("config.manual_labour.category.create", "Create Compatibility");
         add("config.manual_labour.option.use_create_milling_recipes", "Use Create Milling Recipes");

@@ -1,6 +1,7 @@
 package com.evandev.manual_labour.client.renderer;
 
 import com.evandev.manual_labour.client.ModToolModels;
+import com.evandev.manual_labour.compat.create.BasinStirClientState;
 import com.evandev.manual_labour.config.ModConfig;
 import com.evandev.manual_labour.content.block.MortarBlock;
 import com.evandev.manual_labour.content.block.entity.MortarBlockEntity;
@@ -17,6 +18,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemDisplayContext;
@@ -100,19 +102,29 @@ public class MortarRenderer implements BlockEntityRenderer<MortarBlockEntity> {
         ItemStack decorativeTool = mortar.getDecorativeTool();
         ItemStack activeTool = mortar.getActiveTool();
         boolean processing = mortar.isProcessing();
-
-        if (!decorativeTool.isEmpty() && !processing) {
-            renderDecorativeTool(mortar, decorativeTool, poseStack, buffer, packedLight, packedOverlay);
-        }
+        BlockPos pos = mortar.getBlockPos();
 
         if (processing && !activeTool.isEmpty()) {
             float time = mortar.getLevel() != null ? mortar.getLevel().getGameTime() + partialTicks : partialTicks;
 
             if (activeTool.is(ModTags.Items.LADLES)) {
-                ToolAnimations.renderLadleStirring(activeTool, time, poseStack, buffer, packedLight, packedOverlay);
+                BasinStirClientState.set(pos, activeTool);
+                BasinStirClientState.StirState state = BasinStirClientState.getOrCreate(pos, activeTool);
+                float angle = state.getInterpolatedAngle(partialTicks);
+                ToolAnimations.renderLadleStirring(activeTool, angle, poseStack, buffer, packedLight, packedOverlay);
             } else if (activeTool.is(ModTags.Items.PESTLES)) {
                 ItemStack primary = stacks.isEmpty() ? ItemStack.EMPTY : stacks.getFirst();
                 renderPestleGrinding(activeTool, primary, firstPileY, time, poseStack, buffer, packedLight, packedOverlay);
+            }
+        } else if (!decorativeTool.isEmpty()) {
+            if (decorativeTool.is(ModTags.Items.LADLES)) {
+                BasinStirClientState.StirState state = BasinStirClientState.getOrCreate(pos, decorativeTool);
+                state.active = false;
+                state.targetAngularVelocity = 0.0F;
+                float angle = state.getInterpolatedAngle(partialTicks);
+                ToolAnimations.renderLadleStirring(decorativeTool, angle, poseStack, buffer, packedLight, packedOverlay);
+            } else {
+                renderDecorativeTool(mortar, decorativeTool, poseStack, buffer, packedLight, packedOverlay);
             }
         }
 
