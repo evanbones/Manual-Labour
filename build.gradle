@@ -64,18 +64,6 @@ repositories {
     exclusiveContent {
         forRepository {
             maven {
-                name = "TerraformersMC"
-                url = "https://maven.terraformersmc.com/"
-            }
-        }
-        filter {
-            includeGroup "dev.emi"
-        }
-    }
-
-    exclusiveContent {
-        forRepository {
-            maven {
                 name = "CreateMod"
                 url = "https://maven.createmod.net"
             }
