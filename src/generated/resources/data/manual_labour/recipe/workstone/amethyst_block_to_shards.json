@@ -1,0 +1,22 @@
+{
+  "type": "manual_labour:workstone",
+  "ingredients": [
+    [
+      {
+        "item": "minecraft:amethyst_block"
+      },
+      {
+        "item": "minecraft:amethyst_cluster"
+      }
+    ],
+    {
+      "tag": "manual_labour:hammers"
+    }
+  ],
+  "results": [
+    {
+      "count": 4,
+      "id": "minecraft:amethyst_shard"
+    }
+  ]
+}

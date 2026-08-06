@@ -1,0 +1,25 @@
+{
+  "type": "manual_labour:workstone",
+  "ingredients": [
+    [
+      {
+        "item": "minecraft:emerald_ore"
+      },
+      {
+        "item": "minecraft:deepslate_emerald_ore"
+      }
+    ],
+    {
+      "tag": "manual_labour:hammers"
+    }
+  ],
+  "results": [
+    {
+      "id": "minecraft:emerald"
+    },
+    {
+      "chance": 0.25,
+      "id": "minecraft:emerald"
+    }
+  ]
+}

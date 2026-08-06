@@ -1,0 +1,27 @@
+{
+  "type": "manual_labour:workstone",
+  "ingredients": [
+    [
+      {
+        "item": "minecraft:redstone_ore"
+      },
+      {
+        "item": "minecraft:deepslate_redstone_ore"
+      }
+    ],
+    {
+      "tag": "manual_labour:hammers"
+    }
+  ],
+  "results": [
+    {
+      "count": 4,
+      "id": "minecraft:redstone"
+    },
+    {
+      "chance": 0.5,
+      "count": 2,
+      "id": "minecraft:redstone"
+    }
+  ]
+}

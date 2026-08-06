@@ -1,0 +1,25 @@
+{
+  "type": "manual_labour:workstone",
+  "ingredients": [
+    [
+      {
+        "item": "minecraft:gold_ore"
+      },
+      {
+        "item": "minecraft:deepslate_gold_ore"
+      }
+    ],
+    {
+      "tag": "manual_labour:hammers"
+    }
+  ],
+  "results": [
+    {
+      "id": "minecraft:raw_gold"
+    },
+    {
+      "chance": 0.35,
+      "id": "minecraft:raw_gold"
+    }
+  ]
+}

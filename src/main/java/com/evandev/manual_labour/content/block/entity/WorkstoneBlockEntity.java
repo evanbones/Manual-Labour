@@ -111,7 +111,7 @@ public class WorkstoneBlockEntity extends BlockEntity {
             }
 
             if (level instanceof ServerLevel serverLevel) {
-                serverLevel.sendParticles(new ItemParticleOption(ParticleTypes.ITEM, hitItem), worldPosition.getX() + 0.5, worldPosition.getY() + 0.8, worldPosition.getZ() + 0.5, 5, 0.1, 0.1, 0.1, 0.05D);
+                serverLevel.sendParticles(new ItemParticleOption(ParticleTypes.ITEM, hitItem.copy()), worldPosition.getX() + 0.5, worldPosition.getY() + 0.8, worldPosition.getZ() + 0.5, 5, 0.1, 0.1, 0.1, 0.05D);
             }
 
             if (stillInProgress) {

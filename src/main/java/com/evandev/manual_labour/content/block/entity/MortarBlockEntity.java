@@ -324,7 +324,7 @@ public class MortarBlockEntity extends SyncedBlockEntity {
         ItemStack particleItem = getPrimaryItem();
         if (particleItem.isEmpty()) particleItem = activeTool;
         if (!particleItem.isEmpty()) {
-            serverLevel.sendParticles(new ItemParticleOption(ParticleTypes.ITEM, particleItem),
+            serverLevel.sendParticles(new ItemParticleOption(ParticleTypes.ITEM, particleItem.copy()),
                     worldPosition.getX() + 0.5, worldPosition.getY() + 0.8, worldPosition.getZ() + 0.5,
                     3, 0.15, 0.1, 0.15, 0.02);
         }
@@ -332,7 +332,7 @@ public class MortarBlockEntity extends SyncedBlockEntity {
         if (!processingIsGrinding) {
             FluidStack fluid = fluidTank.getTank().getFluid();
             if (!fluid.isEmpty() && fluid.getAmount() > 0) {
-                serverLevel.sendParticles(FluidFX.getFluidParticle(fluid),
+                serverLevel.sendParticles(FluidFX.getFluidParticle(fluid.copy()),
                         worldPosition.getX() + 0.5, worldPosition.getY() + 0.85, worldPosition.getZ() + 0.5,
                         2, 0.15, 0.05, 0.15, 0.0);
             }

@@ -1,0 +1,17 @@
+{
+  "type": "manual_labour:workstone",
+  "ingredients": [
+    {
+      "item": "minecraft:blue_ice"
+    },
+    {
+      "tag": "manual_labour:hammers"
+    }
+  ],
+  "results": [
+    {
+      "count": 9,
+      "id": "minecraft:packed_ice"
+    }
+  ]
+}

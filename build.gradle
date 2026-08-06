@@ -215,7 +215,9 @@ publishMods {
         client = true
         server = true
 
+        requires("create")
         requires("yacl")
+        optional("jei")
     }
 
     modrinth {
@@ -223,6 +225,8 @@ publishMods {
         projectId = "kCbtgaek"
         minecraftVersions.add("${minecraft_version}")
 
+        requires("create")
         requires("yacl")
+        optional("jei")
     }
 }

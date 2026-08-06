@@ -1,0 +1,20 @@
+{
+  "type": "manual_labour:workstone",
+  "ingredients": [
+    {
+      "item": "minecraft:diorite"
+    },
+    {
+      "tag": "manual_labour:hammers"
+    }
+  ],
+  "results": [
+    {
+      "id": "minecraft:cobblestone"
+    },
+    {
+      "chance": 0.25,
+      "id": "minecraft:quartz"
+    }
+  ]
+}

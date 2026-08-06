@@ -1,0 +1,20 @@
+{
+  "type": "manual_labour:workstone",
+  "ingredients": [
+    {
+      "item": "minecraft:cobbled_deepslate"
+    },
+    {
+      "tag": "manual_labour:hammers"
+    }
+  ],
+  "results": [
+    {
+      "id": "minecraft:gravel"
+    },
+    {
+      "chance": 0.3,
+      "id": "minecraft:flint"
+    }
+  ]
+}

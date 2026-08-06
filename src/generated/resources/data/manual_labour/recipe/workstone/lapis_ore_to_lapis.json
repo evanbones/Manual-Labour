@@ -1,0 +1,27 @@
+{
+  "type": "manual_labour:workstone",
+  "ingredients": [
+    [
+      {
+        "item": "minecraft:lapis_ore"
+      },
+      {
+        "item": "minecraft:deepslate_lapis_ore"
+      }
+    ],
+    {
+      "tag": "manual_labour:hammers"
+    }
+  ],
+  "results": [
+    {
+      "count": 4,
+      "id": "minecraft:lapis_lazuli"
+    },
+    {
+      "chance": 0.5,
+      "count": 3,
+      "id": "minecraft:lapis_lazuli"
+    }
+  ]
+}

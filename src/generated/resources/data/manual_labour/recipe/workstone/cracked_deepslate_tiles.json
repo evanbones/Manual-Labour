@@ -1,0 +1,16 @@
+{
+  "type": "manual_labour:workstone",
+  "ingredients": [
+    {
+      "item": "minecraft:deepslate_tiles"
+    },
+    {
+      "tag": "manual_labour:hammers"
+    }
+  ],
+  "results": [
+    {
+      "id": "minecraft:cracked_deepslate_tiles"
+    }
+  ]
+}

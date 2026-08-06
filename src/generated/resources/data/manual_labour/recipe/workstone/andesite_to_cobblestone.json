@@ -1,0 +1,20 @@
+{
+  "type": "manual_labour:workstone",
+  "ingredients": [
+    {
+      "item": "minecraft:andesite"
+    },
+    {
+      "tag": "manual_labour:hammers"
+    }
+  ],
+  "results": [
+    {
+      "id": "minecraft:cobblestone"
+    },
+    {
+      "chance": 0.15,
+      "id": "minecraft:iron_nugget"
+    }
+  ]
+}

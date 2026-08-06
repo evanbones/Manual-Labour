@@ -1,0 +1,22 @@
+{
+  "type": "manual_labour:workstone",
+  "ingredients": [
+    {
+      "item": "minecraft:sea_lantern"
+    },
+    {
+      "tag": "manual_labour:hammers"
+    }
+  ],
+  "results": [
+    {
+      "count": 4,
+      "id": "minecraft:prismarine_crystals"
+    },
+    {
+      "chance": 0.5,
+      "count": 5,
+      "id": "minecraft:prismarine_shard"
+    }
+  ]
+}

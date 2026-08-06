@@ -1,0 +1,16 @@
+{
+  "type": "manual_labour:workstone",
+  "ingredients": [
+    {
+      "item": "minecraft:polished_blackstone_bricks"
+    },
+    {
+      "tag": "manual_labour:hammers"
+    }
+  ],
+  "results": [
+    {
+      "id": "minecraft:cracked_polished_blackstone_bricks"
+    }
+  ]
+}

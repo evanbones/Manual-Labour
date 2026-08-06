@@ -1,0 +1,21 @@
+{
+  "type": "manual_labour:workstone",
+  "ingredients": [
+    {
+      "item": "minecraft:breeze_rod"
+    },
+    {
+      "tag": "manual_labour:hammers"
+    }
+  ],
+  "results": [
+    {
+      "count": 4,
+      "id": "minecraft:wind_charge"
+    },
+    {
+      "chance": 0.5,
+      "id": "minecraft:wind_charge"
+    }
+  ]
+}

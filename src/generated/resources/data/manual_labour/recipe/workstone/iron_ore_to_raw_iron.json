@@ -1,0 +1,25 @@
+{
+  "type": "manual_labour:workstone",
+  "ingredients": [
+    [
+      {
+        "item": "minecraft:iron_ore"
+      },
+      {
+        "item": "minecraft:deepslate_iron_ore"
+      }
+    ],
+    {
+      "tag": "manual_labour:hammers"
+    }
+  ],
+  "results": [
+    {
+      "id": "minecraft:raw_iron"
+    },
+    {
+      "chance": 0.35,
+      "id": "minecraft:raw_iron"
+    }
+  ]
+}

@@ -12,6 +12,11 @@
   "block.millstone.loop": {
     "category": "block",
     "subtitle": "subtitles.manual_labour.block.millstone.loop",
-    "sounds": ["manual_labour:block/millstone/loop"]
+    "sounds": [
+      {
+        "name": "manual_labour:block/millstone/loop",
+        "volume": 0.4
+      }
+    ]
   }
 }

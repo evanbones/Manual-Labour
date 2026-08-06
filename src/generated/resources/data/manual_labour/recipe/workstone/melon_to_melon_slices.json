@@ -1,0 +1,17 @@
+{
+  "type": "manual_labour:workstone",
+  "ingredients": [
+    {
+      "item": "minecraft:melon"
+    },
+    {
+      "tag": "manual_labour:hammers"
+    }
+  ],
+  "results": [
+    {
+      "count": 9,
+      "id": "minecraft:melon_slice"
+    }
+  ]
+}

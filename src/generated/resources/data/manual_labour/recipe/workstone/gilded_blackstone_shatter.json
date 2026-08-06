@@ -1,0 +1,25 @@
+{
+  "type": "manual_labour:workstone",
+  "ingredients": [
+    {
+      "item": "minecraft:gilded_blackstone"
+    },
+    {
+      "tag": "manual_labour:hammers"
+    }
+  ],
+  "results": [
+    {
+      "id": "minecraft:blackstone"
+    },
+    {
+      "count": 2,
+      "id": "minecraft:gold_nugget"
+    },
+    {
+      "chance": 0.5,
+      "count": 2,
+      "id": "minecraft:gold_nugget"
+    }
+  ]
+}

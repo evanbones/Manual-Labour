@@ -1,0 +1,21 @@
+{
+  "type": "manual_labour:workstone",
+  "ingredients": [
+    {
+      "item": "minecraft:magma_block"
+    },
+    {
+      "tag": "manual_labour:hammers"
+    }
+  ],
+  "results": [
+    {
+      "count": 2,
+      "id": "minecraft:magma_cream"
+    },
+    {
+      "chance": 0.5,
+      "id": "minecraft:magma_cream"
+    }
+  ]
+}
