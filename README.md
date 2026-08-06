@@ -21,7 +21,7 @@ The **Workstone** is your primary station for hammering and shaping materials.
 
 * **Tiered Hammers**: Craft hammers out of **Flint**, **Iron**, **Gold**, **Diamond**, or **Netherite**.
 * **Forging & Crushing**: Place items directly on the Workstone and strike them to flatten ingots into plates, break down ores, or shape raw components.
-* **Durability & Speed**: Higher tier hammers grant improved durability.
+* **Durability**: Higher tier hammers have improved durability.
 
 ![Workstone & Hammers Showcase](https://raw.githubusercontent.com/evanbones/Manual-Labour/refs/heads/1.21.1/images/workstone.png)
 
