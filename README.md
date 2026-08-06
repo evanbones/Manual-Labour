@@ -23,7 +23,7 @@ The **Workstone** is your primary station for hammering and shaping materials.
 * **Forging & Crushing**: Place items directly on the Workstone and strike them to flatten ingots into plates, break down ores, or shape raw components.
 * **Durability & Speed**: Higher tier hammers grant improved durability.
 
-![Workstone & Hammers Showcase](images/workstone.png)
+![Workstone & Hammers Showcase](https://raw.githubusercontent.com/evanbones/Manual-Labour/refs/heads/1.21.1/images/workstone.png)
 
 ---
 
@@ -33,7 +33,7 @@ The **Mortar** allows you to grind down ingredients and mix fluids.
 * **Pestle**: Use the Pestle inside the Mortar to crush herbs, plants, minerals, and food items into powders and dyes.
 * **Ladle**: Use the Ladle to manually mix mixtures and multi-ingredient recipes.
 
-![Mortar, Pestle & Ladle Showcase](images/mortar.png)
+![Mortar, Pestle & Ladle Showcase](https://raw.githubusercontent.com/evanbones/Manual-Labour/refs/heads/1.21.1/images/mortar.png)
 
 ---
 
@@ -41,7 +41,7 @@ The **Mortar** allows you to grind down ingredients and mix fluids.
 The **Millstone** is an aesthetic alternative to the Create millstone, inspired by the Wayfarer modpack. It supports 
 all the same recipes and is powered similarly to the other Create machines.
 
-![Millstone Showcase](images/millstone.png)
+![Millstone Showcase](https://raw.githubusercontent.com/evanbones/Manual-Labour/refs/heads/1.21.1/images/millstone.png)
 
 ---
 
@@ -51,7 +51,7 @@ all the same recipes and is powered similarly to the other Create machines.
 * **JEI Support**: Full recipe viewer integration for all Workstone, Mortar, and Millstone recipes. Works with EMI using [TMRV](https://modrinth.com/mod/tmrv).
 * **Ponder Support**: Features interactive Ponder scenes to visually guide you through using each workstation in-game.
 
-![Ponder & Mod Compatibility](images/ponder.png)
+![Ponder & Mod Compatibility](https://raw.githubusercontent.com/evanbones/Manual-Labour/refs/heads/1.21.1/images/ponder.png)
 
 ---
 
