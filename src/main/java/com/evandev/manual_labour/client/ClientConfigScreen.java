@@ -55,7 +55,9 @@ public class ClientConfigScreen {
                 .option(createBoolOption("use_create_deploying_recipes", true,
                         () -> ModConfig.get().useCreateDeployingRecipes, val -> ModConfig.get().useCreateDeployingRecipes = val))
                 .option(createBoolOption("use_create_pressing_recipes", true,
-                        () -> ModConfig.get().useCreatePressingRecipes, val -> ModConfig.get().useCreatePressingRecipes = val));
+                        () -> ModConfig.get().useCreatePressingRecipes, val -> ModConfig.get().useCreatePressingRecipes = val))
+                .option(createFloatOption("workstone_pressing_yield", 0.75F, 0.0F, 1.0F, 0.05F,
+                        () -> ModConfig.get().workstonePressingYield, val -> ModConfig.get().workstonePressingYield = val));
 
         ConfigCategory.Builder jei = ConfigCategory.createBuilder()
                 .name(Component.translatable("config.manual_labour.category.jei"))

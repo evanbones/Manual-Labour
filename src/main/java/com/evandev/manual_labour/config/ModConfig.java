@@ -55,6 +55,9 @@ public class ModConfig {
     @SerializedName("use_create_pressing_recipes")
     public boolean useCreatePressingRecipes = true;
 
+    @SerializedName("workstone_pressing_yield")
+    public float workstonePressingYield = 0.75F;
+
     @SerializedName("workstone_hammer_cooldown_ticks")
     public int workstoneHammerCooldownTicks = 10;
 

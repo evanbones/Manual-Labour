@@ -11,9 +11,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemDisplayContext;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Random;
@@ -51,7 +49,9 @@ public class WorkstoneRenderer implements BlockEntityRenderer<WorkstoneBlockEnti
             float zOffset = modelCount == 1 ? 0 : (this.random.nextFloat() * 2.0F - 1.0F) * 0.15F * 0.5F;
             float yOffset = i * 0.03F;
 
-            if (isBlockItem) {
+            if (workstone.isItemCarvingWorkstone()) {
+                renderItemCarved(poseStack, direction, itemStack);
+            } else if (isBlockItem) {
                 poseStack.translate(0.5D + xOffset, 0.96D + yOffset, 0.5D + zOffset);
                 float f = -direction.toYRot();
                 poseStack.mulPose(Axis.YP.rotationDegrees(f));
@@ -71,6 +71,24 @@ public class WorkstoneRenderer implements BlockEntityRenderer<WorkstoneBlockEnti
 
             poseStack.popPose();
         }
+    }
+
+    private void renderItemCarved(PoseStack poseStack, Direction direction, ItemStack itemStack) {
+        poseStack.translate(0.5D, 0.90D, 0.5D);
+        float f = -direction.toYRot() + 180.0F;
+        poseStack.mulPose(Axis.YP.rotationDegrees(f));
+
+        Item toolItem = itemStack.getItem();
+        float poseAngle;
+        if (toolItem instanceof PickaxeItem || toolItem instanceof HoeItem) {
+            poseAngle = 225.0F;
+        } else if (toolItem instanceof TridentItem) {
+            poseAngle = 135.0F;
+        } else {
+            poseAngle = 180.0F;
+        }
+        poseStack.mulPose(Axis.ZP.rotationDegrees(poseAngle));
+        poseStack.scale(0.6F, 0.6F, 0.6F);
     }
 
     protected int getModelCount(ItemStack stack) {

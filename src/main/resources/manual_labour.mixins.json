@@ -4,9 +4,9 @@
   "package": "com.evandev.manual_labour.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "WorkstoneDispenserMixin"
   ],
   "client": [
-    "ExampleMixin"
   ],
   "server": [],
   "injectors": {

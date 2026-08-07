@@ -36,6 +36,13 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.evandev.manual_labour.Constants;
+import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionResult;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+
 public class WorkstoneBlock extends BaseEntityBlock implements SimpleWaterloggedBlock {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
@@ -152,8 +159,39 @@ public class WorkstoneBlock extends BaseEntityBlock implements SimpleWaterlogged
         }
         ItemStack storedStack = workstone.getStoredItem();
         if (!storedStack.isEmpty()) {
-            return 15; // TODO: scale based on stack count?
+            float proportion = (float) storedStack.getCount() / Math.min(workstone.getMaxStackSize(), storedStack.getMaxStackSize());
+            return Mth.floor(proportion * 14.0F) + 1;
         }
         return 0;
+    }
+
+    @EventBusSubscriber(modid = Constants.MOD_ID)
+    public static class ToolCarvingEvent {
+        @SubscribeEvent
+        public static void onSneakPlaceTool(PlayerInteractEvent.RightClickBlock event) {
+            Level level = event.getLevel();
+            BlockPos pos = event.getPos();
+
+            if (!(level.getBlockEntity(pos) instanceof WorkstoneBlockEntity workstone)) {
+                return;
+            }
+
+            Player player = event.getEntity();
+            ItemStack heldStack = player.getMainHandItem();
+
+            if (!player.isSecondaryUseActive() || heldStack.isEmpty()) {
+                return;
+            }
+
+            if (workstone.carveToolOnWorkstone(player.getAbilities().instabuild ? heldStack.copy() : heldStack)) {
+                if (!player.isCreative()) {
+                    player.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
+                }
+                Vec3 centerPos = pos.getCenter();
+                level.playSound(null, centerPos.x(), centerPos.y(), centerPos.z(), SoundEvents.STONE_PLACE, SoundSource.BLOCKS, 1.0F, 0.8F);
+                event.setCanceled(true);
+                event.setCancellationResult(InteractionResult.SUCCESS);
+            }
+        }
     }
 }

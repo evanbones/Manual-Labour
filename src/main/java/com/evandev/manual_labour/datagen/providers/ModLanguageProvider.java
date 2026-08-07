@@ -50,6 +50,11 @@ public class ModLanguageProvider extends LanguageProvider {
         add("config.manual_labour.option.use_create_deploying_recipes.tooltip", "Let the Workstone complete Create's Deployer steps within Sequenced Assembly recipes as a fallback when no Manual Labour workstone recipe matches.");
         add("config.manual_labour.option.use_create_pressing_recipes", "Use Create Pressing Recipes");
         add("config.manual_labour.option.use_create_pressing_recipes.tooltip", "Let the Workstone press items with a Hammer using Create's Mechanical Press recipes, including steps in Sequenced Assembly recipes.");
+        add("config.manual_labour.option.workstone_pressing_yield", "Workstone Pressing Yield");
+        add("config.manual_labour.option.workstone_pressing_yield.tooltip", "Output chance (0.0 to 1.0) when pressing items/plates on the Workstone using Create's Pressing recipes.");
+
+        add("block.manual_labour.workstone.invalid_item", "This doesn't seem hammerable...");
+        add("block.manual_labour.workstone.invalid_tool", "Maybe with a different tool...");
 
         add("config.manual_labour.category.jei", "JEI Integration");
         add("config.manual_labour.option.enable_workstone_jei", "Enable Workstone JEI Category");

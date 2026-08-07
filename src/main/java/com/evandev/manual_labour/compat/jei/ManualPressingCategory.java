@@ -16,6 +16,8 @@ import net.minecraft.world.item.crafting.Ingredient;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.List;
 
+import com.evandev.manual_labour.config.ModConfig;
+
 @ParametersAreNonnullByDefault
 public class ManualPressingCategory extends CreateRecipeCategory<PressingRecipe> {
 
@@ -36,14 +38,16 @@ public class ManualPressingCategory extends CreateRecipeCategory<PressingRecipe>
 
         List<ProcessingOutput> results = recipe.getRollableResults();
         boolean single = results.size() == 1;
+        float yieldMultiplier = ModConfig.get().workstonePressingYield;
         for (int i = 0; i < results.size(); i++) {
             ProcessingOutput output = results.get(i);
+            ProcessingOutput adjustedOutput = new ProcessingOutput(output.getStack(), output.getChance() * yieldMultiplier);
             int xOffset = i % 2 == 0 ? 0 : 19;
             int yOffset = (i / 2) * -19;
             builder.addSlot(RecipeIngredientRole.OUTPUT, single ? 132 : 132 + xOffset, 51 + yOffset)
-                    .setBackground(getRenderedSlot(output), -1, -1)
-                    .addItemStack(output.getStack())
-                    .addRichTooltipCallback(addStochasticTooltip(output));
+                    .setBackground(getRenderedSlot(adjustedOutput), -1, -1)
+                    .addItemStack(adjustedOutput.getStack())
+                    .addRichTooltipCallback(addStochasticTooltip(adjustedOutput));
         }
     }
 
