@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Create is now an optional dependency!
 - Reworked the Workstone JEI category.
+- Adjusted handheld pestle model.
 
 ### Fixed
 
