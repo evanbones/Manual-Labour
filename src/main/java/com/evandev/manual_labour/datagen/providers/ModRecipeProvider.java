@@ -1,5 +1,7 @@
 package com.evandev.manual_labour.datagen.providers;
 
+import com.evandev.manual_labour.compat.create.CreateCompat;
+import com.evandev.manual_labour.compat.create.impl.millstone.CreateContent;
 import com.evandev.manual_labour.registry.ModBlocks;
 import com.evandev.manual_labour.registry.ModItems;
 import com.simibubi.create.AllBlocks;
@@ -11,6 +13,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Blocks;
 import net.neoforged.neoforge.common.Tags;
+import net.neoforged.neoforge.common.conditions.ModLoadedCondition;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletableFuture;
@@ -104,7 +107,8 @@ public class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy("has_honeycomb", has(Items.HONEYCOMB))
                 .save(output);
 
-        ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModItems.MILLSTONE_ITEM.get())
+        RecipeOutput createOnly = output.withConditions(new ModLoadedCondition(CreateCompat.CREATE));
+        ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, CreateContent.MILLSTONE_ITEM.get())
                 .pattern(" | ")
                 .pattern("SSS")
                 .pattern("BBB")
@@ -112,7 +116,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 .define('S', Tags.Items.STONES)
                 .define('B', Blocks.STONE_BRICKS)
                 .unlockedBy("has_shaft", has(AllBlocks.SHAFT.get()))
-                .save(output);
+                .save(createOnly);
 
         WorkstoneRecipeProvider.buildRecipes(output);
         MortarRecipeProvider.buildRecipes(output);

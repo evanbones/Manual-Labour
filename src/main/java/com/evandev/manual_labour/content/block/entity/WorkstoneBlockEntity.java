@@ -1,19 +1,14 @@
 package com.evandev.manual_labour.content.block.entity;
 
+import com.evandev.manual_labour.compat.create.CreateCompat;
 import com.evandev.manual_labour.config.ModConfig;
 import com.evandev.manual_labour.content.block.WorkstoneBlock;
-import com.evandev.manual_labour.recipe.WorkstoneRecipe;
+import com.evandev.manual_labour.recipe.WorkstoneProcess;
+import com.evandev.manual_labour.recipe.WorkstoneRecipeLike;
 import com.evandev.manual_labour.registry.ModBlockEntities;
 import com.evandev.manual_labour.registry.ModRecipeTypes;
 import com.evandev.manual_labour.registry.ModSounds;
 import com.evandev.manual_labour.registry.ModTags;
-import com.simibubi.create.AllDataComponents;
-import com.simibubi.create.AllRecipeTypes;
-import com.simibubi.create.content.kinetics.deployer.DeployerApplicationRecipe;
-import com.simibubi.create.content.kinetics.press.PressingRecipe;
-import com.simibubi.create.content.processing.recipe.ProcessingOutput;
-import com.simibubi.create.content.processing.recipe.ProcessingRecipe;
-import com.simibubi.create.content.processing.sequenced.SequencedAssemblyRecipe;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -34,7 +29,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
-import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -44,7 +38,6 @@ import net.neoforged.neoforge.items.wrapper.RecipeWrapper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -60,7 +53,7 @@ public class WorkstoneBlockEntity extends BlockEntity {
     };
 
     private final ItemStackHandler recipeInv = new ItemStackHandler(2);
-    private final RecipeManager.CachedCheck<RecipeWrapper, WorkstoneRecipe> quickCheck;
+    private final RecipeManager.CachedCheck<RecipeWrapper, WorkstoneRecipeLike> quickCheck;
     private boolean isItemCarvingWorkstone;
 
     public WorkstoneBlockEntity(BlockPos pos, BlockState state) {
@@ -71,33 +64,21 @@ public class WorkstoneBlockEntity extends BlockEntity {
     public boolean processStoredItemUsingTool(ItemStack toolStack, Player player) {
         if (level == null || isItemCarvingWorkstone) return false;
 
-        Optional<RecipeHolder<? extends ProcessingRecipe<?, ?>>> matchingRecipe = getMatchingRecipe(toolStack);
+        Optional<WorkstoneProcess> matchingProcess = getMatchingProcess(toolStack);
 
-        if (matchingRecipe.isPresent()) {
-            RecipeHolder<? extends ProcessingRecipe<?, ?>> recipeHolder = matchingRecipe.get();
-            ProcessingRecipe<?, ?> recipe = recipeHolder.value();
+        if (matchingProcess.isPresent()) {
+            WorkstoneProcess process = matchingProcess.get();
             Direction direction = getBlockState().getValue(WorkstoneBlock.FACING).getCounterClockWise();
             ItemStack hitItem = getStoredItem();
 
-            List<ItemStack> rolledResults;
-            boolean isStandalonePressing = recipe instanceof PressingRecipe
-                    && !hitItem.has(AllDataComponents.SEQUENCED_ASSEMBLY);
+            boolean applyPressingYield = process.usesPressingYield()
+                    && !CreateCompat.get().isSequencedAssemblyInProgress(hitItem);
+            float yieldMultiplier = applyPressingYield ? ModConfig.get().workstonePressingYield : 1.0F;
 
-            if (isStandalonePressing) {
-                float yieldMultiplier = ModConfig.get().workstonePressingYield;
-                rolledResults = new ArrayList<>();
-                for (ProcessingOutput output : recipe.getRollableResults()) {
-                    float chance = output.getChance() * yieldMultiplier;
-                    if (chance >= 1.0F || level.random.nextFloat() < chance) {
-                        rolledResults.add(output.getStack().copy());
-                    }
-                }
-            } else {
-                rolledResults = recipe.rollResults(level.random);
-            }
+            List<ItemStack> rolledResults = process.rollResults(level.random, yieldMultiplier);
 
             boolean stillInProgress = !rolledResults.isEmpty()
-                    && rolledResults.getFirst().has(AllDataComponents.SEQUENCED_ASSEMBLY);
+                    && CreateCompat.get().isSequencedAssemblyInProgress(rolledResults.getFirst());
 
             int ejectFrom = stillInProgress ? 1 : 0;
             for (int i = ejectFrom; i < rolledResults.size(); i++) {
@@ -114,12 +95,11 @@ public class WorkstoneBlockEntity extends BlockEntity {
             }
 
             if (!level.isClientSide) {
-                if (recipe instanceof DeployerApplicationRecipe deployerRecipe) {
-                    if (!deployerRecipe.shouldKeepHeldItem()) {
-                        toolStack.shrink(1);
+                switch (process.toolUse()) {
+                    case CONSUME -> toolStack.shrink(1);
+                    case KEEP -> {
                     }
-                } else {
-                    toolStack.hurtAndBreak(1, (ServerLevel) level, player, (item) -> {
+                    case DAMAGE -> toolStack.hurtAndBreak(1, (ServerLevel) level, player, (item) -> {
                     });
                 }
 
@@ -143,6 +123,16 @@ public class WorkstoneBlockEntity extends BlockEntity {
             }
 
             if (stillInProgress) {
+                if (hitItem.getCount() > 1) {
+                    ItemStack remainder = hitItem.copyWithCount(hitItem.getCount() - 1);
+                    ItemEntity remainderEntity = new ItemEntity(
+                            level, worldPosition.getX() + 0.5 + (direction.getStepX() * 0.2),
+                            worldPosition.getY() + 0.8, worldPosition.getZ() + 0.5 + (direction.getStepZ() * 0.2),
+                            remainder
+                    );
+                    remainderEntity.setDeltaMovement(direction.getStepX() * 0.2F, 0.0F, direction.getStepZ() * 0.2F);
+                    level.addFreshEntity(remainderEntity);
+                }
                 inventory.setStackInSlot(0, rolledResults.getFirst());
             } else {
                 inventory.extractItem(0, 1, false);
@@ -171,7 +161,7 @@ public class WorkstoneBlockEntity extends BlockEntity {
             }
         }
 
-        return matchingRecipe.isPresent();
+        return matchingProcess.isPresent();
     }
 
     public boolean hasAnyRecipeFor(ItemStack storedItem) {
@@ -179,71 +169,32 @@ public class WorkstoneBlockEntity extends BlockEntity {
 
         RecipeManager manager = level.getRecipeManager();
 
-        for (RecipeHolder<WorkstoneRecipe> recipe : manager.getAllRecipesFor(ModRecipeTypes.WORKSTONE.get())) {
+        for (RecipeHolder<WorkstoneRecipeLike> recipe : manager.getAllRecipesFor(ModRecipeTypes.WORKSTONE.get())) {
             if (!recipe.value().getIngredients().isEmpty() && recipe.value().getIngredients().getFirst().test(storedItem)) {
                 return true;
             }
         }
 
-        if (ModConfig.get().useCreateDeployingRecipes) {
-            for (RecipeHolder<?> holder : manager.getAllRecipesFor(AllRecipeTypes.DEPLOYING.getType())) {
-                if (holder.value() instanceof DeployerApplicationRecipe deployerRecipe) {
-                    if (!deployerRecipe.getIngredients().isEmpty() && deployerRecipe.getIngredients().getFirst().test(storedItem)) {
-                        return true;
-                    }
-                }
-            }
-        }
-
-        if (ModConfig.get().useCreatePressingRecipes) {
-            SingleRecipeInput pressingInput = new SingleRecipeInput(storedItem);
-            return AllRecipeTypes.PRESSING.find(pressingInput, level).isPresent();
-        }
-
-        return false;
+        return CreateCompat.get().hasAnyWorkstoneProcessFor(level, storedItem);
     }
 
-    private Optional<RecipeHolder<? extends ProcessingRecipe<?, ?>>> getMatchingRecipe(ItemStack toolStack) {
+    private Optional<WorkstoneProcess> getMatchingProcess(ItemStack toolStack) {
         if (level == null) return Optional.empty();
+
+        Optional<WorkstoneProcess> sequencedStep = CreateCompat.get().findSequencedStep(level, getStoredItem(), toolStack);
+        if (sequencedStep.isPresent()) {
+            return sequencedStep;
+        }
 
         recipeInv.setStackInSlot(0, getStoredItem());
         recipeInv.setStackInSlot(1, toolStack);
-        RecipeWrapper wrapper = new RecipeWrapper(recipeInv);
-
-        Optional<RecipeHolder<WorkstoneRecipe>> workstoneStep = SequencedAssemblyRecipe.getRecipe(
-                level, wrapper, ModRecipeTypes.WORKSTONE.get(), WorkstoneRecipe.class);
-        if (workstoneStep.isPresent()) {
-            return Optional.of(workstoneStep.get());
-        }
-
-        if (ModConfig.get().useCreateDeployingRecipes) {
-            Optional<RecipeHolder<DeployerApplicationRecipe>> deployingStep = SequencedAssemblyRecipe.getRecipe(
-                    level, wrapper, AllRecipeTypes.DEPLOYING.getType(), DeployerApplicationRecipe.class);
-            if (deployingStep.isPresent()) {
-                return Optional.of(deployingStep.get());
-            }
-        }
-
-        Optional<RecipeHolder<WorkstoneRecipe>> standalone = quickCheck.getRecipeFor(wrapper, level);
+        Optional<RecipeHolder<WorkstoneRecipeLike>> standalone =
+                quickCheck.getRecipeFor(new RecipeWrapper(recipeInv), level);
         if (standalone.isPresent()) {
-            return Optional.of(standalone.get());
+            return Optional.of(standalone.get().value());
         }
 
-        if (ModConfig.get().useCreatePressingRecipes && toolStack.is(ModTags.Items.HAMMERS)) {
-            Optional<RecipeHolder<PressingRecipe>> pressingStep = SequencedAssemblyRecipe.getRecipe(
-                    level, getStoredItem(), AllRecipeTypes.PRESSING.getType(), PressingRecipe.class);
-            if (pressingStep.isPresent()) {
-                return Optional.of(pressingStep.get());
-            }
-
-            SingleRecipeInput pressingInput = new SingleRecipeInput(getStoredItem());
-            Optional<RecipeHolder<PressingRecipe>> pressing = AllRecipeTypes.PRESSING.find(pressingInput, level);
-            if (pressing.isPresent()) {
-                return Optional.of(pressing.get());
-            }
-        }
-
-        return Optional.empty();
+        return CreateCompat.get().findPressing(level, getStoredItem(), toolStack.is(ModTags.Items.HAMMERS));
     }
 
     public boolean canAddItem(ItemStack addedStack) {

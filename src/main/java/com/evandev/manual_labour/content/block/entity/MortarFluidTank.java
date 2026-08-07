@@ -1,6 +1,6 @@
 package com.evandev.manual_labour.content.block.entity;
 
-import com.simibubi.create.foundation.fluid.SmartFluidTank;
+import com.evandev.manual_labour.foundation.fluid.SmartFluidTank;
 import net.createmod.catnip.animation.LerpedFloat;
 import net.createmod.catnip.animation.LerpedFloat.Chaser;
 import net.minecraft.core.HolderLookup;

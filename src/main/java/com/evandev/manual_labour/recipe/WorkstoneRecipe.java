@@ -1,85 +1,109 @@
 package com.evandev.manual_labour.recipe;
 
-import com.evandev.manual_labour.compat.jei.WorkstoneAssemblySubCategory;
-import com.evandev.manual_labour.registry.ModBlocks;
+import com.evandev.manual_labour.foundation.recipe.ProcessingOutput;
+import com.evandev.manual_labour.foundation.recipe.ProcessingRecipeData;
+import com.evandev.manual_labour.registry.ModRecipeSerializers;
 import com.evandev.manual_labour.registry.ModRecipeTypes;
-import com.simibubi.create.compat.jei.category.sequencedAssembly.SequencedAssemblySubCategory;
-import com.simibubi.create.content.processing.recipe.ProcessingRecipeParams;
-import com.simibubi.create.content.processing.recipe.StandardProcessingRecipe;
-import com.simibubi.create.content.processing.sequenced.IAssemblyRecipe;
-import net.minecraft.network.chat.Component;
+import com.mojang.serialization.MapCodec;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.NonNullList;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.level.ItemLike;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.items.wrapper.RecipeWrapper;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
-import java.util.Set;
-import java.util.function.Supplier;
 
-public class WorkstoneRecipe extends StandardProcessingRecipe<RecipeWrapper> implements IAssemblyRecipe {
-
-    public WorkstoneRecipe(ProcessingRecipeParams params) {
-        super(ModRecipeTypes.WORKSTONE_INFO, params);
-    }
+public record WorkstoneRecipe(ProcessingRecipeData data) implements WorkstoneRecipeLike {
 
     @Override
     public boolean matches(@NotNull RecipeWrapper inv, @NotNull Level level) {
-        if (ingredients.size() < 2) return false;
+        if (data.getIngredients().size() < 2) return false;
         return getInputIngredient().test(inv.getItem(0)) && getToolIngredient().test(inv.getItem(1));
     }
 
     @Override
-    protected int getMaxInputCount() {
-        return 2;
-    }
-
-    @Override
-    protected int getMaxOutputCount() {
-        return 4;
-    }
-
     public Ingredient getInputIngredient() {
-        return ingredients.getFirst();
+        return data.getIngredients().getFirst();
     }
 
+    @Override
     public Ingredient getToolIngredient() {
-        return ingredients.get(1);
+        return data.getIngredients().get(1);
     }
 
     @Override
-    public void addAssemblyIngredients(List<Ingredient> list) {
-        list.add(getToolIngredient());
+    public List<ProcessingOutput> getOutputs() {
+        return data.getResults();
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
-    public Component getDescriptionForAssembly() {
-        ItemStack[] matchingStacks = getToolIngredient().getItems();
-        if (matchingStacks.length == 0) {
-            return Component.literal("Invalid");
+    public List<ItemStack> rollResults(RandomSource random, float yieldMultiplier) {
+        return data.rollResults(random);
+    }
+
+    @Override
+    public @NotNull NonNullList<Ingredient> getIngredients() {
+        return data.getIngredients();
+    }
+
+    @Override
+    public @NotNull ItemStack assemble(@NotNull RecipeWrapper input, HolderLookup.@NotNull Provider registries) {
+        return getResultItem(registries);
+    }
+
+    @Override
+    public boolean canCraftInDimensions(int width, int height) {
+        return true;
+    }
+
+    @Override
+    public @NotNull ItemStack getResultItem(HolderLookup.@NotNull Provider registries) {
+        return data.getResults().isEmpty() ? ItemStack.EMPTY : data.getResults().getFirst().getStack();
+    }
+
+    @Override
+    public boolean isSpecial() {
+        return true;
+    }
+
+    @Override
+    public @NotNull String getGroup() {
+        return "processing";
+    }
+
+    @Override
+    public @NotNull RecipeSerializer<?> getSerializer() {
+        return ModRecipeSerializers.WORKSTONE.get();
+    }
+
+    @Override
+    public @NotNull RecipeType<?> getType() {
+        return ModRecipeTypes.WORKSTONE.get();
+    }
+
+    public static class Serializer implements RecipeSerializer<WorkstoneRecipe> {
+
+        private static final MapCodec<WorkstoneRecipe> CODEC =
+                ProcessingRecipeData.CODEC.xmap(WorkstoneRecipe::new, WorkstoneRecipe::data);
+
+        private static final StreamCodec<RegistryFriendlyByteBuf, WorkstoneRecipe> STREAM_CODEC =
+                ProcessingRecipeData.STREAM_CODEC.map(WorkstoneRecipe::new, WorkstoneRecipe::data);
+
+        @Override
+        public @NotNull MapCodec<WorkstoneRecipe> codec() {
+            return CODEC;
         }
-        return Component.translatable("recipe.assembly.manual_labour.workstone",
-                Component.translatable(matchingStacks[0].getDescriptionId()).getString());
-    }
 
-    @Override
-    public void addRequiredMachines(Set<ItemLike> list) {
-        list.add(ModBlocks.WORKSTONE.get());
-    }
-
-    @Override
-    public Supplier<Supplier<SequencedAssemblySubCategory>> getJEISubCategory() {
-        return () -> WorkstoneAssemblySubCategory::new;
-    }
-
-    public static class Serializer extends StandardProcessingRecipe.Serializer<WorkstoneRecipe> {
-        public Serializer() {
-            super(WorkstoneRecipe::new);
+        @Override
+        public @NotNull StreamCodec<RegistryFriendlyByteBuf, WorkstoneRecipe> streamCodec() {
+            return STREAM_CODEC;
         }
     }
 }

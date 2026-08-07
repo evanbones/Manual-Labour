@@ -1,7 +1,6 @@
 package com.evandev.manual_labour.registry;
 
 import com.evandev.manual_labour.Constants;
-import com.evandev.manual_labour.content.block.MillstoneBlockItem;
 import com.evandev.manual_labour.content.item.HammerItem;
 import com.evandev.manual_labour.content.item.LadleItem;
 import com.evandev.manual_labour.content.item.PestleItem;
@@ -19,9 +18,6 @@ public class ModItems {
 
     public static final DeferredItem<Item> MORTAR_ITEM = ITEMS.register("mortar",
             () -> new BlockItem(ModBlocks.MORTAR.get(), new Item.Properties()));
-
-    public static final DeferredItem<Item> MILLSTONE_ITEM = ITEMS.register("millstone",
-            () -> new MillstoneBlockItem(ModBlocks.MILLSTONE.get(), new Item.Properties()));
 
     public static final DeferredItem<Item> FLINT_HAMMER = ITEMS.register("flint_hammer", () -> new HammerItem(Tiers.STONE, 7.0f, -3.2f, new Item.Properties()));
     public static final DeferredItem<Item> IRON_HAMMER = ITEMS.register("iron_hammer", () -> new HammerItem(Tiers.IRON, 6.0f, -3.1f, new Item.Properties()));

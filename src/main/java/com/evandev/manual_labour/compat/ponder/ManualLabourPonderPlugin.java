@@ -1,6 +1,7 @@
 package com.evandev.manual_labour.compat.ponder;
 
 import com.evandev.manual_labour.Constants;
+import com.evandev.manual_labour.compat.create.CreateCompat;
 import com.evandev.manual_labour.registry.ModBlocks;
 import net.createmod.ponder.api.registration.PonderPlugin;
 import net.createmod.ponder.api.registration.PonderSceneRegistrationHelper;
@@ -17,6 +18,6 @@ public class ManualLabourPonderPlugin implements PonderPlugin {
     @Override
     public void registerScenes(PonderSceneRegistrationHelper<ResourceLocation> helper) {
         helper.addStoryBoard(ModBlocks.MORTAR.getId(), "mortar", ManualLabourPonderScenes::mortar);
-        helper.addStoryBoard(ModBlocks.MILLSTONE.getId(), "millstone", ManualLabourPonderScenes::millstone);
+        CreateCompat.get().registerPonderScenes(helper);
     }
 }

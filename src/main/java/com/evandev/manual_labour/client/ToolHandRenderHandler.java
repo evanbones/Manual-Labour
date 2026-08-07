@@ -2,9 +2,9 @@ package com.evandev.manual_labour.client;
 
 import com.evandev.manual_labour.Constants;
 import com.evandev.manual_labour.compat.create.BasinStirClientState;
+import com.evandev.manual_labour.compat.create.CreateCompat;
 import com.evandev.manual_labour.content.block.entity.MortarBlockEntity;
 import com.evandev.manual_labour.registry.ModTags;
-import com.simibubi.create.content.processing.basin.BasinBlockEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
@@ -38,10 +38,8 @@ public class ToolHandRenderHandler {
             if (mortar.isProcessing()) {
                 event.setCanceled(true);
             }
-        } else if (blockEntity instanceof BasinBlockEntity) {
-            if (BasinStirClientState.isStirring(pos)) {
-                event.setCanceled(true);
-            }
+        } else if (BasinStirClientState.isStirring(pos) && CreateCompat.get().isBasin(level, pos)) {
+            event.setCanceled(true);
         }
     }
 }

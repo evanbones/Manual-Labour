@@ -1,0 +1,24 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:not",
+      "value": {
+        "type": "neoforge:mod_loaded",
+        "modid": "create"
+      }
+    }
+  ],
+  "type": "manual_labour:mortar_grinding",
+  "ingredient": {
+    "item": "minecraft:glowstone"
+  },
+  "processing_time": 80,
+  "results": [
+    {
+      "result": {
+        "count": 4,
+        "id": "minecraft:glowstone_dust"
+      }
+    }
+  ]
+}

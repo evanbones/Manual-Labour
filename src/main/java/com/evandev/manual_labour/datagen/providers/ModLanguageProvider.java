@@ -1,6 +1,7 @@
 package com.evandev.manual_labour.datagen.providers;
 
 import com.evandev.manual_labour.Constants;
+import com.evandev.manual_labour.compat.create.impl.millstone.CreateContent;
 import com.evandev.manual_labour.compat.ponder.ManualLabourPonderPlugin;
 import com.evandev.manual_labour.registry.ModBlocks;
 import com.evandev.manual_labour.registry.ModItems;
@@ -40,6 +41,7 @@ public class ModLanguageProvider extends LanguageProvider {
         add("config.manual_labour.option.ladle_stir_speed.tooltip", "Speed in degrees per tick at which the Ladle rotates while stirring in a Basin or Mortar.");
 
         add("config.manual_labour.category.create", "Create Compatibility");
+        add("config.manual_labour.requires_create", "Requires the Create mod, which is not installed.");
         add("config.manual_labour.option.use_create_milling_recipes", "Use Create Milling Recipes");
         add("config.manual_labour.option.use_create_milling_recipes.tooltip", "Let the Mortar grind items using Create's Millstone recipes as a fallback when no Manual Labour grinding recipe matches. Disable to rely only on hand-authored mortar_grinding recipes.");
         add("config.manual_labour.option.use_create_crushing_recipes", "Use Create Crushing Recipes");
@@ -72,7 +74,7 @@ public class ModLanguageProvider extends LanguageProvider {
 
         addBlock(ModBlocks.WORKSTONE, "Workstone");
         addBlock(ModBlocks.MORTAR, "Mortar");
-        addBlock(ModBlocks.MILLSTONE, "Millstone");
+        addBlock(CreateContent.MILLSTONE, "Millstone");
 
         addItem(ModItems.FLINT_HAMMER, "Flint Hammer");
         addItem(ModItems.IRON_HAMMER, "Iron Hammer");
@@ -91,6 +93,7 @@ public class ModLanguageProvider extends LanguageProvider {
         add("manual_labour.recipe.manual_assembly", "Manual Assembly");
         add("manual_labour.recipe.millstone", "Milling");
         add("manual_labour.recipe.manual_pressing", "Manual Pressing");
+        add("manual_labour.recipe.processing.chance", "%1$s%% Chance");
 
         add("message.manual_labour.millstone_space", "Clear Blocks for Placement");
         add("subtitles.manual_labour.block.millstone.loop", "Millstone turns");

@@ -1,22 +1,15 @@
 package com.evandev.manual_labour.content.block.entity;
 
-import com.evandev.manual_labour.config.ModConfig;
+import com.evandev.manual_labour.compat.create.CreateCompat;
 import com.evandev.manual_labour.content.block.MortarBlock;
+import com.evandev.manual_labour.foundation.blockentity.SyncedBlockEntity;
+import com.evandev.manual_labour.foundation.item.ItemHelper;
 import com.evandev.manual_labour.recipe.MortarGrindingRecipe;
 import com.evandev.manual_labour.recipe.MortarGrindingRecipeInput;
 import com.evandev.manual_labour.recipe.MortarMixingRecipe;
 import com.evandev.manual_labour.recipe.MortarProcess;
 import com.evandev.manual_labour.registry.ModBlockEntities;
 import com.evandev.manual_labour.registry.ModRecipeTypes;
-import com.simibubi.create.AllRecipeTypes;
-import com.simibubi.create.AllSoundEvents;
-import com.simibubi.create.content.fluids.FluidFX;
-import com.simibubi.create.content.kinetics.crusher.CrushingRecipe;
-import com.simibubi.create.content.kinetics.millstone.MillingRecipe;
-import com.simibubi.create.content.kinetics.mixer.MixingRecipe;
-import com.simibubi.create.content.processing.burner.BlazeBurnerBlock.HeatLevel;
-import com.simibubi.create.foundation.blockEntity.SyncedBlockEntity;
-import com.simibubi.create.foundation.item.ItemHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -32,7 +25,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
-import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.fluids.FluidStack;
@@ -214,23 +206,7 @@ public class MortarBlockEntity extends SyncedBlockEntity {
             return Optional.of(new MortarProcess.OwnGrindingProcess(own.get().value()));
         }
 
-        SingleRecipeInput createInput = new SingleRecipeInput(candidate);
-
-        if (ModConfig.get().useCreateMillingRecipes) {
-            Optional<RecipeHolder<MillingRecipe>> milling = AllRecipeTypes.MILLING.find(createInput, level);
-            if (milling.isPresent()) {
-                return Optional.of(new MortarProcess.CreateProcess(milling.get().value()));
-            }
-        }
-
-        if (ModConfig.get().useCreateCrushingRecipes) {
-            Optional<RecipeHolder<CrushingRecipe>> crushing = AllRecipeTypes.CRUSHING.find(createInput, level);
-            if (crushing.isPresent()) {
-                return Optional.of(new MortarProcess.CreateProcess(crushing.get().value()));
-            }
-        }
-
-        return Optional.empty();
+        return CreateCompat.get().findMortarGrinding(level, candidate);
     }
 
     private Optional<MortarProcess> findMixingProcess() {
@@ -241,18 +217,7 @@ public class MortarBlockEntity extends SyncedBlockEntity {
             if (consumeIngredients(process, true)) return Optional.of(process);
         }
 
-        if (ModConfig.get().useCreateMixingRecipes) {
-            List<RecipeHolder<MixingRecipe>> mixingRecipes =
-                    level.getRecipeManager().getAllRecipesFor(AllRecipeTypes.MIXING.getType());
-            for (RecipeHolder<MixingRecipe> holder : mixingRecipes) {
-                MixingRecipe recipe = holder.value();
-                if (!recipe.getRequiredHeat().testBlazeBurner(HeatLevel.NONE)) continue;
-                MortarProcess process = new MortarProcess.CreateProcess(recipe);
-                if (consumeIngredients(process, true)) return Optional.of(process);
-            }
-        }
-
-        return Optional.empty();
+        return CreateCompat.get().findMortarMixing(level, process -> consumeIngredients(process, true));
     }
 
     private ItemStack getPrimaryItem() {
@@ -332,7 +297,7 @@ public class MortarBlockEntity extends SyncedBlockEntity {
         if (!processingIsGrinding) {
             FluidStack fluid = fluidTank.getTank().getFluid();
             if (!fluid.isEmpty() && fluid.getAmount() > 0) {
-                serverLevel.sendParticles(FluidFX.getFluidParticle(fluid.copy()),
+                serverLevel.sendParticles(CreateCompat.get().fluidParticle(fluid.copy()),
                         worldPosition.getX() + 0.5, worldPosition.getY() + 0.85, worldPosition.getZ() + 0.5,
                         2, 0.15, 0.05, 0.15, 0.0);
             }
@@ -348,11 +313,9 @@ public class MortarBlockEntity extends SyncedBlockEntity {
         float pitch = 0.85F + serverLevel.random.nextFloat() * 0.3F;
 
         if (processingIsGrinding) {
-            boolean primary = serverLevel.random.nextFloat() < 0.78F;
-            (primary ? AllSoundEvents.CRUSHING_1 : AllSoundEvents.CRUSHING_2)
-                    .play(serverLevel, null, x, y, z, 0.5F, pitch);
+            CreateCompat.get().playGrindSound(serverLevel, x, y, z, 0.5F, pitch);
         } else {
-            AllSoundEvents.MIXING.play(serverLevel, null, x, y, z, 0.6F, pitch);
+            CreateCompat.get().playMixSound(serverLevel, x, y, z, 0.6F, pitch);
         }
     }
 

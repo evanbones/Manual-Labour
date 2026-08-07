@@ -6,6 +6,8 @@ This mod is all about bringing hands-on work back to your Minecraft experience. 
 
 Perfect for an early-game progression step before building more complex setups, or as a natural manual companion to [Create](https://modrinth.com/mod/create) machines.
 
+The Workstone, Mortar, Pestle, Ladle and Hammers all work on their own, with a built-in set of grinding and mixing recipes. If you install Create, they instead use Create's own milling, crushing, mixing, pressing and deploying recipes instead.
+
 ---
 
 ## Features & Workstations
@@ -32,6 +34,8 @@ The **Mortar** allows you to grind down ingredients and mix fluids.
 ---
 
 ### The Millstone
+> **Requires Create to be installed.**
+
 The **Millstone** is an aesthetic alternative to the Create millstone, inspired by the Wayfarer modpack. It supports 
 all the same recipes and is powered similarly to the other Create machines.
 
@@ -41,9 +45,9 @@ all the same recipes and is powered similarly to the other Create machines.
 
 ## Compatibility & Integrations
 
-* **Create**: Manual Labour tools are designed as manual alternatives to Create's Mechanical Press, Mechanical Mixer, and Sequenced Assembly.
+* **Create** *(optional)*: Manual Labour tools are designed as manual alternatives to Create's Mechanical Press, Mechanical Mixer, and Sequenced Assembly. With Create installed the Mortar also grinds Millstone recipes, the Workstone completes Deployer and Press steps inside Sequenced Assembly, the Ladle can stir a Basin, and the Millstone becomes available. Every one of these can be toggled in the config.
 * **JEI Support**: Full recipe viewer integration for all Workstone, Mortar, and Millstone recipes. Works with EMI using [TMRV](https://modrinth.com/mod/tmrv).
-* **Ponder Support**: Features interactive Ponder scenes to visually guide you through using each workstation in-game.
+* **Ponder Support**: Features interactive Ponder scenes to visually guide you through using each workstation in-game. Ponder is bundled with the mod.
 
 ![Ponder & Mod Compatibility](https://raw.githubusercontent.com/evanbones/Manual-Labour/refs/heads/1.21.1/images/ponder.png)
 

@@ -4,10 +4,9 @@ import com.evandev.manual_labour.content.block.entity.MortarBlockEntity;
 import com.evandev.manual_labour.content.block.entity.MortarFluidTransfer;
 import com.evandev.manual_labour.registry.ModBlockEntities;
 import com.evandev.manual_labour.registry.ModTags;
+import com.evandev.manual_labour.compat.create.CreateCompat;
+import com.evandev.manual_labour.foundation.item.ItemHelper;
 import com.mojang.serialization.MapCodec;
-import com.simibubi.create.content.fluids.transfer.GenericItemEmptying;
-import com.simibubi.create.content.fluids.transfer.GenericItemFilling;
-import com.simibubi.create.foundation.item.ItemHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
@@ -109,7 +108,7 @@ public class MortarBlock extends BaseEntityBlock implements SimpleWaterloggedBlo
                 return ItemInteractionResult.sidedSuccess(level.isClientSide);
             }
 
-            if (GenericItemEmptying.canItemBeEmptied(level, stack) || GenericItemFilling.canItemBeFilled(level, stack)) {
+            if (CreateCompat.get().isFluidContainer(level, stack)) {
                 return ItemInteractionResult.SUCCESS;
             }
 

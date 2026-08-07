@@ -1,8 +1,8 @@
 package com.evandev.manual_labour.compat.jei;
 
+import com.evandev.manual_labour.foundation.gui.CustomLightingSettings;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
-import com.simibubi.create.foundation.gui.CustomLightingSettings;
 import net.createmod.catnip.gui.ILightingSettings;
 import net.createmod.catnip.gui.element.GuiGameElement;
 import net.minecraft.client.gui.GuiGraphics;

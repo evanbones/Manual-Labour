@@ -1,8 +1,9 @@
 package com.evandev.manual_labour.datagen.providers;
 
 import com.evandev.manual_labour.Constants;
-import com.evandev.manual_labour.content.block.MillstoneStructuralBlock;
-import com.evandev.manual_labour.content.block.MillstoneStructure;
+import com.evandev.manual_labour.compat.create.impl.millstone.CreateContent;
+import com.evandev.manual_labour.compat.create.impl.millstone.MillstoneStructuralBlock;
+import com.evandev.manual_labour.compat.create.impl.millstone.MillstoneStructure;
 import com.evandev.manual_labour.registry.ModBlocks;
 import com.google.common.hash.Hashing;
 import com.google.common.hash.HashingOutputStream;
@@ -56,9 +57,9 @@ public class PonderSchematicProvider implements DataProvider {
 
     private static Map<BlockPos, BlockState> millstoneScene() {
         Map<BlockPos, BlockState> blocks = baseFloor();
-        blocks.put(CENTER, ModBlocks.MILLSTONE.get().defaultBlockState());
+        blocks.put(CENTER, CreateContent.MILLSTONE.get().defaultBlockState());
         for (BlockPos offset : MillstoneStructure.ALL_OFFSETS) {
-            BlockState structural = ModBlocks.MILLSTONE_STRUCTURAL.get().defaultBlockState()
+            BlockState structural = CreateContent.MILLSTONE_STRUCTURAL.get().defaultBlockState()
                     .setValue(DirectionalBlock.FACING, MillstoneStructure.baseFacing(offset))
                     .setValue(MillstoneStructuralBlock.CORNER, MillstoneStructure.isCorner(offset));
             blocks.put(CENTER.offset(offset), structural);
@@ -132,7 +133,7 @@ public class PonderSchematicProvider implements DataProvider {
                 Path path = pathProvider.file(ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, name), "nbt");
                 output.writeIfNeeded(path, bytes.toByteArray(), hashing.hash());
             } catch (IOException e) {
-                Constants.LOG.error("Failed to write ponder schematic " + name, e);
+                Constants.LOG.error("Failed to write ponder schematic {}", name, e);
             }
         });
     }

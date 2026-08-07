@@ -1,15 +1,21 @@
 # Custom Recipes
 
-Manual Labour adds a few new ways to craft items. These are all plain datapack JSON, meaning they work from any datapack or mod. The best part is you do not even need to have the Create mod installed for them to work.
+Manual Labour adds a few new ways to craft items. These are all plain datapack JSON, meaning they work from any datapack or mod. Create is entirely optional: every recipe type below loads and runs whether or not you have it installed.
 
-If you are using Create, each of our recipe types has an equivalent Create recipe it can fall back to. If there is ever a conflict, the Manual Labour recipes are always prioritized.
+If you are using Create, each of our recipe types has an equivalent Create recipe it can fall back to. If there is ever a conflict, the Manual Labour recipes are always prioritized. Each fallback has its own config toggle under **Create Compatibility**.
+
+## Built-in recipes and Create
+
+The Mortar has a set of default grinding and mixing recipes so that it is useful on its own. With Create installed, the Mortar uses Create's own Milling and Mixing recipes instead.
 
 ## Workstone
 **Type:** `manual_labour:workstone`
 
 This takes two ingredients (the item to process, then the tool that must hit it) and an array of chance-weighted results. 
 
-For Create users, this falls back to Deployer steps in Sequenced Assembly, or the Mechanical Press. You can toggle this behavior with `use_create_deploying_recipes` and `use_create_pressing_recipes`.
+For Create users, this falls back to Deployer steps in Sequenced Assembly, or the Mechanical Press. You can toggle this behavior with `use_create_deploying_recipes` and `use_create_pressing_recipes`. A Workstone recipe can also be a step in a Sequenced Assembly itself.
+
+The file format is Create's processing recipe shape and does not change based on whether Create is installed.
 
 ```json
 {

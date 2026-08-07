@@ -3,8 +3,8 @@ package com.evandev.manual_labour.client;
 import com.evandev.manual_labour.Constants;
 import com.evandev.manual_labour.client.renderer.ToolAnimations;
 import com.evandev.manual_labour.compat.create.BasinStirClientState;
+import com.evandev.manual_labour.compat.create.CreateCompat;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.simibubi.create.content.processing.basin.BasinBlockEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LevelRenderer;
@@ -40,7 +40,7 @@ public final class BasinStirRenderer {
 
         for (Map.Entry<BlockPos, BasinStirClientState.StirState> entry : BasinStirClientState.stirStates().entrySet()) {
             BlockPos pos = entry.getKey();
-            if (!(level.getBlockEntity(pos) instanceof BasinBlockEntity)) continue;
+            if (!CreateCompat.get().isBasin(level, pos)) continue;
 
             BasinStirClientState.StirState state = entry.getValue();
             if (state.tool.isEmpty()) continue;

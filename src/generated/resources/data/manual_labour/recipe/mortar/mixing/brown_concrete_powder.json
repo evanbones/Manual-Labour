@@ -1,0 +1,49 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:not",
+      "value": {
+        "type": "neoforge:mod_loaded",
+        "modid": "create"
+      }
+    }
+  ],
+  "type": "manual_labour:mortar_mixing",
+  "ingredients": [
+    {
+      "item": "minecraft:sand"
+    },
+    {
+      "item": "minecraft:sand"
+    },
+    {
+      "item": "minecraft:sand"
+    },
+    {
+      "item": "minecraft:sand"
+    },
+    {
+      "item": "minecraft:gravel"
+    },
+    {
+      "item": "minecraft:gravel"
+    },
+    {
+      "item": "minecraft:gravel"
+    },
+    {
+      "item": "minecraft:gravel"
+    },
+    {
+      "item": "minecraft:brown_dye"
+    }
+  ],
+  "results": [
+    {
+      "result": {
+        "count": 8,
+        "id": "minecraft:brown_concrete_powder"
+      }
+    }
+  ]
+}

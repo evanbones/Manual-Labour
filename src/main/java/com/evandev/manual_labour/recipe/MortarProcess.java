@@ -1,6 +1,6 @@
 package com.evandev.manual_labour.recipe;
 
-import com.simibubi.create.content.processing.recipe.ProcessingRecipe;
+import com.evandev.manual_labour.foundation.recipe.ProcessingOutput;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -11,6 +11,10 @@ import java.util.List;
 import java.util.Optional;
 
 public interface MortarProcess {
+    private static List<ProcessingOutput> toOutputs(List<ChanceResult> results) {
+        return results.stream().map(r -> new ProcessingOutput(r.stack(), r.chance())).toList();
+    }
+
     List<Ingredient> ingredients();
 
     List<SizedFluidIngredient> fluidIngredients();
@@ -20,6 +24,8 @@ public interface MortarProcess {
     List<ItemStack> rollResults(RandomSource random);
 
     List<FluidStack> fluidResults();
+
+    List<ProcessingOutput> displayOutputs();
 
     record OwnGrindingProcess(MortarGrindingRecipe recipe) implements MortarProcess {
         @Override
@@ -48,6 +54,11 @@ public interface MortarProcess {
         @Override
         public List<FluidStack> fluidResults() {
             return List.of();
+        }
+
+        @Override
+        public List<ProcessingOutput> displayOutputs() {
+            return toOutputs(recipe.getResults());
         }
     }
 
@@ -80,33 +91,10 @@ public interface MortarProcess {
         public List<FluidStack> fluidResults() {
             return List.of();
         }
-    }
-
-    record CreateProcess(ProcessingRecipe<?, ?> recipe) implements MortarProcess {
-        @Override
-        public List<Ingredient> ingredients() {
-            return recipe.getIngredients();
-        }
 
         @Override
-        public List<SizedFluidIngredient> fluidIngredients() {
-            return recipe.getFluidIngredients();
-        }
-
-        @Override
-        public int processingTime() {
-            int duration = recipe.getProcessingDuration();
-            return duration > 0 ? duration : MortarMixingRecipe.DEFAULT_PROCESSING_TIME;
-        }
-
-        @Override
-        public List<ItemStack> rollResults(RandomSource random) {
-            return recipe.rollResults(random);
-        }
-
-        @Override
-        public List<FluidStack> fluidResults() {
-            return recipe.getFluidResults();
+        public List<ProcessingOutput> displayOutputs() {
+            return toOutputs(recipe.getResults());
         }
     }
 }

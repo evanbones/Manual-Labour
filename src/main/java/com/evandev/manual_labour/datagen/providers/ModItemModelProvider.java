@@ -25,7 +25,29 @@ public class ModItemModelProvider extends ItemModelProvider {
         handheldItem(ModItems.DIAMOND_HAMMER.get());
         handheldItem(ModItems.NETHERITE_HAMMER.get());
 
-        handheldItem(ModItems.PESTLE.get());
+        handheldItem(ModItems.PESTLE.get())
+                .transforms()
+                .transform(ItemDisplayContext.THIRD_PERSON_RIGHT_HAND)
+                    .rotation(0, -90, -125)
+                    .translation(0, 4.0f, 0.5f)
+                    .scale(0.85f)
+                    .end()
+                .transform(ItemDisplayContext.THIRD_PERSON_LEFT_HAND)
+                    .rotation(0, 90, 125)
+                    .translation(0, 4.0f, 0.5f)
+                    .scale(0.85f)
+                    .end()
+                .transform(ItemDisplayContext.FIRST_PERSON_RIGHT_HAND)
+                    .rotation(0, -90, -155)
+                    .translation(1.13f, 3.2f, 1.13f)
+                    .scale(0.68f)
+                    .end()
+                .transform(ItemDisplayContext.FIRST_PERSON_LEFT_HAND)
+                    .rotation(0, 90, 155)
+                    .translation(1.13f, 3.2f, 1.13f)
+                    .scale(0.68f)
+                    .end()
+                .end();
 
         handheldItem(ModItems.LADLE.get())
                 .transforms()

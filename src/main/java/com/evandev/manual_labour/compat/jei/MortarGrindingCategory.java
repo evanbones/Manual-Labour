@@ -1,11 +1,10 @@
 package com.evandev.manual_labour.compat.jei;
 
+import com.evandev.manual_labour.compat.create.CreateCompat;
+import com.evandev.manual_labour.foundation.recipe.ProcessingOutput;
 import com.evandev.manual_labour.recipe.MortarGrindingRecipe;
+import com.evandev.manual_labour.recipe.MortarProcess;
 import com.evandev.manual_labour.registry.ModBlocks;
-import com.simibubi.create.compat.jei.category.CreateRecipeCategory;
-import com.simibubi.create.content.kinetics.crusher.AbstractCrushingRecipe;
-import com.simibubi.create.content.processing.recipe.ProcessingOutput;
-import com.simibubi.create.foundation.gui.AllGuiTextures;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.recipe.IFocusGroup;
@@ -19,7 +18,7 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.List;
 
 @ParametersAreNonnullByDefault
-public class MortarGrindingCategory extends CreateRecipeCategory<Recipe<?>> {
+public class MortarGrindingCategory extends ManualRecipeCategory<Recipe<?>> {
 
     public MortarGrindingCategory(Info<Recipe<?>> info) {
         super(info);
@@ -27,26 +26,23 @@ public class MortarGrindingCategory extends CreateRecipeCategory<Recipe<?>> {
 
     @Override
     public void setRecipe(IRecipeLayoutBuilder builder, Recipe<?> recipe, IFocusGroup focuses) {
-        Ingredient input;
-        List<ProcessingOutput> outputs;
-
+        MortarProcess process;
         if (recipe instanceof MortarGrindingRecipe mortarRecipe) {
-            input = mortarRecipe.getIngredients().getFirst();
-            outputs = mortarRecipe.getResults().stream()
-                    .map(cr -> new ProcessingOutput(cr.stack(), cr.chance()))
-                    .toList();
-        } else if (recipe instanceof AbstractCrushingRecipe crushingRecipe) {
-            input = crushingRecipe.getIngredients().getFirst();
-            outputs = crushingRecipe.getRollableResults();
+            process = new MortarProcess.OwnGrindingProcess(mortarRecipe);
         } else {
-            return;
+            process = CreateCompat.get().describeMortarRecipe(recipe).orElse(null);
+            if (process == null) return;
         }
+
+        List<Ingredient> inputs = process.ingredients();
+        if (inputs.isEmpty()) return;
 
         builder
                 .addSlot(RecipeIngredientRole.INPUT, 51, 3)
                 .setBackground(getRenderedSlot(), -1, -1)
-                .addIngredients(input);
+                .addIngredients(inputs.getFirst());
 
+        List<ProcessingOutput> outputs = process.displayOutputs();
         int xOffset = getBackground().getWidth() / 2;
         int yOffset = 86;
         LayoutHelper layout = LayoutHelper.centeredHorizontal(outputs.size(), 1, 18, 18, 1);
@@ -61,7 +57,7 @@ public class MortarGrindingCategory extends CreateRecipeCategory<Recipe<?>> {
 
     @Override
     public void draw(Recipe<?> recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics graphics, double mouseX, double mouseY) {
-        AllGuiTextures.JEI_DOWN_ARROW.render(graphics, 72, 7);
+        CategorySkin.get().drawDownArrow(graphics, 72, 7);
         JeiBlockIcon.draw(graphics, ModBlocks.MORTAR.get().defaultBlockState(), getBackground().getWidth() / 2 - 13, 55, 20);
     }
 }

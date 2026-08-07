@@ -1,7 +1,7 @@
 package com.evandev.manual_labour.content.item;
 
-import com.evandev.manual_labour.compat.create.LadleBasinInteraction;
-import com.simibubi.create.content.processing.basin.BasinBlockEntity;
+import com.evandev.manual_labour.compat.create.CreateCompat;
+import com.evandev.manual_labour.compat.create.CreateIntegration.LadleResult;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -25,16 +25,14 @@ public class LadleItem extends Item {
     @Override
     public @NotNull InteractionResult useOn(UseOnContext context) {
         Level level = context.getLevel();
-        if (!(level.getBlockEntity(context.getClickedPos()) instanceof BasinBlockEntity basin)) {
-            return InteractionResult.PASS;
-        }
-
         Player player = context.getPlayer();
         if (player == null) return InteractionResult.PASS;
-        if (level.isClientSide) return InteractionResult.CONSUME;
 
-        return LadleBasinInteraction.tryMix(basin, player, context.getItemInHand())
-                ? InteractionResult.SUCCESS
-                : InteractionResult.CONSUME;
+        LadleResult result = CreateCompat.get().tryStirBasin(level, context.getClickedPos(), player, context.getItemInHand());
+        return switch (result) {
+            case NOT_A_BASIN -> InteractionResult.PASS;
+            case NOTHING_TO_MIX -> InteractionResult.CONSUME;
+            case STIRRING -> InteractionResult.SUCCESS;
+        };
     }
 }

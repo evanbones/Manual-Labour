@@ -1,6 +1,6 @@
 package com.evandev.manual_labour.content.block.entity;
 
-import com.simibubi.create.foundation.item.SmartInventory;
+import com.evandev.manual_labour.foundation.item.SmartInventory;
 import net.minecraft.world.item.ItemStack;
 
 public class MortarInventory extends SmartInventory {

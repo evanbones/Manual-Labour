@@ -1,5 +1,6 @@
 package com.evandev.manual_labour.datagen.providers;
 
+import com.evandev.manual_labour.compat.create.impl.millstone.CreateContent;
 import com.evandev.manual_labour.Constants;
 import com.evandev.manual_labour.registry.ModBlocks;
 import net.minecraft.core.Direction;
@@ -43,7 +44,7 @@ public class ModBlockStateProvider extends BlockStateProvider {
     }
 
     private void registerMillstone() {
-        simpleBlock(ModBlocks.MILLSTONE.get(), models().getExistingFile(modLoc("block/millstone/base")));
-        simpleBlock(ModBlocks.MILLSTONE_STRUCTURAL.get(), models().getExistingFile(modLoc("block/millstone/invisible")));
+        simpleBlock(CreateContent.MILLSTONE.get(), models().getExistingFile(modLoc("block/millstone/base")));
+        simpleBlock(CreateContent.MILLSTONE_STRUCTURAL.get(), models().getExistingFile(modLoc("block/millstone/invisible")));
     }
 }

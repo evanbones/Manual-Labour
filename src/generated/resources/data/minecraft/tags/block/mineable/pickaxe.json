@@ -2,7 +2,13 @@
   "values": [
     "manual_labour:workstone",
     "manual_labour:mortar",
-    "manual_labour:millstone",
-    "manual_labour:millstone_structural"
+    {
+      "id": "manual_labour:millstone",
+      "required": false
+    },
+    {
+      "id": "manual_labour:millstone_structural",
+      "required": false
+    }
   ]
 }

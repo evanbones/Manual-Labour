@@ -1,5 +1,6 @@
 package com.evandev.manual_labour.datagen.providers;
 
+import com.evandev.manual_labour.compat.create.impl.millstone.CreateContent;
 import com.evandev.manual_labour.Constants;
 import com.evandev.manual_labour.registry.ModBlocks;
 import net.minecraft.core.HolderLookup;
@@ -23,13 +24,13 @@ public class ModBlockTagsProvider extends BlockTagsProvider {
         this.tag(BlockTags.MINEABLE_WITH_PICKAXE)
                 .add(ModBlocks.WORKSTONE.get())
                 .add(ModBlocks.MORTAR.get())
-                .add(ModBlocks.MILLSTONE.get())
-                .add(ModBlocks.MILLSTONE_STRUCTURAL.get());
+                .addOptional(CreateContent.MILLSTONE.getId())
+                .addOptional(CreateContent.MILLSTONE_STRUCTURAL.getId());
 
         this.tag(BlockTags.NEEDS_STONE_TOOL)
                 .add(ModBlocks.WORKSTONE.get())
                 .add(ModBlocks.MORTAR.get())
-                .add(ModBlocks.MILLSTONE.get())
-                .add(ModBlocks.MILLSTONE_STRUCTURAL.get());
+                .addOptional(CreateContent.MILLSTONE.getId())
+                .addOptional(CreateContent.MILLSTONE_STRUCTURAL.getId());
     }
 }

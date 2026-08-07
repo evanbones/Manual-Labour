@@ -1,7 +1,7 @@
 package com.evandev.manual_labour.datagen.providers;
 
 import com.evandev.manual_labour.Constants;
-import com.evandev.manual_labour.recipe.WorkstoneRecipe;
+import com.evandev.manual_labour.compat.create.impl.CreateWorkstoneRecipe;
 import com.evandev.manual_labour.registry.ModTags;
 import com.simibubi.create.content.processing.recipe.ProcessingOutput;
 import com.simibubi.create.content.processing.recipe.StandardProcessingRecipe;
@@ -160,8 +160,8 @@ public class WorkstoneRecipeProvider {
     private static void createHammerRecipe(RecipeOutput output, String recipeName, Ingredient input, List<ProcessingOutput> resultsList) {
         Ingredient tool = Ingredient.of(ModTags.Items.HAMMERS);
 
-        StandardProcessingRecipe.Builder<WorkstoneRecipe> builder = new StandardProcessingRecipe.Builder<>(
-                WorkstoneRecipe::new, ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, recipeName))
+        StandardProcessingRecipe.Builder<CreateWorkstoneRecipe> builder = new StandardProcessingRecipe.Builder<>(
+                CreateWorkstoneRecipe::new, ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, recipeName))
                 .require(input)
                 .require(tool);
 

@@ -149,8 +149,25 @@ dependencies {
     compileOnly "mezz.jei:jei-${minecraft_version}-neoforge-api:${jei_version}"
     runtimeOnly "mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}"
 
-    // Create
-    implementation "com.simibubi.create:create-${minecraft_version}:${create_version}"
+    compileOnly "com.simibubi.create:create-${minecraft_version}:${create_version}"
+    if (create_in_dev_runtime.toBoolean()) {
+        runtimeOnly "com.simibubi.create:create-${minecraft_version}:${create_version}"
+    }
+
+    jarJar(implementation("net.createmod.ponder:ponder-neoforge:${ponder_version}+mc${minecraft_version}") {
+        version {
+            strictly "[${ponder_version}+mc${minecraft_version},)"
+            prefer "${ponder_version}+mc${minecraft_version}"
+        }
+    })
+
+    compileOnly "dev.engine-room.flywheel:flywheel-neoforge-api-${minecraft_version}:${flywheel_version}"
+    jarJar(runtimeOnly("dev.engine-room.flywheel:flywheel-neoforge-${minecraft_version}:${flywheel_version}") {
+        version {
+            strictly "[${flywheel_version},2.0)"
+            prefer flywheel_version
+        }
+    })
 
     compileOnly group: 'org.spongepowered', name: 'mixin', version: '0.8.5'
     compileOnly group: 'org.ow2.asm', name: 'asm-tree', version: '9.6'
@@ -191,7 +208,9 @@ processResources {
             'neoforge_loader_version_range': neoforge_loader_version_range,
             'credits'                      : credits,
             'java_version'                 : java_version,
-            'yacl_version'                 : yacl_version
+            'yacl_version'                 : yacl_version,
+            'ponder_version'               : ponder_version,
+            'flywheel_version_range'       : flywheel_version_range
     ]
 
     filesMatching(['pack.mcmeta', 'META-INF/neoforge.mods.toml', '*.mixins.json']) {
@@ -215,9 +234,11 @@ publishMods {
         client = true
         server = true
 
-        requires("create")
         requires("yacl")
+        optional("create")
         optional("jei")
+        embeds("ponder")
+        embeds("flywheel")
     }
 
     modrinth {
@@ -225,8 +246,10 @@ publishMods {
         projectId = "kCbtgaek"
         minecraftVersions.add("${minecraft_version}")
 
-        requires("create")
         requires("yacl")
+        optional("create")
         optional("jei")
+        embeds("ponder")
+        embeds("flywheel")
     }
 }
