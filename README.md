@@ -2,12 +2,6 @@
 
 <a href="https://neoforged.net/"><img alt="NeoForge Supported" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/supported/neoforge_vector.svg"></a>
 
----
-
-## Overview
-
-Welcome to **Manual Labour**! 
-
 This mod is all about bringing hands-on work back to your Minecraft experience. Instead of simply clicking a recipe button in a crafting table, Manual Labour lets you grind, hammer, crush, and mix your materials by hand.
 
 Perfect for an early-game progression step before building more complex setups, or as a natural manual companion to [Create](https://modrinth.com/mod/create) machines.
