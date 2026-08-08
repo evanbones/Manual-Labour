@@ -1,11 +1,11 @@
 # Manual Assembly
 **Type:** `manual_labour:manual_assembly`
 
-Use this when one hit isn't enough. The item is hit once per step, carrying a `transitional_item` between hits, and only turns into a result once the whole `sequence` has run `loops` times. So a single-step sequence with `"loops": 5` is simply "hit this five times".
+A recipe type for when one hit on the workstone isn't enough. The item is hit once per step, carrying a `transitional_item` between hits, and only turns into a result once the whole `sequence` has run `loops` times. So a single-step sequence with `"loops": 5` simply means "hit this five times".
 
-Each entry in `sequence` is an inline `manual_labour:workstone` recipe. Only its tool ingredient matters: which item the step applies to is decided by the assembly's own `ingredient` and `transitional_item`, so the step's first ingredient is ignored. Its `results` are ignored too, because the assembly decides what the item becomes.
+Each entry in `sequence` is a `manual_labour:workstone` recipe.
 
-`results` is a weighted pool. The first entry is the real output and any others are salvage rolled instead of it. `loops` defaults to `1`.
+`results` is a weighted pool. The first entry is the actual output and any others are salvage rolled instead of it. `loops` defaults to `1`.
 
 The transitional item sits on the Workstone between hits and shows its progress and next step on its tooltip.
 
