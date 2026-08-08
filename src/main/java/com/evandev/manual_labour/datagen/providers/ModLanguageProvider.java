@@ -54,8 +54,6 @@ public class ModLanguageProvider extends LanguageProvider {
         add("config.manual_labour.option.use_create_deploying_recipes.tooltip", "Let the Workstone complete Create's Deployer steps within Sequenced Assembly recipes as a fallback when no Manual Labour workstone recipe matches.");
         add("config.manual_labour.option.use_create_pressing_recipes", "Use Create Pressing Recipes");
         add("config.manual_labour.option.use_create_pressing_recipes.tooltip", "Let the Workstone press items with a Hammer using Create's Mechanical Press recipes, including steps in Sequenced Assembly recipes.");
-        add("config.manual_labour.option.workstone_pressing_yield", "Workstone Pressing Yield");
-        add("config.manual_labour.option.workstone_pressing_yield.tooltip", "Output chance (0.0 to 1.0) when pressing items/plates on the Workstone using Create's Pressing recipes.");
 
         add("block.manual_labour.workstone.invalid_item", "This doesn't seem hammerable...");
         add("block.manual_labour.workstone.invalid_tool", "Maybe with a different tool...");
@@ -92,6 +90,18 @@ public class ModLanguageProvider extends LanguageProvider {
 
         add("subtitles.manual_labour.block.workstone.hammer", "Workstone hammered");
         add("recipe.assembly.manual_labour.workstone", "Hit with %s");
+        add("recipe.assembly.manual_labour.workstone.invalid", "Invalid Step");
+
+        add("manual_labour.recipe.assembly", "Recipe Sequence");
+        add("manual_labour.recipe.assembly.progress", "Progress: %1$s/%2$s");
+        add("manual_labour.recipe.assembly.next", "Next: %1$s");
+        add("manual_labour.recipe.assembly.step", "Step %1$s:");
+        add("manual_labour.recipe.assembly.junk", "Random salvage");
+        add("manual_labour.recipe.assembly.repeat", "Repeat Sequence %1$s Times");
+
+        add("manual_labour.recipe.heat_requirement.none", "No Heating Required");
+        add("manual_labour.recipe.heat_requirement.heated", "Heated");
+        add("manual_labour.recipe.heat_requirement.superheated", "Super-Heated");
 
         add("manual_labour.recipe.workstone", "Workstone");
         add("manual_labour.recipe.mortar_grinding", "Mortar Grinding");

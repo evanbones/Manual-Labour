@@ -8,21 +8,20 @@ import com.evandev.manual_labour.compat.jei.ManualRecipeCategory;
 import com.evandev.manual_labour.config.ModConfig;
 import com.evandev.manual_labour.recipe.WorkstoneRecipeLike;
 import com.evandev.manual_labour.registry.ModBlocks;
+import com.evandev.manual_labour.registry.ModRecipeTypes;
 import com.simibubi.create.AllRecipeTypes;
 import com.simibubi.create.content.kinetics.crusher.AbstractCrushingRecipe;
-import com.simibubi.create.content.kinetics.deployer.DeployerApplicationRecipe;
 import com.simibubi.create.content.kinetics.press.PressingRecipe;
 import com.simibubi.create.content.processing.sequenced.SequencedAssemblyRecipe;
-import com.simibubi.create.content.processing.sequenced.SequencedRecipe;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.RecipeHolder;
-import net.minecraft.world.item.crafting.RecipeInput;
-import net.minecraft.world.item.crafting.RecipeManager;
-import net.minecraft.world.item.crafting.SingleRecipeInput;
+import net.minecraft.world.item.crafting.*;
 import net.neoforged.neoforge.items.wrapper.RecipeWrapper;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 
 public final class CreateJeiCategories {
@@ -31,16 +30,6 @@ public final class CreateJeiCategories {
     }
 
     public static void addCategories(Consumer<ManualRecipeCategory<?>> sink) {
-        if (ModConfig.get().enableManualAssemblyJei) {
-            sink.accept(new ManualAssemblyCategory(ManualLabourJeiPlugin.info(
-                    ManualLabourJeiPlugin.id("manual_assembly"),
-                    new EmptyBackground(180, 115),
-                    new ItemIcon(() -> new ItemStack(ModBlocks.WORKSTONE.get())),
-                    CreateJeiCategories::gatherWorkstoneAssemblies,
-                    List.of(() -> new ItemStack(ModBlocks.WORKSTONE.get()))
-            )));
-        }
-
         if (ModConfig.get().enableMillstoneJei) {
             sink.accept(new MillstoneCategory(ManualLabourJeiPlugin.info(
                     ManualLabourJeiPlugin.id("millstone"),
@@ -62,28 +51,13 @@ public final class CreateJeiCategories {
         }
     }
 
-    private static List<RecipeHolder<SequencedAssemblyRecipe>> gatherWorkstoneAssemblies() {
-        RecipeManager manager = ManualLabourJeiPlugin.recipeManager();
-        if (manager == null) return List.of();
-
-        List<RecipeHolder<SequencedAssemblyRecipe>> recipes = new ArrayList<>();
+    public static void addSequencedAssemblies(RecipeManager manager, List<RecipeHolder<Recipe<?>>> out) {
         for (RecipeHolder<SequencedAssemblyRecipe> holder :
                 manager.getAllRecipesFor(AllRecipeTypes.SEQUENCED_ASSEMBLY.<RecipeWrapper, SequencedAssemblyRecipe>getType())) {
-            if (usesWorkstone(holder.value())) recipes.add(holder);
+            if (CreateAssemblyView.isManual(holder.value())) {
+                out.add(new RecipeHolder<>(holder.id(), holder.value()));
+            }
         }
-        return recipes;
-    }
-
-    private static boolean usesWorkstone(SequencedAssemblyRecipe recipe) {
-        boolean allowDeploying = ModConfig.get().useCreateDeployingRecipes;
-        boolean allowPressing = ModConfig.get().useCreatePressingRecipes;
-        for (SequencedRecipe<?> step : recipe.getSequence()) {
-            Object stepRecipe = step.getRecipe();
-            if (stepRecipe instanceof WorkstoneRecipeLike) return true;
-            if (allowDeploying && stepRecipe instanceof DeployerApplicationRecipe) return true;
-            if (allowPressing && stepRecipe instanceof PressingRecipe) return true;
-        }
-        return false;
     }
 
     private static List<RecipeHolder<AbstractCrushingRecipe>> gatherMillingRecipes() {
@@ -96,7 +70,28 @@ public final class CreateJeiCategories {
     private static List<RecipeHolder<PressingRecipe>> gatherPressingRecipes() {
         RecipeManager manager = ManualLabourJeiPlugin.recipeManager();
         if (manager == null) return List.of();
-        return new ArrayList<>(manager.getAllRecipesFor(
-                AllRecipeTypes.PRESSING.<SingleRecipeInput, PressingRecipe>getType()));
+
+        Set<Item> overridden = new HashSet<>();
+        for (RecipeHolder<WorkstoneRecipeLike> workstoneRecipe : manager.getAllRecipesFor(ModRecipeTypes.WORKSTONE.get())) {
+            for (ItemStack stack : workstoneRecipe.value().getInputIngredient().getItems()) {
+                overridden.add(stack.getItem());
+            }
+        }
+
+        List<RecipeHolder<PressingRecipe>> recipes = new ArrayList<>();
+        for (RecipeHolder<PressingRecipe> holder : manager.getAllRecipesFor(
+                AllRecipeTypes.PRESSING.<SingleRecipeInput, PressingRecipe>getType())) {
+            boolean covered = false;
+            for (ItemStack stack : holder.value().getIngredients().getFirst().getItems()) {
+                if (overridden.contains(stack.getItem())) {
+                    covered = true;
+                    break;
+                }
+            }
+            if (!covered) {
+                recipes.add(holder);
+            }
+        }
+        return recipes;
     }
 }

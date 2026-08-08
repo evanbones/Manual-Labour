@@ -1,0 +1,9 @@
+{
+  "values": [
+    "manual_labour:flint_hammer",
+    "manual_labour:iron_hammer",
+    "manual_labour:golden_hammer",
+    "manual_labour:diamond_hammer",
+    "manual_labour:netherite_hammer"
+  ]
+}

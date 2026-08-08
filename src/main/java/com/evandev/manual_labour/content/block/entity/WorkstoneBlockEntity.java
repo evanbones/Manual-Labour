@@ -3,6 +3,7 @@ package com.evandev.manual_labour.content.block.entity;
 import com.evandev.manual_labour.compat.create.CreateCompat;
 import com.evandev.manual_labour.config.ModConfig;
 import com.evandev.manual_labour.content.block.WorkstoneBlock;
+import com.evandev.manual_labour.recipe.ManualAssembly;
 import com.evandev.manual_labour.recipe.WorkstoneProcess;
 import com.evandev.manual_labour.recipe.WorkstoneRecipeLike;
 import com.evandev.manual_labour.registry.ModBlockEntities;
@@ -71,14 +72,10 @@ public class WorkstoneBlockEntity extends BlockEntity {
             Direction direction = getBlockState().getValue(WorkstoneBlock.FACING).getCounterClockWise();
             ItemStack hitItem = getStoredItem();
 
-            boolean applyPressingYield = process.usesPressingYield()
-                    && !CreateCompat.get().isSequencedAssemblyInProgress(hitItem);
-            float yieldMultiplier = applyPressingYield ? ModConfig.get().workstonePressingYield : 1.0F;
-
-            List<ItemStack> rolledResults = process.rollResults(level.random, yieldMultiplier);
+            List<ItemStack> rolledResults = process.rollResults(level.random);
 
             boolean stillInProgress = !rolledResults.isEmpty()
-                    && CreateCompat.get().isSequencedAssemblyInProgress(rolledResults.getFirst());
+                    && ManualAssembly.isInProgress(rolledResults.getFirst());
 
             int ejectFrom = stillInProgress ? 1 : 0;
             for (int i = ejectFrom; i < rolledResults.size(); i++) {
@@ -167,6 +164,8 @@ public class WorkstoneBlockEntity extends BlockEntity {
     public boolean hasAnyRecipeFor(ItemStack storedItem) {
         if (level == null || storedItem.isEmpty()) return false;
 
+        if (ManualAssembly.hasAnyFor(level, storedItem)) return true;
+
         RecipeManager manager = level.getRecipeManager();
 
         for (RecipeHolder<WorkstoneRecipeLike> recipe : manager.getAllRecipesFor(ModRecipeTypes.WORKSTONE.get())) {
@@ -180,6 +179,11 @@ public class WorkstoneBlockEntity extends BlockEntity {
 
     private Optional<WorkstoneProcess> getMatchingProcess(ItemStack toolStack) {
         if (level == null) return Optional.empty();
+
+        Optional<WorkstoneProcess> assemblyStep = ManualAssembly.findStep(level, getStoredItem(), toolStack);
+        if (assemblyStep.isPresent()) {
+            return assemblyStep;
+        }
 
         Optional<WorkstoneProcess> sequencedStep = CreateCompat.get().findSequencedStep(level, getStoredItem(), toolStack);
         if (sequencedStep.isPresent()) {

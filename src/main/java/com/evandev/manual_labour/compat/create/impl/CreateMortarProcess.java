@@ -1,5 +1,6 @@
 package com.evandev.manual_labour.compat.create.impl;
 
+import com.evandev.manual_labour.foundation.recipe.HeatCondition;
 import com.evandev.manual_labour.foundation.recipe.ProcessingOutput;
 import com.evandev.manual_labour.recipe.MortarMixingRecipe;
 import com.evandev.manual_labour.recipe.MortarProcess;
@@ -45,5 +46,14 @@ public record CreateMortarProcess(ProcessingRecipe<?, ?> recipe) implements Mort
         return recipe.getRollableResults().stream()
                 .map(result -> new ProcessingOutput(result.getStack(), result.getChance()))
                 .toList();
+    }
+
+    @Override
+    public HeatCondition heatRequirement() {
+        return switch (recipe.getRequiredHeat()) {
+            case NONE -> HeatCondition.NONE;
+            case HEATED -> HeatCondition.HEATED;
+            case SUPERHEATED -> HeatCondition.SUPERHEATED;
+        };
     }
 }

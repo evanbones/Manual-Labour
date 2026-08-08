@@ -26,6 +26,12 @@ public interface CategorySkin {
 
     void drawShadow(GuiGraphics graphics, int x, int y);
 
+    void drawLongArrow(GuiGraphics graphics, int x, int y);
+
+    void drawRepeatIcon(GuiGraphics graphics, int x, int y);
+
+    void drawHeatBar(GuiGraphics graphics, int x, int y, boolean heated);
+
     final class Holder {
         private static CategorySkin current;
 

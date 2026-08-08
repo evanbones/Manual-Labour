@@ -3,14 +3,13 @@ package com.evandev.manual_labour.compat.create.impl;
 import com.evandev.manual_labour.compat.create.impl.jei.WorkstoneAssemblySubCategory;
 import com.evandev.manual_labour.foundation.recipe.ProcessingOutput;
 import com.evandev.manual_labour.recipe.WorkstoneRecipeLike;
+import com.evandev.manual_labour.recipe.WorkstoneStepDescription;
 import com.evandev.manual_labour.registry.ModBlocks;
 import com.simibubi.create.compat.jei.category.sequencedAssembly.SequencedAssemblySubCategory;
 import com.simibubi.create.content.processing.recipe.ProcessingRecipeParams;
 import com.simibubi.create.content.processing.recipe.StandardProcessingRecipe;
 import com.simibubi.create.content.processing.sequenced.IAssemblyRecipe;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
@@ -67,11 +66,6 @@ public class CreateWorkstoneRecipe extends StandardProcessingRecipe<RecipeWrappe
     }
 
     @Override
-    public List<ItemStack> rollResults(RandomSource random, float yieldMultiplier) {
-        return rollResults(random);
-    }
-
-    @Override
     public void addAssemblyIngredients(List<Ingredient> list) {
         list.add(getToolIngredient());
     }
@@ -79,12 +73,7 @@ public class CreateWorkstoneRecipe extends StandardProcessingRecipe<RecipeWrappe
     @Override
     @OnlyIn(Dist.CLIENT)
     public Component getDescriptionForAssembly() {
-        ItemStack[] matchingStacks = getToolIngredient().getItems();
-        if (matchingStacks.length == 0) {
-            return Component.literal("Invalid");
-        }
-        return Component.translatable("recipe.assembly.manual_labour.workstone",
-                Component.translatable(matchingStacks[0].getDescriptionId()).getString());
+        return WorkstoneStepDescription.of(this);
     }
 
     @Override

@@ -1,0 +1,43 @@
+# Mortar Grinding
+**Type:** `manual_labour:mortar_grinding`
+
+This recipe takes a single ingredient. It does not need a tool slot because any Pestle will work just fine. You can also add an optional `processing_time` in ticks (the default is 100), and an optional `fluid_results` array — see [Mortar Fluids](./recipes-mortar-fluids) for how the tanks work.
+
+For Create users, this falls back to the Millstone or Crushing Wheels (though the crushing wheel fallback is disabled by default, for balance reasons). You can toggle these with `use_create_milling_recipes` and `use_create_crushing_recipes`.
+
+```json
+{
+  "type": "manual_labour:mortar_grinding",
+  "ingredient": {
+    "item": "minecraft:wheat"
+  },
+  "processing_time": 100,
+  "results": [
+    {
+      "result": {
+        "id": "minecraft:wheat_seeds",
+        "count": 2
+      },
+      "chance": 1.0
+    }
+  ]
+}
+```
+
+Grinding something down into a liquid works too. This one produces only fluid, so it leaves `results` out:
+
+```json
+{
+  "type": "manual_labour:mortar_grinding",
+  "ingredient": {
+    "item": "minecraft:sweet_berries"
+  },
+  "processing_time": 60,
+  "fluid_results": [
+    {
+      "id": "minecraft:water",
+      "amount": 100
+    }
+  ]
+}
+```

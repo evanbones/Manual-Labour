@@ -4,8 +4,8 @@ import com.evandev.manual_labour.compat.create.CreateCompat;
 import com.evandev.manual_labour.content.block.MortarBlock;
 import com.evandev.manual_labour.content.block.MortarHeat;
 import com.evandev.manual_labour.foundation.blockentity.SyncedBlockEntity;
-import com.evandev.manual_labour.foundation.recipe.HeatCondition;
 import com.evandev.manual_labour.foundation.item.ItemHelper;
+import com.evandev.manual_labour.foundation.recipe.HeatCondition;
 import com.evandev.manual_labour.recipe.MortarGrindingRecipe;
 import com.evandev.manual_labour.recipe.MortarGrindingRecipeInput;
 import com.evandev.manual_labour.recipe.MortarMixingRecipe;
@@ -211,11 +211,13 @@ public class MortarBlockEntity extends SyncedBlockEntity {
     private Optional<MortarProcess> findMixingProcess() {
         if (level == null) return Optional.empty();
 
-        HeatCondition heat = MortarHeat.below(level, worldPosition);
-        if (heat == HeatCondition.SUPERHEATED) return Optional.empty();
+        HeatCondition heat = MortarHeat.below(level, worldPosition) == HeatCondition.NONE
+                ? HeatCondition.NONE
+                : HeatCondition.HEATED;
 
         for (RecipeHolder<MortarMixingRecipe> holder : level.getRecipeManager().getAllRecipesFor(ModRecipeTypes.MORTAR_MIXING.get())) {
             MortarProcess process = new MortarProcess.OwnMixingProcess(holder.value());
+            if (!process.heatRequirement().test(heat)) continue;
             if (canRun(process)) return Optional.of(process);
         }
 

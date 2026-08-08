@@ -1,0 +1,23 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "create"
+    }
+  ],
+  "type": "manual_labour:workstone",
+  "ingredients": [
+    {
+      "tag": "c:ingots/brass"
+    },
+    {
+      "tag": "manual_labour:hammers"
+    }
+  ],
+  "results": [
+    {
+      "chance": 0.75,
+      "id": "create:brass_sheet"
+    }
+  ]
+}

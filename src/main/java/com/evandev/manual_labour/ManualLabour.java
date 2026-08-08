@@ -5,6 +5,7 @@ import com.evandev.manual_labour.compat.create.BasinStirClientState;
 import com.evandev.manual_labour.compat.create.BasinStirPayload;
 import com.evandev.manual_labour.compat.create.CreateCompat;
 import com.evandev.manual_labour.config.ModConfig;
+import com.evandev.manual_labour.recipe.ManualProcessingExclusions;
 import com.evandev.manual_labour.registry.*;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.neoforged.bus.api.IEventBus;
@@ -16,6 +17,7 @@ import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
@@ -34,6 +36,7 @@ public class ManualLabour {
         ModBlockEntities.BLOCK_ENTITIES.register(modEventBus);
         ModRecipeTypes.RECIPE_TYPES.register(modEventBus);
         ModRecipeSerializers.RECIPE_SERIALIZERS.register(modEventBus);
+        ModDataComponents.DATA_COMPONENTS.register(modEventBus);
         ModSounds.SOUNDS.register(modEventBus);
 
         CreateCompat.get().registerContent();
@@ -62,6 +65,11 @@ public class ManualLabour {
         );
 
         CreateCompat.get().registerCapabilities(event);
+    }
+
+    @SubscribeEvent
+    public static void addReloadListeners(AddReloadListenerEvent event) {
+        event.addListener(new ManualProcessingExclusions());
     }
 
     @SubscribeEvent

@@ -1,5 +1,6 @@
 package com.evandev.manual_labour.recipe;
 
+import com.evandev.manual_labour.foundation.recipe.HeatCondition;
 import com.evandev.manual_labour.registry.ModRecipeSerializers;
 import com.evandev.manual_labour.registry.ModRecipeTypes;
 import com.mojang.serialization.Codec;
@@ -29,17 +30,24 @@ public class MortarMixingRecipe implements Recipe<MortarMixingRecipeInput> {
     private final NonNullList<Ingredient> inputs;
     private final Optional<SizedFluidIngredient> fluidInput;
     private final int processingTime;
+    private final HeatCondition heatRequirement;
     private final NonNullList<ChanceResult> results;
     private final NonNullList<FluidStack> fluidResults;
 
     public MortarMixingRecipe(String group, NonNullList<Ingredient> inputs, Optional<SizedFluidIngredient> fluidInput,
-                              int processingTime, NonNullList<ChanceResult> results, NonNullList<FluidStack> fluidResults) {
+                              int processingTime, HeatCondition heatRequirement, NonNullList<ChanceResult> results,
+                              NonNullList<FluidStack> fluidResults) {
         this.group = group;
         this.inputs = inputs;
         this.fluidInput = fluidInput;
         this.processingTime = processingTime;
+        this.heatRequirement = heatRequirement;
         this.results = results;
         this.fluidResults = fluidResults;
+    }
+
+    public HeatCondition getHeatRequirement() {
+        return heatRequirement;
     }
 
     public NonNullList<ChanceResult> getResults() {
@@ -110,16 +118,17 @@ public class MortarMixingRecipe implements Recipe<MortarMixingRecipeInput> {
                 Ingredient.CODEC_NONEMPTY.listOf().fieldOf("ingredients").forGetter(r -> r.inputs),
                 SizedFluidIngredient.FLAT_CODEC.optionalFieldOf("fluid_ingredient").forGetter(MortarMixingRecipe::getFluidInput),
                 Codec.INT.optionalFieldOf("processing_time", DEFAULT_PROCESSING_TIME).forGetter(MortarMixingRecipe::getProcessingTime),
+                HeatCondition.CODEC.optionalFieldOf("heat_requirement", HeatCondition.NONE).forGetter(MortarMixingRecipe::getHeatRequirement),
                 ChanceResult.CODEC.listOf().optionalFieldOf("results", List.of()).forGetter(r -> r.results),
                 FluidStack.CODEC.listOf().optionalFieldOf("fluid_results", List.of()).forGetter(r -> r.fluidResults)
-        ).apply(inst, (group, inputsList, fluidInput, processingTime, resultsList, fluidResultsList) -> {
+        ).apply(inst, (group, inputsList, fluidInput, processingTime, heatRequirement, resultsList, fluidResultsList) -> {
             NonNullList<Ingredient> inputs = NonNullList.create();
             inputs.addAll(inputsList);
             NonNullList<ChanceResult> results = NonNullList.create();
             results.addAll(resultsList);
             NonNullList<FluidStack> fluidResults = NonNullList.create();
             fluidResults.addAll(fluidResultsList);
-            return new MortarMixingRecipe(group, inputs, fluidInput, processingTime, results, fluidResults);
+            return new MortarMixingRecipe(group, inputs, fluidInput, processingTime, heatRequirement, results, fluidResults);
         }));
 
         public static final StreamCodec<RegistryFriendlyByteBuf, MortarMixingRecipe> STREAM_CODEC = StreamCodec.of(
@@ -132,6 +141,7 @@ public class MortarMixingRecipe implements Recipe<MortarMixingRecipeInput> {
                     buffer.writeBoolean(recipe.fluidInput.isPresent());
                     recipe.fluidInput.ifPresent(fluidIngredient -> SizedFluidIngredient.STREAM_CODEC.encode(buffer, fluidIngredient));
                     buffer.writeVarInt(recipe.processingTime);
+                    buffer.writeEnum(recipe.heatRequirement);
                     buffer.writeVarInt(recipe.results.size());
                     for (ChanceResult result : recipe.results) {
                         ItemStack.STREAM_CODEC.encode(buffer, result.stack());
@@ -153,6 +163,7 @@ public class MortarMixingRecipe implements Recipe<MortarMixingRecipeInput> {
                             ? Optional.of(SizedFluidIngredient.STREAM_CODEC.decode(buffer))
                             : Optional.empty();
                     int processingTime = buffer.readVarInt();
+                    HeatCondition heatRequirement = buffer.readEnum(HeatCondition.class);
                     int resultCount = buffer.readVarInt();
                     NonNullList<ChanceResult> results = NonNullList.createWithCapacity(resultCount);
                     for (int i = 0; i < resultCount; i++) {
@@ -163,7 +174,7 @@ public class MortarMixingRecipe implements Recipe<MortarMixingRecipeInput> {
                     for (int i = 0; i < fluidResultCount; i++) {
                         fluidResults.add(FluidStack.STREAM_CODEC.decode(buffer));
                     }
-                    return new MortarMixingRecipe(group, inputs, fluidInput, processingTime, results, fluidResults);
+                    return new MortarMixingRecipe(group, inputs, fluidInput, processingTime, heatRequirement, results, fluidResults);
                 }
         );
 

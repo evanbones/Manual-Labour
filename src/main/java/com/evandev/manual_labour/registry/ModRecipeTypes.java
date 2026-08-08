@@ -1,6 +1,7 @@
 package com.evandev.manual_labour.registry;
 
 import com.evandev.manual_labour.Constants;
+import com.evandev.manual_labour.recipe.ManualAssemblyRecipe;
 import com.evandev.manual_labour.recipe.MortarGrindingRecipe;
 import com.evandev.manual_labour.recipe.MortarMixingRecipe;
 import com.evandev.manual_labour.recipe.WorkstoneRecipeLike;
@@ -30,6 +31,13 @@ public class ModRecipeTypes {
         @Override
         public String toString() {
             return "mortar_mixing";
+        }
+    });
+
+    public static final DeferredHolder<RecipeType<?>, RecipeType<ManualAssemblyRecipe>> MANUAL_ASSEMBLY = RECIPE_TYPES.register("manual_assembly", () -> new RecipeType<>() {
+        @Override
+        public String toString() {
+            return "manual_assembly";
         }
     });
 }

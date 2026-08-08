@@ -44,7 +44,7 @@ public record WorkstoneRecipe(ProcessingRecipeData data) implements WorkstoneRec
     }
 
     @Override
-    public List<ItemStack> rollResults(RandomSource random, float yieldMultiplier) {
+    public List<ItemStack> rollResults(RandomSource random) {
         return data.rollResults(random);
     }
 

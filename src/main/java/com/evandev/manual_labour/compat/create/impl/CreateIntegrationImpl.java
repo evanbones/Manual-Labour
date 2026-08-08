@@ -5,13 +5,11 @@ import com.evandev.manual_labour.compat.create.impl.millstone.*;
 import com.evandev.manual_labour.compat.create.impl.ponder.MillstonePonderScene;
 import com.evandev.manual_labour.config.ModConfig;
 import com.evandev.manual_labour.foundation.recipe.HeatCondition;
+import com.evandev.manual_labour.recipe.ManualProcessingExclusions;
 import com.evandev.manual_labour.recipe.MortarProcess;
 import com.evandev.manual_labour.recipe.WorkstoneProcess;
 import com.evandev.manual_labour.registry.ModRecipeTypes;
-import com.simibubi.create.AllCreativeModeTabs;
-import com.simibubi.create.AllDataComponents;
-import com.simibubi.create.AllRecipeTypes;
-import com.simibubi.create.AllSoundEvents;
+import com.simibubi.create.*;
 import com.simibubi.create.api.stress.BlockStressValues;
 import com.simibubi.create.content.fluids.FluidFX;
 import com.simibubi.create.content.fluids.transfer.GenericItemEmptying;
@@ -154,7 +152,7 @@ public class CreateIntegrationImpl implements CreateIntegration {
         if (ModConfig.get().useCreateDeployingRecipes) {
             Optional<RecipeHolder<DeployerApplicationRecipe>> deployingStep = SequencedAssemblyRecipe.getRecipe(
                     level, wrapper, AllRecipeTypes.DEPLOYING.getType(), DeployerApplicationRecipe.class);
-            if (deployingStep.isPresent()) {
+            if (deployingStep.isPresent() && !ManualProcessingExclusions.isExcluded(deployingStep.get().id())) {
                 return Optional.of(CreateWorkstoneProcess.of(deployingStep.get().value()));
             }
         }
@@ -168,13 +166,14 @@ public class CreateIntegrationImpl implements CreateIntegration {
 
         Optional<RecipeHolder<PressingRecipe>> pressingStep = SequencedAssemblyRecipe.getRecipe(
                 level, stored, AllRecipeTypes.PRESSING.getType(), PressingRecipe.class);
-        if (pressingStep.isPresent()) {
-            return Optional.of(CreateWorkstoneProcess.pressing(pressingStep.get().value()));
+        if (pressingStep.isPresent() && !ManualProcessingExclusions.isExcluded(pressingStep.get().id())) {
+            return Optional.of(CreateWorkstoneProcess.of(pressingStep.get().value()));
         }
 
         Optional<RecipeHolder<PressingRecipe>> pressing =
                 AllRecipeTypes.PRESSING.find(new SingleRecipeInput(stored), level);
-        return pressing.map(holder -> CreateWorkstoneProcess.pressing(holder.value()));
+        return pressing.filter(holder -> !ManualProcessingExclusions.isExcluded(holder.id()))
+                .map(holder -> CreateWorkstoneProcess.of(holder.value()));
     }
 
     @Override
@@ -183,14 +182,17 @@ public class CreateIntegrationImpl implements CreateIntegration {
             for (RecipeHolder<?> holder : level.getRecipeManager().getAllRecipesFor(AllRecipeTypes.DEPLOYING.getType())) {
                 if (holder.value() instanceof DeployerApplicationRecipe deployerRecipe
                         && !deployerRecipe.getIngredients().isEmpty()
-                        && deployerRecipe.getIngredients().getFirst().test(stored)) {
+                        && deployerRecipe.getIngredients().getFirst().test(stored)
+                        && !ManualProcessingExclusions.isExcluded(holder.id())) {
                     return true;
                 }
             }
         }
 
         if (ModConfig.get().useCreatePressingRecipes) {
-            return AllRecipeTypes.PRESSING.find(new SingleRecipeInput(stored), level).isPresent();
+            return AllRecipeTypes.PRESSING.find(new SingleRecipeInput(stored), level)
+                    .filter(holder -> !ManualProcessingExclusions.isExcluded(holder.id()))
+                    .isPresent();
         }
 
         return false;
@@ -207,14 +209,14 @@ public class CreateIntegrationImpl implements CreateIntegration {
 
         if (ModConfig.get().useCreateMillingRecipes) {
             Optional<RecipeHolder<MillingRecipe>> milling = AllRecipeTypes.MILLING.find(input, level);
-            if (milling.isPresent()) {
+            if (milling.isPresent() && !ManualProcessingExclusions.isExcluded(milling.get().id())) {
                 return Optional.of(new CreateMortarProcess(milling.get().value()));
             }
         }
 
         if (ModConfig.get().useCreateCrushingRecipes) {
             Optional<RecipeHolder<CrushingRecipe>> crushing = AllRecipeTypes.CRUSHING.find(input, level);
-            if (crushing.isPresent()) {
+            if (crushing.isPresent() && !ManualProcessingExclusions.isExcluded(crushing.get().id())) {
                 return Optional.of(new CreateMortarProcess(crushing.get().value()));
             }
         }
@@ -226,11 +228,17 @@ public class CreateIntegrationImpl implements CreateIntegration {
     public void addMortarGrindingRecipes(RecipeManager manager, List<RecipeHolder<Recipe<?>>> out) {
         if (ModConfig.get().useCreateMillingRecipes) {
             manager.getAllRecipesFor(AllRecipeTypes.MILLING.<RecipeInput, MillingRecipe>getType())
-                    .forEach(r -> out.add(new RecipeHolder<>(r.id(), r.value())));
+                    .forEach(r -> {
+                        if (!ManualProcessingExclusions.isExcluded(r.id()))
+                            out.add(new RecipeHolder<>(r.id(), r.value()));
+                    });
         }
         if (ModConfig.get().useCreateCrushingRecipes) {
             manager.getAllRecipesFor(AllRecipeTypes.CRUSHING.<RecipeInput, CrushingRecipe>getType())
-                    .forEach(r -> out.add(new RecipeHolder<>(r.id(), r.value())));
+                    .forEach(r -> {
+                        if (!ManualProcessingExclusions.isExcluded(r.id()))
+                            out.add(new RecipeHolder<>(r.id(), r.value()));
+                    });
         }
     }
 
@@ -242,6 +250,7 @@ public class CreateIntegrationImpl implements CreateIntegration {
             MixingRecipe recipe = r.value();
             if (!recipe.getRequiredHeat().testBlazeBurner(HeatLevel.KINDLED)) return;
             if (recipe.getFluidIngredients().size() > 1) return;
+            if (ManualProcessingExclusions.isExcluded(r.id())) return;
             out.add(new RecipeHolder<>(r.id(), recipe));
         });
     }
@@ -264,6 +273,7 @@ public class CreateIntegrationImpl implements CreateIntegration {
         for (RecipeHolder<MixingRecipe> holder : mixingRecipes) {
             MixingRecipe recipe = holder.value();
             if (!recipe.getRequiredHeat().testBlazeBurner(heat)) continue;
+            if (ManualProcessingExclusions.isExcluded(holder.id())) continue;
 
             MortarProcess process = new CreateMortarProcess(recipe);
             if (canRun.test(process)) return Optional.of(process);
@@ -281,6 +291,11 @@ public class CreateIntegrationImpl implements CreateIntegration {
             case SEETHING -> HeatCondition.SUPERHEATED;
             default -> HeatCondition.HEATED;
         };
+    }
+
+    @Override
+    public void addHeatSourceItems(List<ItemStack> out) {
+        out.add(AllBlocks.BLAZE_BURNER.asStack());
     }
 
     @Override

@@ -1,0 +1,63 @@
+# Mortar Mixing
+**Type:** `manual_labour:mortar_mixing`
+
+This takes a list of item ingredients plus an optional sized fluid ingredient. You can also specify an optional `processing_time`, an optional `fluid_results` array (see [Mortar Fluids](./recipes-mortar-fluids)), and an optional `heat_requirement`.
+
+`heat_requirement` is either `none` (the default) or `heated`. A heated recipe only runs with a lit block from the `#manual_labour:heat_sources` tag under the Mortar, or a lit Blaze Burner if you have Create. A Mortar cannot reach `superheated`, so recipes asking for it never run in one.
+
+If you have Create installed, this falls back to the Mechanical Mixer for both unheated and heated recipes. This can be toggled using `use_create_mixing_recipes`.
+
+```json
+{
+  "type": "manual_labour:mortar_mixing",
+  "ingredients": [
+    {
+      "item": "minecraft:sand"
+    },
+    {
+      "item": "minecraft:gravel"
+    }
+  ],
+  "fluid_ingredient": {
+    "fluid": "minecraft:water",
+    "amount": 250
+  },
+  "processing_time": 100,
+  "heat_requirement": "none",
+  "results": [
+    {
+      "result": {
+        "id": "minecraft:clay_ball"
+      },
+      "chance": 1.0
+    }
+  ]
+}
+```
+
+A recipe can also consume one fluid and produce a different one. The ingredient is taken from the input tank and the result is placed in the output tank. Any fluid id works here:
+
+```json
+{
+  "type": "manual_labour:mortar_mixing",
+  "ingredients": [
+    {
+      "item": "minecraft:sugar"
+    },
+    {
+      "item": "minecraft:honeycomb"
+    }
+  ],
+  "fluid_ingredient": {
+    "fluid": "minecraft:water",
+    "amount": 250
+  },
+  "processing_time": 100,
+  "fluid_results": [
+    {
+      "id": "create:honey",
+      "amount": 250
+    }
+  ]
+}
+```

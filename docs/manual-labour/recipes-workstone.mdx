@@ -1,0 +1,35 @@
+# Workstone
+**Type:** `manual_labour:workstone`
+
+This takes two ingredients (the item to process, then the tool that must hit it) and an array of chance-weighted results.
+
+For Create users, this falls back to Deployer steps in Sequenced Assembly, or the Mechanical Press. You can toggle this behavior with `use_create_deploying_recipes` and `use_create_pressing_recipes`. A Workstone recipe can also be a step in a Sequenced Assembly itself.
+
+The file format is Create's processing recipe shape and does not change based on whether Create is installed.
+
+This example lets you hammer cobblestone into gravel, with a 25% chance for an additional flint.
+
+```json
+{
+  "type": "manual_labour:workstone",
+  "ingredients": [
+    {
+      "item": "minecraft:cobblestone"
+    },
+    {
+      "tag": "manual_labour:hammers"
+    }
+  ],
+  "results": [
+    {
+      "id": "minecraft:gravel",
+      "chance": 1.0
+    },
+    {
+      "id": "minecraft:flint",
+      "count": 1,
+      "chance": 0.25
+    }
+  ]
+}
+```

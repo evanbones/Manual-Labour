@@ -2,6 +2,7 @@ package com.evandev.manual_labour.datagen.providers;
 
 import com.evandev.manual_labour.Constants;
 import com.evandev.manual_labour.compat.create.CreateCompat;
+import com.evandev.manual_labour.foundation.recipe.HeatCondition;
 import com.evandev.manual_labour.recipe.ChanceResult;
 import com.evandev.manual_labour.recipe.MortarGrindingRecipe;
 import com.evandev.manual_labour.recipe.MortarMixingRecipe;
@@ -109,7 +110,7 @@ public class MortarRecipeProvider {
     private static void mix(RecipeOutput output, String recipeName, List<Ingredient> inputs,
                             Optional<SizedFluidIngredient> fluidInput, int processingTime,
                             ItemLike result, int count) {
-        createMixingRecipe(output, recipeName, inputs, fluidInput, processingTime,
+        createMixingRecipe(output, recipeName, inputs, fluidInput, processingTime, HeatCondition.NONE,
                 List.of(new ChanceResult(new ItemStack(result, count), 1.0F)), List.of());
     }
 
@@ -132,6 +133,7 @@ public class MortarRecipeProvider {
 
     private static void createMixingRecipe(RecipeOutput output, String recipeName, List<Ingredient> inputs,
                                            Optional<SizedFluidIngredient> fluidInput, int processingTime,
+                                           HeatCondition heatRequirement,
                                            List<ChanceResult> resultsList, List<FluidStack> fluidResultsList) {
         NonNullList<Ingredient> inputList = NonNullList.create();
         inputList.addAll(inputs);
@@ -142,7 +144,7 @@ public class MortarRecipeProvider {
         NonNullList<FluidStack> fluidResults = NonNullList.create();
         fluidResults.addAll(fluidResultsList);
 
-        MortarMixingRecipe recipe = new MortarMixingRecipe("", inputList, fluidInput, processingTime, results, fluidResults);
+        MortarMixingRecipe recipe = new MortarMixingRecipe("", inputList, fluidInput, processingTime, heatRequirement, results, fluidResults);
 
         output.accept(
                 ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "mortar/mixing/" + recipeName),

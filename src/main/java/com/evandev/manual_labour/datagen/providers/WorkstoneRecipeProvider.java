@@ -1,22 +1,46 @@
 package com.evandev.manual_labour.datagen.providers;
 
 import com.evandev.manual_labour.Constants;
+import com.evandev.manual_labour.compat.create.CreateCompat;
 import com.evandev.manual_labour.compat.create.impl.CreateWorkstoneRecipe;
 import com.evandev.manual_labour.registry.ModTags;
+import com.simibubi.create.AllItems;
 import com.simibubi.create.content.processing.recipe.ProcessingOutput;
 import com.simibubi.create.content.processing.recipe.StandardProcessingRecipe;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
+import net.neoforged.neoforge.common.Tags;
+import net.neoforged.neoforge.common.conditions.ModLoadedCondition;
 
 import java.util.List;
 
 public class WorkstoneRecipeProvider {
 
+    private static final TagKey<Item> BRASS_INGOTS =
+            TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("c", "ingots/brass"));
+
     public static void buildRecipes(RecipeOutput output) {
+        RecipeOutput createOnly = output.withConditions(new ModLoadedCondition(CreateCompat.CREATE));
+        hammer(createOnly, "iron_ingot_to_iron_sheet", Ingredient.of(Tags.Items.INGOTS_IRON), List.of(
+                new ProcessingOutput(new ItemStack(AllItems.IRON_SHEET.get()), 0.75F)
+        ));
+        hammer(createOnly, "gold_ingot_to_golden_sheet", Ingredient.of(Tags.Items.INGOTS_GOLD), List.of(
+                new ProcessingOutput(new ItemStack(AllItems.GOLDEN_SHEET.get()), 0.75F)
+        ));
+        hammer(createOnly, "copper_ingot_to_copper_sheet", Ingredient.of(Tags.Items.INGOTS_COPPER), List.of(
+                new ProcessingOutput(new ItemStack(AllItems.COPPER_SHEET.get()), 0.75F)
+        ));
+        hammer(createOnly, "brass_ingot_to_brass_sheet", Ingredient.of(BRASS_INGOTS), List.of(
+                new ProcessingOutput(new ItemStack(AllItems.BRASS_SHEET.get()), 0.75F)
+        ));
+
         hammer(output, "cracked_stone_bricks", Items.STONE_BRICKS, Items.CRACKED_STONE_BRICKS, 1);
         hammer(output, "cracked_deepslate_bricks", Items.DEEPSLATE_BRICKS, Items.CRACKED_DEEPSLATE_BRICKS, 1);
         hammer(output, "cracked_deepslate_tiles", Items.DEEPSLATE_TILES, Items.CRACKED_DEEPSLATE_TILES, 1);

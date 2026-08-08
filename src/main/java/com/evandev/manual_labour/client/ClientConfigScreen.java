@@ -64,9 +64,7 @@ public class ClientConfigScreen {
                 .option(createBoolOption("use_create_deploying_recipes", true, CREATE,
                         () -> ModConfig.get().useCreateDeployingRecipes, val -> ModConfig.get().useCreateDeployingRecipes = val))
                 .option(createBoolOption("use_create_pressing_recipes", true, CREATE,
-                        () -> ModConfig.get().useCreatePressingRecipes, val -> ModConfig.get().useCreatePressingRecipes = val))
-                .option(createFloatOption("workstone_pressing_yield", 0.75F, 0.0F, 1.0F, 0.05F, CREATE,
-                        () -> ModConfig.get().workstonePressingYield, val -> ModConfig.get().workstonePressingYield = val));
+                        () -> ModConfig.get().useCreatePressingRecipes, val -> ModConfig.get().useCreatePressingRecipes = val));
 
         ConfigCategory.Builder jei = ConfigCategory.createBuilder()
                 .name(Component.translatable("config.manual_labour.category.jei"))
@@ -76,7 +74,7 @@ public class ClientConfigScreen {
                         () -> ModConfig.get().enableMortarGrindingJei, val -> ModConfig.get().enableMortarGrindingJei = val))
                 .option(createBoolOption("enable_mortar_mixing_jei", true,
                         () -> ModConfig.get().enableMortarMixingJei, val -> ModConfig.get().enableMortarMixingJei = val))
-                .option(createBoolOption("enable_manual_assembly_jei", true, CREATE,
+                .option(createBoolOption("enable_manual_assembly_jei", true,
                         () -> ModConfig.get().enableManualAssemblyJei, val -> ModConfig.get().enableManualAssemblyJei = val))
                 .option(createBoolOption("enable_millstone_jei", true, CREATE,
                         () -> ModConfig.get().enableMillstoneJei, val -> ModConfig.get().enableMillstoneJei = val))

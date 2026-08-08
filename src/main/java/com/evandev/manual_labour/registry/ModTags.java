@@ -22,6 +22,8 @@ public class ModTags {
         public static final TagKey<Item> PESTLES = tag("pestles");
         public static final TagKey<Item> LADLES = tag("ladles");
 
+        public static final TagKey<Item> TOOLS_HAMMER = ItemTags.create(ResourceLocation.fromNamespaceAndPath("c", "tools/hammer"));
+
         private static TagKey<Item> tag(String name) {
             return ItemTags.create(ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, name));
         }

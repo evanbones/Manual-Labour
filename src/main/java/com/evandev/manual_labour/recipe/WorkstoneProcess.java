@@ -7,14 +7,10 @@ import java.util.List;
 
 public interface WorkstoneProcess {
 
-    List<ItemStack> rollResults(RandomSource random, float yieldMultiplier);
+    List<ItemStack> rollResults(RandomSource random);
 
     default ToolUse toolUse() {
         return ToolUse.DAMAGE;
-    }
-
-    default boolean usesPressingYield() {
-        return false;
     }
 
     enum ToolUse {

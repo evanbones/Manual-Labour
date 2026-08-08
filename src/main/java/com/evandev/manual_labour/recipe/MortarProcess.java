@@ -1,5 +1,6 @@
 package com.evandev.manual_labour.recipe;
 
+import com.evandev.manual_labour.foundation.recipe.HeatCondition;
 import com.evandev.manual_labour.foundation.recipe.ProcessingOutput;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
@@ -26,6 +27,10 @@ public interface MortarProcess {
     List<FluidStack> fluidResults();
 
     List<ProcessingOutput> displayOutputs();
+
+    default HeatCondition heatRequirement() {
+        return HeatCondition.NONE;
+    }
 
     record OwnGrindingProcess(MortarGrindingRecipe recipe) implements MortarProcess {
         @Override
@@ -95,6 +100,11 @@ public interface MortarProcess {
         @Override
         public List<ProcessingOutput> displayOutputs() {
             return toOutputs(recipe.getResults());
+        }
+
+        @Override
+        public HeatCondition heatRequirement() {
+            return recipe.getHeatRequirement();
         }
     }
 }

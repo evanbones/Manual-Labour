@@ -4,9 +4,14 @@ import com.evandev.manual_labour.compat.create.CreateCompat;
 import com.evandev.manual_labour.foundation.recipe.HeatCondition;
 import com.evandev.manual_labour.registry.ModTags;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public final class MortarHeat {
 
@@ -20,6 +25,18 @@ public final class MortarHeat {
         if (blazeBurner != HeatCondition.NONE) return blazeBurner;
 
         return isLitHeatSource(state) ? HeatCondition.HEATED : HeatCondition.NONE;
+    }
+
+    public static List<ItemStack> sourceItems() {
+        List<ItemStack> items = new ArrayList<>();
+
+        BuiltInRegistries.BLOCK.getTag(ModTags.Blocks.HEAT_SOURCES).ifPresent(tag -> tag.forEach(holder -> {
+            ItemStack stack = new ItemStack(holder.value());
+            if (!stack.isEmpty()) items.add(stack);
+        }));
+
+        CreateCompat.get().addHeatSourceItems(items);
+        return items;
     }
 
     private static boolean isLitHeatSource(BlockState state) {

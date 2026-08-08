@@ -1,0 +1,54 @@
+# Manual Assembly
+**Type:** `manual_labour:manual_assembly`
+
+Use this when one hit isn't enough. The item is hit once per step, carrying a `transitional_item` between hits, and only turns into a result once the whole `sequence` has run `loops` times. So a single-step sequence with `"loops": 5` is simply "hit this five times".
+
+Each entry in `sequence` is an inline `manual_labour:workstone` recipe. Only its tool ingredient matters: which item the step applies to is decided by the assembly's own `ingredient` and `transitional_item`, so the step's first ingredient is ignored. Its `results` are ignored too, because the assembly decides what the item becomes.
+
+`results` is a weighted pool. The first entry is the real output and any others are salvage rolled instead of it. `loops` defaults to `1`.
+
+The transitional item sits on the Workstone between hits and shows its progress and next step on its tooltip.
+
+Here's an example of hammering an iron ingot 3 times, to get an iron pickaxe:
+
+```json
+{
+  "type": "manual_labour:manual_assembly",
+  "ingredient": {
+    "item": "minecraft:iron_ingot"
+  },
+  "transitional_item": {
+    "id": "minecraft:iron_nugget"
+  },
+  "loops": 3,
+  "sequence": [
+    {
+      "type": "manual_labour:workstone",
+      "ingredients": [
+        {
+          "item": "minecraft:iron_ingot"
+        },
+        {
+          "tag": "manual_labour:hammers"
+        }
+      ],
+      "results": [
+        {
+          "id": "minecraft:iron_nugget"
+        }
+      ]
+    }
+  ],
+  "results": [
+    {
+      "id": "minecraft:iron_pickaxe"
+    },
+    {
+      "id": "minecraft:flint",
+      "chance": 0.25
+    }
+  ]
+}
+```
+
+This type does not need Create, and it shows up in JEI's **Manual Assembly** category either way.

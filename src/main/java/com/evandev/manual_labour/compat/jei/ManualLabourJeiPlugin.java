@@ -66,6 +66,19 @@ public class ManualLabourJeiPlugin implements IModPlugin {
         return new ArrayList<>(manager.getAllRecipesFor(ModRecipeTypes.WORKSTONE.get()));
     }
 
+    private static List<RecipeHolder<Recipe<?>>> gatherManualAssemblyRecipes() {
+        RecipeManager manager = recipeManager();
+        if (manager == null) return List.of();
+
+        List<RecipeHolder<Recipe<?>>> recipes = new ArrayList<>();
+        manager.getAllRecipesFor(ModRecipeTypes.MANUAL_ASSEMBLY.get())
+                .forEach(r -> recipes.add(new RecipeHolder<>(r.id(), r.value())));
+        if (CreateCompat.isLoaded()) {
+            CreateJeiCategories.addSequencedAssemblies(manager, recipes);
+        }
+        return recipes;
+    }
+
     private static List<RecipeHolder<Recipe<?>>> gatherMortarGrindingRecipes() {
         RecipeManager manager = recipeManager();
         if (manager == null) return List.of();
@@ -126,10 +139,20 @@ public class ManualLabourJeiPlugin implements IModPlugin {
         if (ModConfig.get().enableMortarMixingJei) {
             categories.add(new MortarMixingCategory(info(
                     id("mortar_mixing"),
-                    new EmptyBackground(177, 100),
+                    new EmptyBackground(177, 127),
                     new DoubleItemIcon(() -> new ItemStack(ModItems.LADLE.get()), () -> new ItemStack(ModItems.MORTAR_ITEM.get())),
                     ManualLabourJeiPlugin::gatherMortarMixingRecipes,
                     List.of(() -> new ItemStack(ModItems.LADLE.get()), () -> new ItemStack(ModBlocks.MORTAR.get()))
+            )));
+        }
+
+        if (ModConfig.get().enableManualAssemblyJei) {
+            categories.add(new ManualAssemblyCategory(info(
+                    id("manual_assembly"),
+                    new EmptyBackground(180, 115),
+                    new ItemIcon(() -> new ItemStack(ModBlocks.WORKSTONE.get())),
+                    ManualLabourJeiPlugin::gatherManualAssemblyRecipes,
+                    List.of(() -> new ItemStack(ModBlocks.WORKSTONE.get()))
             )));
         }
 

@@ -1,6 +1,8 @@
 package com.evandev.manual_labour.compat.jei;
 
 import com.evandev.manual_labour.compat.create.CreateCompat;
+import com.evandev.manual_labour.content.block.MortarHeat;
+import com.evandev.manual_labour.foundation.recipe.HeatCondition;
 import com.evandev.manual_labour.foundation.recipe.ProcessingOutput;
 import com.evandev.manual_labour.recipe.MortarMixingRecipe;
 import com.evandev.manual_labour.recipe.MortarProcess;
@@ -10,11 +12,14 @@ import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import net.createmod.catnip.layout.LayoutHelper;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
+import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.List;
@@ -22,19 +27,25 @@ import java.util.List;
 @ParametersAreNonnullByDefault
 public class MortarMixingCategory extends ManualRecipeCategory<Recipe<?>> {
 
+    private static final int HEAT_BAR_X = 4;
+    private static final int HEAT_BAR_Y = 106;
+
     public MortarMixingCategory(Info<Recipe<?>> info) {
         super(info);
     }
 
+    @Nullable
+    private static MortarProcess process(Recipe<?> recipe) {
+        if (recipe instanceof MortarMixingRecipe mortarRecipe) {
+            return new MortarProcess.OwnMixingProcess(mortarRecipe);
+        }
+        return CreateCompat.get().describeMortarRecipe(recipe).orElse(null);
+    }
+
     @Override
     public void setRecipe(IRecipeLayoutBuilder builder, Recipe<?> recipe, IFocusGroup focuses) {
-        MortarProcess process;
-        if (recipe instanceof MortarMixingRecipe mortarRecipe) {
-            process = new MortarProcess.OwnMixingProcess(mortarRecipe);
-        } else {
-            process = CreateCompat.get().describeMortarRecipe(recipe).orElse(null);
-            if (process == null) return;
-        }
+        MortarProcess process = process(recipe);
+        if (process == null) return;
 
         List<Ingredient> inputs = process.ingredients();
         List<SizedFluidIngredient> fluidInputs = process.fluidIngredients();
@@ -68,11 +79,24 @@ public class MortarMixingCategory extends ManualRecipeCategory<Recipe<?>> {
             addFluidSlot(builder, xOffset + outputLayout.getX() + 1, yOffset + outputLayout.getY() + 1, fluidOutput);
             outputLayout.next();
         }
+
+        if (process.heatRequirement() != HeatCondition.NONE) {
+            builder.addSlot(RecipeIngredientRole.CATALYST, HEAT_BAR_X + 148, HEAT_BAR_Y + 1)
+                    .setBackground(getRenderedSlot(), -1, -1)
+                    .addItemStacks(MortarHeat.sourceItems());
+        }
     }
 
     @Override
     public void draw(Recipe<?> recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics graphics, double mouseX, double mouseY) {
         CategorySkin.get().drawDownArrow(graphics, 72, 30);
         JeiBlockIcon.draw(graphics, ModBlocks.MORTAR.get().defaultBlockState(), getBackground().getWidth() / 2 - 13, 66, 20);
+
+        MortarProcess process = process(recipe);
+        HeatCondition heat = process == null ? HeatCondition.NONE : process.heatRequirement();
+
+        CategorySkin.get().drawHeatBar(graphics, HEAT_BAR_X, HEAT_BAR_Y, heat != HeatCondition.NONE);
+        graphics.drawString(Minecraft.getInstance().font, Component.translatable(heat.getTranslationKey()),
+                HEAT_BAR_X + 5, HEAT_BAR_Y + 6, heat.getColor(), false);
     }
 }

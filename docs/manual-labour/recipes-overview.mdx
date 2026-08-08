@@ -1,0 +1,26 @@
+# Custom Recipes
+
+Manual Labour adds a few new ways to craft items. These are all plain datapack JSON, meaning they work from any datapack or mod. Create is optional, so every recipe type below loads and runs whether or not you have it installed.
+
+If you are using Create, each of our recipe types has an equivalent Create recipe it can fall back to. If there is ever a conflict, the Manual Labour recipes are always prioritized. Each fallback has its own config toggle under **Create Compatibility**.
+
+## Built-in recipes and Create
+
+The Mortar has a set of default grinding and mixing recipes so that it is useful on its own. With Create installed, the Mortar uses Create's own Milling and Mixing recipes instead.
+
+### Excluding specific Create recipes
+
+Manual Labour's own recipe types (`manual_labour:mortar_grinding`, `manual_labour:mortar_mixing`, `manual_labour:workstone`) are specific "manual-only" recipes. Create's Milling, Crushing, Mixing, Deploying and Pressing recipes go the other way by default: as long as the matching `use_create_..._recipes` toggle is on, every recipe of that type is usable both in Create's own machine and manually (Mortar or Workstone).
+
+To make an individual Create recipe **Create-only** (usable in its machine but not manually), add an exclusion file anywhere under `data/<namespace>/manual_labour/recipe_exclusions/`. The namespace and filename don't matter, only the ids inside. A file can have a single `recipe` or a `recipes` array:
+
+```json
+{
+  "recipes": [
+    "create:mixing/andesite_alloy",
+    "create:mixing/andesite_alloy_from_zinc"
+  ]
+}
+```
+
+An excluded recipe never appears as a manual alternative, even with its config toggle enabled.

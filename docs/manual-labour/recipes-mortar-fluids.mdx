@@ -1,0 +1,10 @@
+# Mortar Fluids
+
+The Mortar holds two separate 1000 mB tanks, in the same way Create's Basin does.
+
+- The **input tank** is the one you fill from the outside, with a bucket or a pipe, and the only one a `fluid_ingredient` is ever drawn from.
+- The **output tank** receives `fluid_results`. It can be drained from the outside but never filled.
+
+A recipe only runs if its entire fluid result fits in the output tank. Once that tank is full, the Mortar simply stops accepting the recipe. Empty the output tank and it picks straight back up.
+
+Both `fluid_ingredient` and `fluid_results` are optional on every [Mortar Grinding](./recipes-mortar-grinding) and [Mortar Mixing](./recipes-mortar-mixing) recipe. If a recipe produces only fluid, `results` can be left out entirely.

@@ -115,6 +115,9 @@ public interface CreateIntegration {
         return HeatCondition.NONE;
     }
 
+    default void addHeatSourceItems(List<ItemStack> out) {
+    }
+
     default boolean isBasin(BlockGetter level, BlockPos pos) {
         return false;
     }

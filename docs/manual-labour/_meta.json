@@ -1,3 +1,8 @@
 {
-  "recipes.mdx": "Custom Recipes"
+  "recipes-overview.mdx": "Custom Recipes",
+  "recipes-workstone.mdx": "Workstone",
+  "recipes-manual-assembly.mdx": "Manual Assembly",
+  "recipes-mortar-fluids.mdx": "Mortar Fluids",
+  "recipes-mortar-grinding.mdx": "Mortar Grinding",
+  "recipes-mortar-mixing.mdx": "Mortar Mixing"
 }
