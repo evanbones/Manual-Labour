@@ -64,6 +64,8 @@ all the same recipes and is powered similarly to the other Create machines.
 
 Contains code adapted from [Farmer's Delight](https://modrinth.com/mod/farmers-delight), used under its MIT license.
 
+Contains code from [Create](https://modrinth.com/mod/create), used under its MIT license.
+
 Project commissioned by AuroraAster.
 
 All art, branding, and sounds by [Baileybun](https://modrinth.com/user/Baileybun)!

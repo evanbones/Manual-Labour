@@ -2,50 +2,45 @@ package com.evandev.manual_labour.compat.create.impl.millstone;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.world.phys.shapes.Shapes;
-import net.minecraft.world.phys.shapes.VoxelShape;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public final class MillstoneStructure {
-    public static final List<BlockPos> BASE_OFFSETS = baseOffsets();
+
+    public static final List<BlockPos> BASE_OFFSETS = List.of(
+            new BlockPos(-1, 0, -1),
+            new BlockPos(-1, 0, 0),
+            new BlockPos(-1, 0, 1),
+            new BlockPos(0, 0, -1),
+            new BlockPos(0, 0, 1),
+            new BlockPos(1, 0, -1),
+            new BlockPos(1, 0, 0),
+            new BlockPos(1, 0, 1));
+
     public static final List<BlockPos> ALL_OFFSETS = BASE_OFFSETS;
 
-    private static List<BlockPos> baseOffsets() {
-        List<BlockPos> offsets = new ArrayList<>();
-        for (int dx = -1; dx <= 1; dx++) {
-            for (int dz = -1; dz <= 1; dz++) {
-                if (dx != 0 || dz != 0) {
-                    offsets.add(new BlockPos(dx, 0, dz));
-                }
-            }
-        }
-        return List.copyOf(offsets);
+    private MillstoneStructure() {
     }
 
     public static boolean isCorner(BlockPos offset) {
-        return offset.getX() != 0 && offset.getZ() != 0;
+        boolean offCentreOnX = offset.getX() != 0;
+        boolean offCentreOnZ = offset.getZ() != 0;
+        return offCentreOnX && offCentreOnZ;
     }
 
     public static Direction baseFacing(BlockPos offset) {
-        int dx = offset.getX();
-        int dz = offset.getZ();
-        if (dx == 0) {
-            return dz > 0 ? Direction.NORTH : Direction.SOUTH;
+        Direction.Axis axis = inwardAxis(offset);
+        int stepAlongAxis = offset.get(axis);
+        Direction.AxisDirection towardsCentre = stepAlongAxis > 0
+                ? Direction.AxisDirection.NEGATIVE
+                : Direction.AxisDirection.POSITIVE;
+        return Direction.fromAxisAndDirection(axis, towardsCentre);
+    }
+
+    private static Direction.Axis inwardAxis(BlockPos offset) {
+        if (!isCorner(offset)) {
+            return offset.getX() != 0 ? Direction.Axis.X : Direction.Axis.Z;
         }
-        if (dz == 0) {
-            return dx > 0 ? Direction.WEST : Direction.EAST;
-        }
-        if (dx > 0 && dz > 0) {
-            return Direction.WEST;
-        }
-        if (dx < 0 && dz > 0) {
-            return Direction.NORTH;
-        }
-        if (dx < 0) {
-            return Direction.EAST;
-        }
-        return Direction.SOUTH;
+        return offset.getX() == offset.getZ() ? Direction.Axis.X : Direction.Axis.Z;
     }
 }

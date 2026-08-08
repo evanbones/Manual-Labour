@@ -1,21 +1,22 @@
 package com.evandev.manual_labour.compat.create.impl.millstone.client;
 
-import com.mojang.blaze3d.platform.NativeImage;
 import com.simibubi.create.AllSoundEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.sounds.SoundInstance;
+import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 
 import java.util.HashMap;
@@ -28,66 +29,128 @@ public class MillstoneEffects {
     private static final double SEAM_Y_OFFSET = 0.53;
     private static final double RIM_MIN = 1.30;
 
+    private static final float IMPACT_CHANCE_PER_RPM = 0.0032F;
+    private static final float IMPACT_CHANCE_MAX = 0.22F;
+    private static final float IMPACT_VOLUME_BASE = 0.45F;
+    private static final float IMPACT_VOLUME_PER_RPM = 0.0045F;
+    private static final float IMPACT_VOLUME_MAX = 0.98F;
+    private static final float IMPACT_PITCH_BASE = 0.86F;
+    private static final float IMPACT_PITCH_JITTER = 0.26F;
+    private static final float IMPACT_PITCH_PER_RPM = 0.0009F;
+    private static final float IMPACT_PITCH_RISE_MAX = 0.18F;
+
+    private static final float DUST_PER_RPM = 0.14F;
+    private static final float DUST_MIN = 0.4F;
+    private static final float DUST_MAX = 14.0F;
+    private static final float DUST_SCALE = 0.85F;
+    private static final double DUST_RING_INSET = 0.02;
+    private static final double DUST_RING_SPREAD = 0.30;
+    private static final double DUST_DROP = 0.28;
+    private static final double DUST_DROP_BIAS = 2.2;
+    private static final double DUST_PUSH_MIN = 0.10;
+    private static final double DUST_PUSH_SPREAD = 0.11;
+    private static final double DUST_SINK = -0.015;
+
+    private static final float CHUNK_CHANCE = 0.4F;
+    private static final double CHUNK_RING_INSET = 0.03;
+    private static final double CHUNK_RING_SPREAD = 0.2;
+    private static final double CHUNK_DROP = 0.12;
+    private static final double CHUNK_PUSH = 0.19;
+    private static final double CHUNK_LIFT = 0.075;
+
+    private static final int SPRITE_ALPHA_CUTOFF = 90;
+    private static final int SPRITE_SAMPLES_PER_AXIS = 16;
+    private static final Vector3f FALLBACK_TINT = new Vector3f(0.66F, 0.63F, 0.58F);
+
+    private static final double TAU = Math.PI * 2.0;
+
     private MillstoneEffects() {
     }
 
     public static void tick(Level level, BlockPos controllerPos, ItemStack grinding, float speed) {
-        MillstoneLoopSound loop = LOOPS.get(controllerPos);
+        BlockPos key = controllerPos.immutable();
+        MillstoneLoopSound loop = LOOPS.get(key);
         if (loop == null || loop.isStopped()) {
-            loop = new MillstoneLoopSound(controllerPos.immutable());
-            LOOPS.put(controllerPos.immutable(), loop);
-            Minecraft.getInstance().getSoundManager().play((SoundInstance) loop);
+            MillstoneLoopSound replacement = new MillstoneLoopSound(key);
+            LOOPS.put(key, replacement);
+            Minecraft.getInstance().getSoundManager().play(replacement);
         }
 
         RandomSource random = level.getRandom();
-        float absSpeed = Math.abs(speed);
+        float rpm = Math.abs(speed);
 
-        double cx = controllerPos.getX() + 0.5;
-        double cz = controllerPos.getZ() + 0.5;
+        Vec3 axle = controllerPos.getCenter();
         double seamY = controllerPos.getY() + SEAM_Y_OFFSET;
 
         if (grinding.isEmpty()) {
-            spawnIdleSparks(level, random, cx, cz, seamY, absSpeed, speed);
+            spawnIdleSparks(level, random, axle.x, axle.z, seamY, rpm, speed);
             return;
         }
 
-        if (random.nextFloat() < Math.min(absSpeed / 300.0F, 0.24F)) {
-            SoundEvent sound = random.nextFloat() < 0.78F
-                    ? AllSoundEvents.CRUSHING_1.getMainEvent()
-                    : AllSoundEvents.CRUSHING_2.getMainEvent();
-            level.playLocalSound(controllerPos.getX() + 0.5, controllerPos.getY() + 0.5, controllerPos.getZ() + 0.5,
-                    sound, SoundSource.BLOCKS,
-                    Mth.clamp(0.5F + absSpeed / 256.0F, 0.5F, 1.0F),
-                    0.9F + random.nextFloat() * 0.2F + Math.min(absSpeed / 1024.0F, 0.2F), false);
+        playGrindingImpact(level, axle, random, rpm);
+        spawnDust(level, random, grinding, axle.x, axle.z, seamY, rpm);
+        spawnChunk(level, random, grinding, axle.x, axle.z, seamY);
+    }
+
+    private static void playGrindingImpact(Level level, Vec3 axle, RandomSource random, float rpm) {
+        float chance = Mth.clamp(rpm * IMPACT_CHANCE_PER_RPM, 0.0F, IMPACT_CHANCE_MAX);
+        if (random.nextFloat() >= chance) {
+            return;
         }
 
-        float dustPerTick = Mth.clamp(absSpeed / 8.0F, 0.5F, 16.0F);
-        int guaranteed = (int) dustPerTick;
-        float fractional = dustPerTick - guaranteed;
-        int count = guaranteed + (random.nextFloat() < fractional ? 1 : 0);
+        SoundEvent sound = random.nextInt(4) == 0
+                ? AllSoundEvents.CRUSHING_2.getMainEvent()
+                : AllSoundEvents.CRUSHING_1.getMainEvent();
+        float volume = Mth.clamp(IMPACT_VOLUME_BASE + rpm * IMPACT_VOLUME_PER_RPM, IMPACT_VOLUME_BASE, IMPACT_VOLUME_MAX);
+        float pitch = IMPACT_PITCH_BASE
+                + random.nextFloat() * IMPACT_PITCH_JITTER
+                + Mth.clamp(rpm * IMPACT_PITCH_PER_RPM, 0.0F, IMPACT_PITCH_RISE_MAX);
 
-        Vector3f color = averageColor(grinding);
-        DustParticleOptions dust = new DustParticleOptions(color, 0.7F);
+        level.playLocalSound(axle.x, axle.y, axle.z, sound, SoundSource.BLOCKS, volume, pitch, false);
+    }
 
+    private static void spawnDust(Level level, RandomSource random, ItemStack grinding,
+                                  double cx, double cz, double seamY, float rpm) {
+        int count = randomRound(random, Mth.clamp(rpm * DUST_PER_RPM, DUST_MIN, DUST_MAX));
+        if (count <= 0) {
+            return;
+        }
+
+        DustParticleOptions dust = new DustParticleOptions(averageColor(grinding), DUST_SCALE);
         for (int i = 0; i < count; i++) {
-            double angle = random.nextDouble() * Math.PI * 2.0;
-            double radius = RIM_MIN + 0.05 + random.nextDouble() * 0.25;
-            double y = seamY - random.nextDouble() * random.nextDouble() * 0.3;
-            double x = cx + Math.cos(angle) * radius;
-            double z = cz + Math.sin(angle) * radius;
-            double outward = 0.12 + random.nextDouble() * 0.08;
-            double vx = Math.cos(angle) * outward;
-            double vz = Math.sin(angle) * outward;
-            level.addParticle(dust, x, y, z, vx, -0.01, vz);
+            double bearing = random.nextDouble() * TAU;
+            double sin = Math.sin(bearing);
+            double cos = Math.cos(bearing);
+
+            double radius = RIM_MIN + DUST_RING_INSET + random.nextDouble() * DUST_RING_SPREAD;
+            double y = seamY - Math.pow(random.nextDouble(), DUST_DROP_BIAS) * DUST_DROP;
+            double push = DUST_PUSH_MIN + random.nextDouble() * DUST_PUSH_SPREAD;
+
+            level.addParticle(dust,
+                    cx + cos * radius, y, cz + sin * radius,
+                    cos * push, DUST_SINK, sin * push);
+        }
+    }
+
+    private static void spawnChunk(Level level, RandomSource random, ItemStack grinding,
+                                   double cx, double cz, double seamY) {
+        if (random.nextFloat() >= CHUNK_CHANCE) {
+            return;
         }
 
-        if (random.nextInt(2) == 0) {
-            double angle = random.nextDouble() * Math.PI * 2.0;
-            double radius = RIM_MIN + 0.05 + random.nextDouble() * 0.15;
-            level.addParticle(new ItemParticleOption(ParticleTypes.ITEM, grinding),
-                    cx + Math.cos(angle) * radius, seamY - random.nextDouble() * 0.15, cz + Math.sin(angle) * radius,
-                    Math.cos(angle) * 0.16, 0.06, Math.sin(angle) * 0.16);
-        }
+        double bearing = random.nextDouble() * TAU;
+        double sin = Math.sin(bearing);
+        double cos = Math.cos(bearing);
+        double radius = RIM_MIN + CHUNK_RING_INSET + random.nextDouble() * CHUNK_RING_SPREAD;
+
+        level.addParticle(new ItemParticleOption(ParticleTypes.ITEM, grinding),
+                cx + cos * radius, seamY - random.nextDouble() * CHUNK_DROP, cz + sin * radius,
+                cos * CHUNK_PUSH, CHUNK_LIFT, sin * CHUNK_PUSH);
+    }
+
+    private static int randomRound(RandomSource random, float rate) {
+        int whole = Mth.floor(rate);
+        return random.nextFloat() < rate - whole ? whole + 1 : whole;
     }
 
     private static void spawnIdleSparks(Level level, RandomSource random, double cx, double cz, double seamY,
@@ -114,28 +177,51 @@ public class MillstoneEffects {
     }
 
     private static Vector3f averageColor(ItemStack stack) {
-        return AVERAGE_COLORS.computeIfAbsent(stack.getItem(), item -> {
-            TextureAtlasSprite sprite = Minecraft.getInstance().getItemRenderer().getModel(stack, null, null, 0).getParticleIcon();
-            NativeImage image = sprite.contents().getOriginalImage();
-            long r = 0;
-            long g = 0;
-            long b = 0;
-            long n = 0;
-            int width = Math.min(image.getWidth(), sprite.contents().width());
-            int height = Math.min(image.getHeight(), sprite.contents().height());
-            for (int x = 0; x < width; x++) {
-                for (int y = 0; y < height; y++) {
-                    int pixel = image.getPixelRGBA(x, y);
-                    int alpha = pixel >> 24 & 0xFF;
-                    if (alpha >= 128) {
-                        r += pixel & 0xFF;
-                        g += pixel >> 8 & 0xFF;
-                        b += pixel >> 16 & 0xFF;
-                        n++;
-                    }
+        Item key = stack.getItem();
+        Vector3f known = AVERAGE_COLORS.get(key);
+        if (known == null) {
+            known = sampleParticleSprite(stack);
+            AVERAGE_COLORS.put(key, known);
+        }
+        return known;
+    }
+
+    private static Vector3f sampleParticleSprite(ItemStack stack) {
+        BakedModel model = Minecraft.getInstance().getItemRenderer().getModel(stack, null, null, 0);
+        TextureAtlasSprite sprite = model.getParticleIcon();
+
+        int spriteWidth = sprite.contents().width();
+        int spriteHeight = sprite.contents().height();
+        if (spriteWidth <= 0 || spriteHeight <= 0) {
+            return new Vector3f(FALLBACK_TINT);
+        }
+
+        int strideX = Math.max(1, spriteWidth / SPRITE_SAMPLES_PER_AXIS);
+        int strideY = Math.max(1, spriteHeight / SPRITE_SAMPLES_PER_AXIS);
+
+        int redSum = 0;
+        int greenSum = 0;
+        int blueSum = 0;
+        int taken = 0;
+
+        for (int y = 0; y < spriteHeight; y += strideY) {
+            for (int x = 0; x < spriteWidth; x += strideX) {
+                int abgr = sprite.getPixelRGBA(0, x, y);
+                if (FastColor.ABGR32.alpha(abgr) < SPRITE_ALPHA_CUTOFF) {
+                    continue;
                 }
+                redSum += FastColor.ABGR32.red(abgr);
+                greenSum += FastColor.ABGR32.green(abgr);
+                blueSum += FastColor.ABGR32.blue(abgr);
+                taken++;
             }
-            return n == 0L ? new Vector3f(0.7F, 0.7F, 0.7F) : new Vector3f((float) r / n / 255.0F, (float) g / n / 255.0F, (float) b / n / 255.0F);
-        });
+        }
+
+        if (taken == 0) {
+            return new Vector3f(FALLBACK_TINT);
+        }
+
+        float scale = taken * 255.0F;
+        return new Vector3f(redSum / scale, greenSum / scale, blueSum / scale);
     }
 }

@@ -10,42 +10,55 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.AABB;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
+import java.util.function.Supplier;
 
 public class MillstoneBlockItem extends BlockItem {
     private static final int OUTLINE_COLOR = 0xFFD82C;
+    private static final int MESSAGE_COLOR = 0xFF5C6C;
+    private static final String OUTLINE_KEY = "millstone";
 
     public MillstoneBlockItem(Block block, Item.Properties properties) {
         super(block, properties);
     }
 
-    @Override
-    public InteractionResult place(BlockPlaceContext context) {
-        InteractionResult result = super.place(context);
-        if (result != InteractionResult.FAIL) {
-            return result;
-        }
+    private static void explainFailure(@Nullable Player player, BlockPos origin) {
+        AABB footprint = new AABB(origin).inflate(1.0, 0.0, 1.0);
+        Outliner outliner = Outliner.getInstance();
+        outliner.showAABB(Pair.of(OUTLINE_KEY, origin), footprint).colored(OUTLINE_COLOR);
 
-        BlockPlaceContext raised = BlockPlaceContext.at(context, context.getClickedPos().above(), Direction.UP);
-        result = super.place(raised);
-        if (result != InteractionResult.FAIL) {
-            return result;
+        if (player == null) {
+            return;
         }
-
-        if (context.getLevel().isClientSide) {
-            showBounds(context);
-        }
-        return result;
+        Component reason = Component.translatable("message.manual_labour.millstone_space").withColor(MESSAGE_COLOR);
+        player.displayClientMessage(reason, true);
     }
 
-    private static void showBounds(BlockPlaceContext context) {
-        BlockPos pos = context.getClickedPos();
-        AABB bounds = new AABB(pos).inflate(1.0, 0.0, 1.0);
-        Outliner.getInstance().showAABB(Pair.of("millstone", pos), bounds).colored(OUTLINE_COLOR);
-        Player player = context.getPlayer();
-        if (player != null) {
-            player.displayClientMessage(Component.translatable("message.manual_labour.millstone_space").withColor(0xFF5C6C), true);
+    @Override
+    public InteractionResult place(BlockPlaceContext context) {
+        Level level = context.getLevel();
+        BlockPos clicked = context.getClickedPos();
+
+        List<Supplier<BlockPlaceContext>> attempts = List.of(
+                () -> context,
+                () -> BlockPlaceContext.at(context, clicked.above(), Direction.UP));
+
+        InteractionResult lastResult = InteractionResult.FAIL;
+        for (Supplier<BlockPlaceContext> attempt : attempts) {
+            lastResult = super.place(attempt.get());
+            if (lastResult != InteractionResult.FAIL) {
+                return lastResult;
+            }
         }
+
+        if (level.isClientSide) {
+            explainFailure(context.getPlayer(), clicked);
+        }
+        return lastResult;
     }
 }

@@ -1,8 +1,5 @@
 package com.evandev.manual_labour.compat.create.impl.millstone;
 
-import com.evandev.manual_labour.compat.create.impl.millstone.MillstoneBlockEntity;
-import com.evandev.manual_labour.registry.ModBlockEntities;
-import com.evandev.manual_labour.registry.ModBlocks;
 import com.mojang.serialization.MapCodec;
 import com.simibubi.create.content.kinetics.base.KineticBlock;
 import com.simibubi.create.foundation.block.IBE;
@@ -37,16 +34,68 @@ import org.jetbrains.annotations.Nullable;
 public class MillstoneBlock extends KineticBlock implements IBE<MillstoneBlockEntity> {
     public static final MapCodec<MillstoneBlock> CODEC = simpleCodec(MillstoneBlock::new);
 
+    private static final VoxelShape BASE_SHAPE = Block.box(0, 0, 0, 16, 8, 16);
+    private static final int ASSEMBLY_DELAY = 1;
+
     public MillstoneBlock(Properties properties) {
         super(properties);
+    }
+
+    private static BlockState ringStateFor(BlockPos offset) {
+        BlockState blank = CreateContent.MILLSTONE_STRUCTURAL.get().defaultBlockState();
+        Direction inward = MillstoneStructure.baseFacing(offset);
+        boolean diagonal = MillstoneStructure.isCorner(offset);
+        return blank.setValue(MillstoneStructuralBlock.FACING, inward)
+                .setValue(MillstoneStructuralBlock.CORNER, diagonal);
+    }
+
+    private static boolean claimRingCell(ServerLevel level, BlockPos ringPos, BlockState desired) {
+        BlockState occupant = level.getBlockState(ringPos);
+        if (occupant == desired) {
+            return true;
+        }
+        boolean cellIsAvailable = occupant.is(desired.getBlock()) || occupant.canBeReplaced();
+        if (!cellIsAvailable) {
+            return false;
+        }
+        level.setBlockAndUpdate(ringPos, desired);
+        return true;
+    }
+
+    private static void disassembleRing(Level level, BlockPos pos) {
+        MillstoneStructuralBlock structural = CreateContent.MILLSTONE_STRUCTURAL.get();
+        for (BlockPos offset : MillstoneStructure.ALL_OFFSETS) {
+            BlockPos ringPos = pos.offset(offset);
+            if (level.getBlockState(ringPos).is(structural)) {
+                level.setBlockAndUpdate(ringPos, Blocks.AIR.defaultBlockState());
+            }
+        }
+    }
+
+    static ItemInteractionResult offerHeldItem(@Nullable MillstoneBlockEntity millstone, Player player,
+                                               InteractionHand hand, ItemStack stack, boolean clientSide) {
+        if (millstone == null) {
+            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        }
+        ItemInteractionResult insertion = millstone.insertByHand(player, hand, stack);
+        if (insertion.consumesAction()) {
+            return insertion;
+        }
+        if (millstone.extractByHand(player).consumesAction()) {
+            return ItemInteractionResult.sidedSuccess(clientSide);
+        }
+        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+    }
+
+    @Nullable
+    private static MillstoneBlockEntity lookup(BlockGetter level, BlockPos pos) {
+        return level.getBlockEntity(pos) instanceof MillstoneBlockEntity millstone ? millstone : null;
     }
 
     @Override
     protected @NotNull MapCodec<? extends Block> codec() {
         return CODEC;
     }
-
-    private static final VoxelShape BASE_SHAPE = Block.box(0, 0, 0, 16, 8, 16);
 
     @Override
     protected @NotNull VoxelShape getOcclusionShape(@NotNull BlockState state, @NotNull BlockGetter level, @NotNull BlockPos pos) {
@@ -86,84 +135,63 @@ public class MillstoneBlock extends KineticBlock implements IBE<MillstoneBlockEn
     @Nullable
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
+        BlockPos origin = context.getClickedPos();
         Level level = context.getLevel();
-        BlockPos pos = context.getClickedPos();
-        for (BlockPos offset : MillstoneStructure.ALL_OFFSETS) {
-            if (!level.getBlockState(pos.offset(offset)).canBeReplaced()) {
-                return null;
-            }
+        boolean footprintIsClear = MillstoneStructure.ALL_OFFSETS.stream()
+                .map(origin::offset)
+                .allMatch(ringPos -> level.getBlockState(ringPos).canBeReplaced());
+        return footprintIsClear ? defaultBlockState() : null;
+    }
+
+    private void queueAssembly(LevelAccessor level, BlockPos pos) {
+        if (level.getBlockTicks().hasScheduledTick(pos, this)) {
+            return;
         }
-        return defaultBlockState();
+        level.scheduleTick(pos, this, ASSEMBLY_DELAY);
     }
 
     @Override
     public void onPlace(BlockState state, @NotNull Level level, @NotNull BlockPos pos, BlockState oldState, boolean movedByPiston) {
         super.onPlace(state, level, pos, oldState, movedByPiston);
-        if (!level.getBlockTicks().hasScheduledTick(pos, this)) {
-            level.scheduleTick(pos, this, 1);
-        }
+        queueAssembly(level, pos);
     }
 
     @Override
     protected @NotNull BlockState updateShape(BlockState state, @NotNull Direction direction, @NotNull BlockState neighborState, @NotNull LevelAccessor level, @NotNull BlockPos pos, @NotNull BlockPos neighborPos) {
-        if (level instanceof Level realLevel && !realLevel.isClientSide && !realLevel.getBlockTicks().hasScheduledTick(pos, this)) {
-            realLevel.scheduleTick(pos, this, 1);
+        if (level instanceof Level realLevel && !realLevel.isClientSide) {
+            queueAssembly(realLevel, pos);
         }
         return super.updateShape(state, direction, neighborState, level, pos, neighborPos);
     }
 
     @Override
     protected void tick(@NotNull BlockState state, @NotNull ServerLevel level, @NotNull BlockPos pos, @NotNull RandomSource random) {
-        for (BlockPos offset : MillstoneStructure.BASE_OFFSETS) {
-            BlockPos target = pos.offset(offset);
-            BlockState expected = CreateContent.MILLSTONE_STRUCTURAL.get().defaultBlockState()
-                    .setValue(MillstoneStructuralBlock.FACING, MillstoneStructure.baseFacing(offset))
-                    .setValue(MillstoneStructuralBlock.CORNER, MillstoneStructure.isCorner(offset));
-            if (!placePiece(level, pos, target, expected)) {
-                return;
+        for (BlockPos offset : MillstoneStructure.ALL_OFFSETS) {
+            if (claimRingCell(level, pos.offset(offset), ringStateFor(offset))) {
+                continue;
             }
+            level.destroyBlock(pos, true);
+            return;
         }
-    }
-
-    private boolean placePiece(ServerLevel level, BlockPos controllerPos, BlockPos target, BlockState expected) {
-        BlockState current = level.getBlockState(target);
-        if (current == expected) {
-            return true;
-        }
-        if (current.is(expected.getBlock()) || current.canBeReplaced()) {
-            level.setBlockAndUpdate(target, expected);
-            return true;
-        }
-        level.destroyBlock(controllerPos, true);
-        return false;
     }
 
     @Override
-    public void updateEntityAfterFallOn(@NotNull BlockGetter level, @NotNull Entity entity) {
-        super.updateEntityAfterFallOn(level, entity);
-        if (entity.level().isClientSide || !(entity instanceof ItemEntity itemEntity) || !entity.isAlive()) {
-            return;
+    public void onRemove(BlockState state, @NotNull Level level, @NotNull BlockPos pos, BlockState newState, boolean movedByPiston) {
+        boolean stillAMillstone = state.is(newState.getBlock());
+        if (!stillAMillstone) {
+            MillstoneBlockEntity millstone = lookup(level, pos);
+            if (millstone != null) {
+                millstone.dropBuffers();
+            }
+            disassembleRing(level, pos);
         }
-        if (level.getBlockEntity(entity.blockPosition()) instanceof MillstoneBlockEntity millstone) {
-            millstone.tryInsertItemEntity(itemEntity);
-        } else if (level.getBlockEntity(entity.blockPosition().below()) instanceof MillstoneBlockEntity millstoneBelow) {
-            millstoneBelow.tryInsertItemEntity(itemEntity);
-        }
+        super.onRemove(state, level, pos, newState, movedByPiston);
     }
 
     @Override
     protected @NotNull ItemInteractionResult useItemOn(@NotNull ItemStack stack, @NotNull BlockState state, Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull InteractionHand hand, @NotNull BlockHitResult hitResult) {
-        if (level.getBlockEntity(pos) instanceof MillstoneBlockEntity millstone) {
-            ItemInteractionResult res = millstone.insertByHand(player, hand, stack);
-            if (res.consumesAction()) {
-                return res;
-            }
-            InteractionResult extractRes = millstone.extractByHand(player);
-            if (extractRes.consumesAction()) {
-                return ItemInteractionResult.sidedSuccess(level.isClientSide);
-            }
-        }
-        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        MillstoneBlockEntity millstone = level.getBlockEntity(pos) instanceof MillstoneBlockEntity be ? be : null;
+        return offerHeldItem(millstone, player, hand, stack, level.isClientSide);
     }
 
     @Override
@@ -175,19 +203,18 @@ public class MillstoneBlock extends KineticBlock implements IBE<MillstoneBlockEn
     }
 
     @Override
-    public void onRemove(BlockState state, @NotNull Level level, @NotNull BlockPos pos, BlockState newState, boolean movedByPiston) {
-        if (!state.is(newState.getBlock())) {
-            if (level.getBlockEntity(pos) instanceof MillstoneBlockEntity millstone) {
-                millstone.dropBuffers();
-            }
-            for (BlockPos offset : MillstoneStructure.ALL_OFFSETS) {
-                BlockPos target = pos.offset(offset);
-                BlockState piece = level.getBlockState(target);
-                if (piece.is(CreateContent.MILLSTONE_STRUCTURAL.get())) {
-                    level.setBlockAndUpdate(target, Blocks.AIR.defaultBlockState());
-                }
-            }
+    public void updateEntityAfterFallOn(@NotNull BlockGetter level, @NotNull Entity entity) {
+        super.updateEntityAfterFallOn(level, entity);
+        if (entity.level().isClientSide || !entity.isAlive() || !(entity instanceof ItemEntity itemEntity)) {
+            return;
         }
-        super.onRemove(state, level, pos, newState, movedByPiston);
+        BlockPos landedOn = entity.blockPosition();
+        MillstoneBlockEntity millstone = lookup(level, landedOn);
+        if (millstone == null) {
+            millstone = lookup(level, landedOn.below());
+        }
+        if (millstone != null) {
+            millstone.tryInsertItemEntity(itemEntity);
+        }
     }
 }

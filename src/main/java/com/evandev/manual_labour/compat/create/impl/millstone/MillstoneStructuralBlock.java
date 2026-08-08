@@ -17,7 +17,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DirectionalBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -34,7 +33,9 @@ import org.jetbrains.annotations.Nullable;
 public class MillstoneStructuralBlock extends DirectionalBlock {
     public static final BooleanProperty CORNER = BooleanProperty.create("corner");
     public static final MapCodec<MillstoneStructuralBlock> CODEC = simpleCodec(MillstoneStructuralBlock::new);
+
     private static final VoxelShape BASE_SHAPE = Block.box(0, 0, 0, 16, 8, 16);
+    private static final int MAX_CHAIN_HOPS = 4;
 
     public MillstoneStructuralBlock(Properties properties) {
         super(properties);
@@ -45,19 +46,44 @@ public class MillstoneStructuralBlock extends DirectionalBlock {
 
     @Nullable
     public static BlockPos getMaster(BlockGetter level, BlockPos pos, BlockState state) {
-        BlockPos cursor = pos;
-        BlockState cursorState = state;
-        for (int i = 0; i < 4; i++) {
-            if (cursorState.getBlock() instanceof MillstoneBlock) {
-                return cursor;
+        int hopsRemaining = MAX_CHAIN_HOPS;
+        BlockPos.MutableBlockPos cursor = pos.mutable();
+        BlockState here = state;
+
+        while (true) {
+            Block block = here.getBlock();
+            if (block instanceof MillstoneBlock) {
+                return cursor.immutable();
             }
-            if (!(cursorState.getBlock() instanceof MillstoneStructuralBlock)) {
+            if (hopsRemaining-- <= 0 || !(block instanceof MillstoneStructuralBlock)) {
                 return null;
             }
-            cursor = cursor.relative(cursorState.getValue(FACING));
-            cursorState = level.getBlockState(cursor);
+            cursor.move(here.getValue(FACING));
+            here = level.getBlockState(cursor);
         }
-        return cursorState.getBlock() instanceof MillstoneBlock ? cursor : null;
+    }
+
+    @Nullable
+    private static MillstoneBlockEntity masterEntity(BlockGetter level, BlockPos pos, BlockState state) {
+        BlockPos master = getMaster(level, pos, state);
+        if (master == null) {
+            return null;
+        }
+        return level.getBlockEntity(master) instanceof MillstoneBlockEntity millstone ? millstone : null;
+    }
+
+    private static void collapseFrom(LevelAccessor level, BlockPos pos, BlockState state, boolean dropResources) {
+        BlockPos controller = getMaster(level, pos, state);
+        if (controller != null) {
+            level.destroyBlock(controller, dropResources);
+        }
+    }
+
+    private void scheduleValidation(LevelAccessor level, BlockPos pos) {
+        if (level.getBlockTicks().hasScheduledTick(pos, this)) {
+            return;
+        }
+        level.scheduleTick(pos, this, 1);
     }
 
     @Override
@@ -86,28 +112,25 @@ public class MillstoneStructuralBlock extends DirectionalBlock {
 
     @Override
     public @NotNull BlockState playerWillDestroy(@NotNull Level level, @NotNull BlockPos pos, @NotNull BlockState state, @NotNull Player player) {
-        BlockPos master = getMaster(level, pos, state);
-        if (master != null && !level.isClientSide) {
-            level.destroyBlock(master, !player.isCreative());
+        if (!level.isClientSide) {
+            collapseFrom(level, pos, state, !player.isCreative());
         }
         return super.playerWillDestroy(level, pos, state, player);
     }
 
     @Override
     protected void onRemove(BlockState state, @NotNull Level level, @NotNull BlockPos pos, BlockState newState, boolean movedByPiston) {
-        if (!state.is(newState.getBlock())) {
-            BlockPos master = getMaster(level, pos, state);
-            if (master != null) {
-                level.destroyBlock(master, true);
-            }
+        boolean replacedByDifferentBlock = !state.is(newState.getBlock());
+        if (replacedByDifferentBlock) {
+            collapseFrom(level, pos, state, true);
         }
         super.onRemove(state, level, pos, newState, movedByPiston);
     }
 
     @Override
     protected @NotNull BlockState updateShape(@NotNull BlockState state, @NotNull Direction direction, @NotNull BlockState neighborState, @NotNull LevelAccessor level, @NotNull BlockPos pos, @NotNull BlockPos neighborPos) {
-        if (!stillValid(level, pos, state) && !level.getBlockTicks().hasScheduledTick(pos, this)) {
-            level.scheduleTick(pos, this, 1);
+        if (!stillValid(level, pos, state)) {
+            scheduleValidation(level, pos);
         }
         return state;
     }
@@ -115,48 +138,37 @@ public class MillstoneStructuralBlock extends DirectionalBlock {
     @Override
     protected void tick(@NotNull BlockState state, @NotNull ServerLevel level, @NotNull BlockPos pos, @NotNull RandomSource random) {
         if (!stillValid(level, pos, state)) {
-            level.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState());
+            level.removeBlock(pos, false);
         }
     }
 
     @Override
     public void updateEntityAfterFallOn(@NotNull BlockGetter level, @NotNull Entity entity) {
         super.updateEntityAfterFallOn(level, entity);
-        if (entity.level().isClientSide || !(entity instanceof ItemEntity itemEntity) || !entity.isAlive()) {
+        if (entity.level().isClientSide || !entity.isAlive() || !(entity instanceof ItemEntity itemEntity)) {
             return;
         }
-        BlockPos masterPos = getMaster(level, entity.blockPosition(), level.getBlockState(entity.blockPosition()));
-        if (masterPos == null) {
-            masterPos = getMaster(level, entity.blockPosition().below(), level.getBlockState(entity.blockPosition().below()));
+
+        BlockPos landedOn = entity.blockPosition();
+        MillstoneBlockEntity millstone = masterEntity(level, landedOn, level.getBlockState(landedOn));
+        if (millstone == null) {
+            BlockPos below = landedOn.below();
+            millstone = masterEntity(level, below, level.getBlockState(below));
         }
-        if (masterPos != null && level.getBlockEntity(masterPos) instanceof MillstoneBlockEntity millstone) {
+        if (millstone != null) {
             millstone.tryInsertItemEntity(itemEntity);
         }
     }
 
     @Override
     protected @NotNull ItemInteractionResult useItemOn(@NotNull ItemStack stack, @NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull InteractionHand hand, @NotNull BlockHitResult hitResult) {
-        BlockPos master = getMaster(level, pos, state);
-        if (master != null && level.getBlockEntity(master) instanceof MillstoneBlockEntity millstone) {
-            ItemInteractionResult res = millstone.insertByHand(player, hand, stack);
-            if (res.consumesAction()) {
-                return res;
-            }
-            InteractionResult extractRes = millstone.extractByHand(player);
-            if (extractRes.consumesAction()) {
-                return ItemInteractionResult.sidedSuccess(level.isClientSide);
-            }
-        }
-        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        return MillstoneBlock.offerHeldItem(masterEntity(level, pos, state), player, hand, stack, level.isClientSide);
     }
 
     @Override
     protected @NotNull InteractionResult useWithoutItem(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull BlockHitResult hitResult) {
-        BlockPos master = getMaster(level, pos, state);
-        if (master != null && level.getBlockEntity(master) instanceof MillstoneBlockEntity millstone) {
-            return millstone.extractByHand(player);
-        }
-        return InteractionResult.PASS;
+        MillstoneBlockEntity millstone = masterEntity(level, pos, state);
+        return millstone == null ? InteractionResult.PASS : millstone.extractByHand(player);
     }
 
     @Override
