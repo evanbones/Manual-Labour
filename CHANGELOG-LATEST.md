@@ -3,6 +3,7 @@
 - Mortars can now be heated from below when Create isn't loaded, unlocking heated mixing recipes.
     - Heat sources are defined by the `#manual_labour:heat_sources` block tag.
 - Added a config option to fill and drain the Mortar's fluid instantly, like a vanilla Cauldron.
+    - Defaults to true when Create isn't installed.
 - Added a config option to disable Manual Labour Ponder scenes.
 - Mortar grinding and mixing recipes can now produce fluids through an optional `fluid_results` array.
     - `results` is now optional on both, so it's possible for a recipe to output only fluid.
