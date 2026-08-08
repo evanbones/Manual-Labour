@@ -1,5 +1,7 @@
 {
+  "schema": "1",
   "id": "manual-labour",
+  "modid": "manual_labour",
   "platforms": {
     "curseforge": "manual-labour",
     "modrinth": "manual-labour"

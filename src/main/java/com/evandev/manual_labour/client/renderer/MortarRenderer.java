@@ -68,7 +68,7 @@ public class MortarRenderer implements BlockEntityRenderer<MortarBlockEntity> {
         float ringRadius = config.itemPileRadius * (crowded ? CROWDED_RING_SPREAD : 1.0F);
 
         float basePileY = fluidSurfaceY > 0.0F
-                ? Math.max(config.itemPileY, fluidSurfaceY - config.itemFloatSinkDepth)
+                ? Math.max(FLUID_MIN_Y, fluidSurfaceY - config.itemFloatSinkDepth)
                 : config.itemPileY;
         float renderTime = AnimationTickHolder.getRenderTime(mortar.getLevel());
         float anglePartition = count > 0 ? 360.0F / count : 0.0F;
