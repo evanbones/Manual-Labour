@@ -1,0 +1,15 @@
+{
+  "values": [
+    "#minecraft:campfires",
+    "#minecraft:fire",
+    "minecraft:lava",
+    "minecraft:magma_block",
+    "minecraft:furnace",
+    "minecraft:blast_furnace",
+    "minecraft:smoker",
+    {
+      "id": "#farmersdelight:heat_sources",
+      "required": false
+    }
+  ]
+}

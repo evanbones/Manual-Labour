@@ -40,6 +40,9 @@ public class ModConfig {
     @SerializedName("ladle_stir_speed")
     public float ladleStirSpeed = 12.0F;
 
+    @SerializedName("instant_fluid_fill")
+    public boolean instantFluidFill = false;
+
     @SerializedName("use_create_milling_recipes")
     public boolean useCreateMillingRecipes = true;
 
@@ -78,6 +81,9 @@ public class ModConfig {
 
     @SerializedName("enable_manual_pressing_jei")
     public boolean enableManualPressingJei = true;
+
+    @SerializedName("enable_ponders")
+    public boolean enablePonders = true;
 
     public static ModConfig get() {
         if (INSTANCE == null) {

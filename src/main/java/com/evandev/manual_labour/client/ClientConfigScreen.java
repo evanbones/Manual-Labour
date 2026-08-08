@@ -49,7 +49,9 @@ public class ClientConfigScreen {
                 .option(createFloatOption("decorative_tool_tilt", 30.0F, 0.0F, 90.0F, 0.5F,
                         () -> ModConfig.get().decorativeToolTilt, val -> ModConfig.get().decorativeToolTilt = val))
                 .option(createFloatOption("ladle_stir_speed", 12.0F, 2.0F, 36.0F, 0.5F,
-                        () -> ModConfig.get().ladleStirSpeed, val -> ModConfig.get().ladleStirSpeed = val));
+                        () -> ModConfig.get().ladleStirSpeed, val -> ModConfig.get().ladleStirSpeed = val))
+                .option(createBoolOption("instant_fluid_fill", !CREATE, // default depends on whether or not Create is loaded
+                        () -> ModConfig.get().instantFluidFill, val -> ModConfig.get().instantFluidFill = val));
 
         ConfigCategory.Builder create = ConfigCategory.createBuilder()
                 .name(Component.translatable("config.manual_labour.category.create"))
@@ -81,7 +83,13 @@ public class ClientConfigScreen {
                 .option(createBoolOption("enable_manual_pressing_jei", true, CREATE,
                         () -> ModConfig.get().enableManualPressingJei, val -> ModConfig.get().enableManualPressingJei = val));
 
-        return builder.category(workstone.build()).category(mortar.build()).category(create.build()).category(jei.build()).build().generateScreen(parent);
+        ConfigCategory.Builder ponder = ConfigCategory.createBuilder()
+                .name(Component.translatable("config.manual_labour.category.ponder"))
+                .option(createBoolOption("enable_ponders", CREATE,
+                        () -> ModConfig.get().enablePonders, val -> ModConfig.get().enablePonders = val));
+
+        return builder.category(workstone.build()).category(mortar.build()).category(create.build())
+                .category(jei.build()).category(ponder.build()).build().generateScreen(parent);
     }
 
     private static Option<Boolean> createBoolOption(String name, boolean defaultValue, Supplier<Boolean> getter, Consumer<Boolean> setter) {

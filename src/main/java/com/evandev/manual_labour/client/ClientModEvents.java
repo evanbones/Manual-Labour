@@ -5,6 +5,7 @@ import com.evandev.manual_labour.client.renderer.MortarRenderer;
 import com.evandev.manual_labour.client.renderer.WorkstoneRenderer;
 import com.evandev.manual_labour.compat.create.CreateCompat;
 import com.evandev.manual_labour.compat.ponder.ManualLabourPonderPlugin;
+import com.evandev.manual_labour.config.ModConfig;
 import com.evandev.manual_labour.registry.ModBlockEntities;
 import net.createmod.ponder.foundation.PonderIndex;
 import net.neoforged.api.distmarker.Dist;
@@ -26,6 +27,7 @@ public class ClientModEvents {
 
     @SubscribeEvent
     public static void onClientSetup(FMLClientSetupEvent event) {
+        if (!ModConfig.get().enablePonders) return;
         PonderIndex.addPlugin(new ManualLabourPonderPlugin());
     }
 

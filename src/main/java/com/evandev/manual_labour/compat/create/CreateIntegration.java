@@ -1,5 +1,6 @@
 package com.evandev.manual_labour.compat.create;
 
+import com.evandev.manual_labour.foundation.recipe.HeatCondition;
 import com.evandev.manual_labour.recipe.MortarProcess;
 import com.evandev.manual_labour.recipe.WorkstoneProcess;
 import com.evandev.manual_labour.recipe.WorkstoneRecipe;
@@ -23,6 +24,7 @@ import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.common.SoundActions;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
@@ -105,8 +107,12 @@ public interface CreateIntegration {
     default void addMortarMixingRecipes(RecipeManager manager, List<RecipeHolder<Recipe<?>>> out) {
     }
 
-    default Optional<MortarProcess> findMortarMixing(Level level, Predicate<MortarProcess> canRun) {
+    default Optional<MortarProcess> findMortarMixing(Level level, HeatCondition availableHeat, Predicate<MortarProcess> canRun) {
         return Optional.empty();
+    }
+
+    default HeatCondition getBlazeBurnerHeat(BlockState state) {
+        return HeatCondition.NONE;
     }
 
     default boolean isBasin(BlockGetter level, BlockPos pos) {

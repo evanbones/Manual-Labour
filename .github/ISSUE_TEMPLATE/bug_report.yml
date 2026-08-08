@@ -35,10 +35,7 @@ body:
       label: Game Version
       description: The Minecraft version you were using to run the mod
       options:
-        - "1.20.1"
         - "1.21.1"
-        - "26.1"
-        - "26.2"
     validations:
       required: true
   - type: input
@@ -47,17 +44,7 @@ body:
       description: The version of the mod you were using
       placeholder: 1.0.0
     validations:
-      required: true
-  - type: dropdown
-    attributes:
-      label: Mod Loader
-      description: Which mod loader were you using?
-      options:
-        - "Forge"
-        - "Fabric"
-        - "NeoForge"
-    validations:
-      required: true
+      required: false
   - type: input
     attributes:
       label: Loader Version

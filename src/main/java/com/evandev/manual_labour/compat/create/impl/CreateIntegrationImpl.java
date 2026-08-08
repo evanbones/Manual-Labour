@@ -4,6 +4,7 @@ import com.evandev.manual_labour.compat.create.CreateIntegration;
 import com.evandev.manual_labour.compat.create.impl.millstone.*;
 import com.evandev.manual_labour.compat.create.impl.ponder.MillstonePonderScene;
 import com.evandev.manual_labour.config.ModConfig;
+import com.evandev.manual_labour.foundation.recipe.HeatCondition;
 import com.evandev.manual_labour.recipe.MortarProcess;
 import com.evandev.manual_labour.recipe.WorkstoneProcess;
 import com.evandev.manual_labour.registry.ModRecipeTypes;
@@ -22,6 +23,7 @@ import com.simibubi.create.content.kinetics.millstone.MillingRecipe;
 import com.simibubi.create.content.kinetics.mixer.MixingRecipe;
 import com.simibubi.create.content.kinetics.press.PressingRecipe;
 import com.simibubi.create.content.processing.basin.BasinBlockEntity;
+import com.simibubi.create.content.processing.burner.BlazeBurnerBlock;
 import com.simibubi.create.content.processing.burner.BlazeBurnerBlock.HeatLevel;
 import com.simibubi.create.content.processing.recipe.ProcessingRecipe;
 import com.simibubi.create.content.processing.sequenced.SequencedAssemblyRecipe;
@@ -90,6 +92,14 @@ public class CreateIntegrationImpl implements CreateIntegration {
         handler.setStackInSlot(0, stored);
         handler.setStackInSlot(1, tool);
         return new RecipeWrapper(handler);
+    }
+
+    private static HeatLevel asBlazeBurnerHeat(HeatCondition heat) {
+        return switch (heat) {
+            case NONE -> HeatLevel.NONE;
+            case HEATED -> HeatLevel.KINDLED;
+            case SUPERHEATED -> HeatLevel.SEETHING;
+        };
     }
 
     @Override
@@ -230,7 +240,7 @@ public class CreateIntegrationImpl implements CreateIntegration {
 
         manager.getAllRecipesFor(AllRecipeTypes.MIXING.<RecipeInput, MixingRecipe>getType()).forEach(r -> {
             MixingRecipe recipe = r.value();
-            if (!recipe.getRequiredHeat().testBlazeBurner(HeatLevel.NONE)) return;
+            if (!recipe.getRequiredHeat().testBlazeBurner(HeatLevel.KINDLED)) return;
             if (recipe.getFluidIngredients().size() > 1) return;
             out.add(new RecipeHolder<>(r.id(), recipe));
         });
@@ -245,20 +255,32 @@ public class CreateIntegrationImpl implements CreateIntegration {
     }
 
     @Override
-    public Optional<MortarProcess> findMortarMixing(Level level, Predicate<MortarProcess> canRun) {
+    public Optional<MortarProcess> findMortarMixing(Level level, HeatCondition availableHeat, Predicate<MortarProcess> canRun) {
         if (!ModConfig.get().useCreateMixingRecipes) return Optional.empty();
 
+        HeatLevel heat = asBlazeBurnerHeat(availableHeat);
         List<RecipeHolder<MixingRecipe>> mixingRecipes =
                 level.getRecipeManager().getAllRecipesFor(AllRecipeTypes.MIXING.<RecipeInput, MixingRecipe>getType());
         for (RecipeHolder<MixingRecipe> holder : mixingRecipes) {
             MixingRecipe recipe = holder.value();
-            if (!recipe.getRequiredHeat().testBlazeBurner(HeatLevel.NONE)) continue;
+            if (!recipe.getRequiredHeat().testBlazeBurner(heat)) continue;
 
             MortarProcess process = new CreateMortarProcess(recipe);
             if (canRun.test(process)) return Optional.of(process);
         }
 
         return Optional.empty();
+    }
+
+    @Override
+    public HeatCondition getBlazeBurnerHeat(BlockState state) {
+        if (!state.hasProperty(BlazeBurnerBlock.HEAT_LEVEL)) return HeatCondition.NONE;
+
+        return switch (state.getValue(BlazeBurnerBlock.HEAT_LEVEL)) {
+            case NONE, SMOULDERING -> HeatCondition.NONE;
+            case SEETHING -> HeatCondition.SUPERHEATED;
+            default -> HeatCondition.HEATED;
+        };
     }
 
     @Override

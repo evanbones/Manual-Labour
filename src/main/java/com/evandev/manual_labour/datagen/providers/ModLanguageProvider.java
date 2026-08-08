@@ -39,6 +39,8 @@ public class ModLanguageProvider extends LanguageProvider {
         add("config.manual_labour.option.decorative_tool_tilt.tooltip", "Tilt angle, in degrees, of a Pestle or Ladle rested decoratively on the Mortar.");
         add("config.manual_labour.option.ladle_stir_speed", "Ladle Stirring Speed");
         add("config.manual_labour.option.ladle_stir_speed.tooltip", "Speed in degrees per tick at which the Ladle rotates while stirring in a Basin or Mortar.");
+        add("config.manual_labour.option.instant_fluid_fill", "Instant Fluid Fill");
+        add("config.manual_labour.option.instant_fluid_fill.tooltip", "Snap the Mortar's fluid level straight to its new height instead of animating it, matching how a vanilla Cauldron fills and drains.");
 
         add("config.manual_labour.category.create", "Create Compatibility");
         add("config.manual_labour.requires_create", "Requires the Create mod, which is not installed.");
@@ -71,6 +73,10 @@ public class ModLanguageProvider extends LanguageProvider {
         add("config.manual_labour.option.enable_millstone_jei.tooltip", "Show the Millstone category in JEI.");
         add("config.manual_labour.option.enable_manual_pressing_jei", "Enable Manual Pressing JEI Category");
         add("config.manual_labour.option.enable_manual_pressing_jei.tooltip", "Show the Manual Pressing category in JEI.");
+
+        add("config.manual_labour.category.ponder", "Ponder");
+        add("config.manual_labour.option.enable_ponders", "Enable Ponder Scenes");
+        add("config.manual_labour.option.enable_ponders.tooltip", "Disable to hide them from the Ponder menu and item tooltips. Requires a game restart to take effect.");
 
         addBlock(ModBlocks.WORKSTONE, "Workstone");
         addBlock(ModBlocks.MORTAR, "Mortar");

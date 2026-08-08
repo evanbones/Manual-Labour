@@ -5,7 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.0.0] - 2026-08-08
+## [2.1.0] - 2026-08-07
+
+### Added
+
+- Mortars can now be heated from below when Create isn't loaded, unlocking heated mixing recipes.
+  - Heat sources are defined by the `#manual_labour:heat_sources` block tag.
+- Added a config option to fill and drain the Mortar's fluid instantly, like a vanilla Cauldron.
+- Added a config option to disable Manual Labour Ponder scenes.
+
+### Changed
+
+- Rewrote Millstone code.
+
+## [2.0.0] - 2026-08-07
 
 ### Changed
 

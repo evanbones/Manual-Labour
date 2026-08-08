@@ -28,6 +28,7 @@ The **Mortar** allows you to grind down ingredients and mix fluids.
 
 * **Pestle**: Use the Pestle inside the Mortar to crush herbs, plants, minerals, and food items into powders and dyes.
 * **Ladle**: Use the Ladle to manually mix mixtures and multi-ingredient recipes.
+* **Heat**: Place the Mortar on a lit heat source, such as a campfire, a Blaze Burner, or anything in the `#manual_labour:heat_sources` block tag, to mix recipes that require heating.
 
 ![Mortar, Pestle & Ladle Showcase](https://raw.githubusercontent.com/evanbones/Manual-Labour/refs/heads/1.21.1/images/mortar.png)
 

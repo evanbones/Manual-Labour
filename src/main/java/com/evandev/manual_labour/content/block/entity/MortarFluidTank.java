@@ -1,5 +1,6 @@
 package com.evandev.manual_labour.content.block.entity;
 
+import com.evandev.manual_labour.config.ModConfig;
 import com.evandev.manual_labour.foundation.fluid.SmartFluidTank;
 import net.createmod.catnip.animation.LerpedFloat;
 import net.createmod.catnip.animation.LerpedFloat.Chaser;
@@ -35,7 +36,11 @@ public class MortarFluidTank {
     }
 
     public void syncLevelToContents() {
-        fluidLevel.chase(tank.getFluidAmount() / (float) tank.getCapacity(), CHASE_SPEED, Chaser.EXP);
+        float target = tank.getFluidAmount() / (float) tank.getCapacity();
+        if (ModConfig.get().instantFluidFill) {
+            fluidLevel.startWithValue(target);
+        }
+        fluidLevel.chase(target, CHASE_SPEED, Chaser.EXP);
 
         if (!tank.getFluid().isEmpty()) {
             renderedFluid = tank.getFluid();
@@ -76,6 +81,9 @@ public class MortarFluidTank {
     public void readNBT(CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
         tank.readFromNBT(registries, compound.contains("TankContent") ? compound.getCompound("TankContent") : compound);
         fluidLevel.readNBT(compound.getCompound("Level"), clientPacket);
+        if (ModConfig.get().instantFluidFill) {
+            fluidLevel.startWithValue(fluidLevel.getChaseTarget());
+        }
         if (!tank.getFluid().isEmpty()) {
             renderedFluid = tank.getFluid();
         }
