@@ -16,6 +16,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.common.conditions.ModLoadedCondition;
 import net.neoforged.neoforge.common.conditions.NotCondition;
+import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
 
 import java.util.ArrayList;
@@ -102,21 +103,25 @@ public class MortarRecipeProvider {
     private static void grind(RecipeOutput output, String recipeName, ItemLike input, int processingTime,
                               ItemLike result, int count) {
         createGrindingRecipe(output, recipeName, Ingredient.of(input), processingTime,
-                List.of(new ChanceResult(new ItemStack(result, count), 1.0F)));
+                List.of(new ChanceResult(new ItemStack(result, count), 1.0F)), List.of());
     }
 
     private static void mix(RecipeOutput output, String recipeName, List<Ingredient> inputs,
                             Optional<SizedFluidIngredient> fluidInput, int processingTime,
                             ItemLike result, int count) {
         createMixingRecipe(output, recipeName, inputs, fluidInput, processingTime,
-                List.of(new ChanceResult(new ItemStack(result, count), 1.0F)));
+                List.of(new ChanceResult(new ItemStack(result, count), 1.0F)), List.of());
     }
 
-    private static void createGrindingRecipe(RecipeOutput output, String recipeName, Ingredient input, int processingTime, List<ChanceResult> resultsList) {
+    private static void createGrindingRecipe(RecipeOutput output, String recipeName, Ingredient input, int processingTime,
+                                             List<ChanceResult> resultsList, List<FluidStack> fluidResultsList) {
         NonNullList<ChanceResult> results = NonNullList.create();
         results.addAll(resultsList);
 
-        MortarGrindingRecipe recipe = new MortarGrindingRecipe("", input, processingTime, results);
+        NonNullList<FluidStack> fluidResults = NonNullList.create();
+        fluidResults.addAll(fluidResultsList);
+
+        MortarGrindingRecipe recipe = new MortarGrindingRecipe("", input, processingTime, results, fluidResults);
 
         output.accept(
                 ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "mortar/grinding/" + recipeName),
@@ -126,14 +131,18 @@ public class MortarRecipeProvider {
     }
 
     private static void createMixingRecipe(RecipeOutput output, String recipeName, List<Ingredient> inputs,
-                                           Optional<SizedFluidIngredient> fluidInput, int processingTime, List<ChanceResult> resultsList) {
+                                           Optional<SizedFluidIngredient> fluidInput, int processingTime,
+                                           List<ChanceResult> resultsList, List<FluidStack> fluidResultsList) {
         NonNullList<Ingredient> inputList = NonNullList.create();
         inputList.addAll(inputs);
 
         NonNullList<ChanceResult> results = NonNullList.create();
         results.addAll(resultsList);
 
-        MortarMixingRecipe recipe = new MortarMixingRecipe("", inputList, fluidInput, processingTime, results);
+        NonNullList<FluidStack> fluidResults = NonNullList.create();
+        fluidResults.addAll(fluidResultsList);
+
+        MortarMixingRecipe recipe = new MortarMixingRecipe("", inputList, fluidInput, processingTime, results, fluidResults);
 
         output.accept(
                 ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "mortar/mixing/" + recipeName),

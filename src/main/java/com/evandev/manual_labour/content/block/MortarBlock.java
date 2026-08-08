@@ -1,6 +1,7 @@
 package com.evandev.manual_labour.content.block;
 
 import com.evandev.manual_labour.content.block.entity.MortarBlockEntity;
+import com.evandev.manual_labour.content.block.entity.MortarFluidTank;
 import com.evandev.manual_labour.content.block.entity.MortarFluidTransfer;
 import com.evandev.manual_labour.registry.ModBlockEntities;
 import com.evandev.manual_labour.registry.ModTags;
@@ -38,7 +39,6 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.neoforged.neoforge.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -219,9 +219,11 @@ public class MortarBlock extends BaseEntityBlock implements SimpleWaterloggedBlo
 
         int itemSignal = ItemHelper.calcRedstoneFromInventory(mortar.getItemHandler());
 
-        FluidStack fluid = mortar.getFluidHandler().getFluidInTank(0);
-        int fluidSignal = fluid.isEmpty() ? 0
-                : Math.max(1, Mth.floor((float) fluid.getAmount() / MortarBlockEntity.TANK_CAPACITY * 14.0F) + 1);
+        MortarFluidTank fluidTank = mortar.getFluidTank();
+        int fluidAmount = fluidTank.getTotalAmount();
+        int fluidCapacity = fluidTank.getCapacity() * fluidTank.getSegments().size();
+        int fluidSignal = fluidAmount == 0 ? 0
+                : Math.max(1, Mth.floor((float) fluidAmount / fluidCapacity * 14.0F) + 1);
 
         return Math.max(itemSignal, fluidSignal);
     }

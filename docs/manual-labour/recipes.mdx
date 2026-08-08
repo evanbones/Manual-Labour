@@ -42,10 +42,21 @@ The file format is Create's processing recipe shape and does not change based on
 }
 ```
 
+## Mortar fluids
+
+The Mortar holds two separate 1000 mB tanks, in the same way Create's Basin does.
+
+- The **input tank** is the one you fill from the outside, with a bucket or a pipe, and the only one a `fluid_ingredient` is ever drawn from.
+- The **output tank** receives `fluid_results`. It can be drained from the outside but never filled.
+
+A recipe only runs if its entire fluid result fits in the output tank. Once that tank is full, the Mortar simply stops accepting the recipe. Empty the output tank and it picks straight back up.
+
+Both `fluid_ingredient` and `fluid_results` are optional on every recipe below. If a recipe produces only fluid, `results` can be left out entirely.
+
 ## Mortar Grinding
 **Type:** `manual_labour:mortar_grinding`
 
-This recipe takes a single ingredient. It does not need a tool slot because any Pestle will work just fine. You can also add an optional `processing_time` in ticks (the default is 100).
+This recipe takes a single ingredient. It does not need a tool slot because any Pestle will work just fine. You can also add an optional `processing_time` in ticks (the default is 100), and an optional `fluid_results` array.
 
 For Create users, this falls back to the Millstone or Crushing Wheels (though the crushing wheel fallback is disabled by default). You can toggle these with `use_create_milling_recipes` and `use_create_crushing_recipes`.
 
@@ -68,10 +79,28 @@ For Create users, this falls back to the Millstone or Crushing Wheels (though th
 }
 ```
 
+Grinding something down into a liquid works too. This one produces only fluid, so it leaves `results` out:
+
+```json
+{
+  "type": "manual_labour:mortar_grinding",
+  "ingredient": {
+    "item": "minecraft:sweet_berries"
+  },
+  "processing_time": 60,
+  "fluid_results": [
+    {
+      "id": "minecraft:water",
+      "amount": 100
+    }
+  ]
+}
+```
+
 ## Mortar Mixing
 **Type:** `manual_labour:mortar_mixing`
 
-This takes a list of item ingredients plus an optional sized fluid ingredient. You can also specify an optional `processing_time`.
+This takes a list of item ingredients plus an optional sized fluid ingredient. You can also specify an optional `processing_time` and an optional `fluid_results` array.
 
 If you have Create installed, this falls back to the Mechanical Mixer (unheated only). This can be toggled using `use_create_mixing_recipes`.
 
@@ -97,6 +126,33 @@ If you have Create installed, this falls back to the Mechanical Mixer (unheated 
         "id": "minecraft:clay_ball"
       },
       "chance": 1.0
+    }
+  ]
+}
+```
+
+A recipe can also consume one fluid and produce a different one. The ingredient is taken from the input tank and the result is placed in the output tank. Any fluid id works here:
+
+```json
+{
+  "type": "manual_labour:mortar_mixing",
+  "ingredients": [
+    {
+      "item": "minecraft:sugar"
+    },
+    {
+      "item": "minecraft:honeycomb"
+    }
+  ],
+  "fluid_ingredient": {
+    "fluid": "minecraft:water",
+    "amount": 250
+  },
+  "processing_time": 100,
+  "fluid_results": [
+    {
+      "id": "create:honey",
+      "amount": 250
     }
   ]
 }

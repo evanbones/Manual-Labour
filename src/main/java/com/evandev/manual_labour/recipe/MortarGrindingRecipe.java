@@ -15,7 +15,10 @@ import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 public class MortarGrindingRecipe implements Recipe<MortarGrindingRecipeInput> {
     public static final int DEFAULT_PROCESSING_TIME = 100;
@@ -24,16 +27,23 @@ public class MortarGrindingRecipe implements Recipe<MortarGrindingRecipeInput> {
     private final Ingredient input;
     private final int processingTime;
     private final NonNullList<ChanceResult> results;
+    private final NonNullList<FluidStack> fluidResults;
 
-    public MortarGrindingRecipe(String group, Ingredient input, int processingTime, NonNullList<ChanceResult> results) {
+    public MortarGrindingRecipe(String group, Ingredient input, int processingTime,
+                                NonNullList<ChanceResult> results, NonNullList<FluidStack> fluidResults) {
         this.group = group;
         this.input = input;
         this.processingTime = processingTime;
         this.results = results;
+        this.fluidResults = fluidResults;
     }
 
     public NonNullList<ChanceResult> getResults() {
         return results;
+    }
+
+    public NonNullList<FluidStack> getFluidResults() {
+        return fluidResults;
     }
 
     public int getProcessingTime() {
@@ -92,11 +102,14 @@ public class MortarGrindingRecipe implements Recipe<MortarGrindingRecipeInput> {
                 Codec.STRING.optionalFieldOf("group", "").forGetter(MortarGrindingRecipe::getGroup),
                 Ingredient.CODEC_NONEMPTY.fieldOf("ingredient").forGetter(r -> r.input),
                 Codec.INT.optionalFieldOf("processing_time", DEFAULT_PROCESSING_TIME).forGetter(MortarGrindingRecipe::getProcessingTime),
-                ChanceResult.CODEC.listOf().fieldOf("results").forGetter(r -> r.results)
-        ).apply(inst, (group, input, processingTime, resultsList) -> {
-            NonNullList<ChanceResult> nonNullList = NonNullList.create();
-            nonNullList.addAll(resultsList);
-            return new MortarGrindingRecipe(group, input, processingTime, nonNullList);
+                ChanceResult.CODEC.listOf().optionalFieldOf("results", List.of()).forGetter(r -> r.results),
+                FluidStack.CODEC.listOf().optionalFieldOf("fluid_results", List.of()).forGetter(r -> r.fluidResults)
+        ).apply(inst, (group, input, processingTime, resultsList, fluidResultsList) -> {
+            NonNullList<ChanceResult> results = NonNullList.create();
+            results.addAll(resultsList);
+            NonNullList<FluidStack> fluidResults = NonNullList.create();
+            fluidResults.addAll(fluidResultsList);
+            return new MortarGrindingRecipe(group, input, processingTime, results, fluidResults);
         }));
 
         public static final StreamCodec<RegistryFriendlyByteBuf, MortarGrindingRecipe> STREAM_CODEC = StreamCodec.of(
@@ -109,6 +122,10 @@ public class MortarGrindingRecipe implements Recipe<MortarGrindingRecipeInput> {
                         ItemStack.STREAM_CODEC.encode(buffer, result.stack());
                         buffer.writeFloat(result.chance());
                     }
+                    buffer.writeVarInt(recipe.fluidResults.size());
+                    for (FluidStack fluidResult : recipe.fluidResults) {
+                        FluidStack.STREAM_CODEC.encode(buffer, fluidResult);
+                    }
                 },
                 (buffer) -> {
                     String group = buffer.readUtf();
@@ -119,7 +136,12 @@ public class MortarGrindingRecipe implements Recipe<MortarGrindingRecipeInput> {
                     for (int i = 0; i < size; i++) {
                         results.add(new ChanceResult(ItemStack.STREAM_CODEC.decode(buffer), buffer.readFloat()));
                     }
-                    return new MortarGrindingRecipe(group, input, processingTime, results);
+                    int fluidResultCount = buffer.readVarInt();
+                    NonNullList<FluidStack> fluidResults = NonNullList.createWithCapacity(fluidResultCount);
+                    for (int i = 0; i < fluidResultCount; i++) {
+                        fluidResults.add(FluidStack.STREAM_CODEC.decode(buffer));
+                    }
+                    return new MortarGrindingRecipe(group, input, processingTime, results, fluidResults);
                 }
         );
 

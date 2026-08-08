@@ -153,19 +153,14 @@ public class MortarBlockEntity extends SyncedBlockEntity {
         Player player = activePlayer;
         boolean grinding = processingIsGrinding;
 
-        if (!consumeIngredients(process, true)) {
+        if (!consumeIngredients(process, true) || !acceptFluidOutputs(process, true)) {
             cancelHold();
             return;
         }
         consumeIngredients(process, false);
 
         ejectOutputs(process.rollResults(level.random));
-
-        for (FluidStack fluidResult : process.fluidResults()) {
-            if (!fluidResult.isEmpty()) {
-                fluidTank.getTank().fill(fluidResult.copy(), IFluidHandler.FluidAction.EXECUTE);
-            }
-        }
+        acceptFluidOutputs(process, false);
 
         if (!level.isClientSide && player != null && !tool.isEmpty() && level instanceof ServerLevel serverLevel) {
             tool.hurtAndBreak(1, serverLevel, player, item -> {
@@ -205,10 +200,12 @@ public class MortarBlockEntity extends SyncedBlockEntity {
     private Optional<MortarProcess> findGrindingProcessFor(ItemStack candidate) {
         Optional<RecipeHolder<MortarGrindingRecipe>> own = grindingCheck.getRecipeFor(new MortarGrindingRecipeInput(candidate), level);
         if (own.isPresent()) {
-            return Optional.of(new MortarProcess.OwnGrindingProcess(own.get().value()));
+            return Optional.<MortarProcess>of(new MortarProcess.OwnGrindingProcess(own.get().value()))
+                    .filter(process -> acceptFluidOutputs(process, true));
         }
 
-        return CreateCompat.get().findMortarGrinding(level, candidate);
+        return CreateCompat.get().findMortarGrinding(level, candidate)
+                .filter(process -> acceptFluidOutputs(process, true));
     }
 
     private Optional<MortarProcess> findMixingProcess() {
@@ -219,10 +216,35 @@ public class MortarBlockEntity extends SyncedBlockEntity {
 
         for (RecipeHolder<MortarMixingRecipe> holder : level.getRecipeManager().getAllRecipesFor(ModRecipeTypes.MORTAR_MIXING.get())) {
             MortarProcess process = new MortarProcess.OwnMixingProcess(holder.value());
-            if (consumeIngredients(process, true)) return Optional.of(process);
+            if (canRun(process)) return Optional.of(process);
         }
 
-        return CreateCompat.get().findMortarMixing(level, heat, process -> consumeIngredients(process, true));
+        return CreateCompat.get().findMortarMixing(level, heat, this::canRun);
+    }
+
+    private boolean canRun(MortarProcess process) {
+        return consumeIngredients(process, true) && acceptFluidOutputs(process, true);
+    }
+
+    private boolean acceptFluidOutputs(MortarProcess process, boolean simulate) {
+        FluidStack pending = FluidStack.EMPTY;
+
+        for (FluidStack fluidResult : process.fluidResults()) {
+            if (fluidResult.isEmpty()) continue;
+
+            if (pending.isEmpty()) {
+                pending = fluidResult.copy();
+            } else if (FluidStack.isSameFluidSameComponents(pending, fluidResult)) {
+                pending.grow(fluidResult.getAmount());
+            } else {
+                return false;
+            }
+        }
+
+        if (pending.isEmpty()) return true;
+
+        IFluidHandler.FluidAction action = simulate ? IFluidHandler.FluidAction.SIMULATE : IFluidHandler.FluidAction.EXECUTE;
+        return fluidTank.getOutputTank().fill(pending, action) == pending.getAmount();
     }
 
     private ItemStack getPrimaryItem() {
@@ -249,7 +271,7 @@ public class MortarBlockEntity extends SyncedBlockEntity {
         }
 
         for (SizedFluidIngredient fluidIngredient : process.fluidIngredients()) {
-            if (!fluidIngredient.test(fluidTank.getTank().getFluid())) return false;
+            if (!fluidIngredient.test(fluidTank.getInputTank().getFluid())) return false;
         }
 
         if (!simulate) {
@@ -257,7 +279,7 @@ public class MortarBlockEntity extends SyncedBlockEntity {
                 if (toExtract[i] > 0) inventory.extractItem(i, toExtract[i], false);
             }
             for (SizedFluidIngredient fluidIngredient : process.fluidIngredients()) {
-                fluidTank.getTank().drain(fluidIngredient.amount(), IFluidHandler.FluidAction.EXECUTE);
+                fluidTank.getInputTank().drain(fluidIngredient.amount(), IFluidHandler.FluidAction.EXECUTE);
             }
         }
 
@@ -300,8 +322,9 @@ public class MortarBlockEntity extends SyncedBlockEntity {
         }
 
         if (!processingIsGrinding) {
-            FluidStack fluid = fluidTank.getTank().getFluid();
-            if (!fluid.isEmpty() && fluid.getAmount() > 0) {
+            FluidStack fluid = fluidTank.getInputTank().getFluid();
+            if (fluid.isEmpty()) fluid = fluidTank.getOutputTank().getFluid();
+            if (!fluid.isEmpty()) {
                 serverLevel.sendParticles(CreateCompat.get().fluidParticle(fluid.copy()),
                         worldPosition.getX() + 0.5, worldPosition.getY() + 0.85, worldPosition.getZ() + 0.5,
                         2, 0.15, 0.05, 0.15, 0.0);
@@ -363,7 +386,7 @@ public class MortarBlockEntity extends SyncedBlockEntity {
         for (int i = 0; i < inventory.getSlots(); i++) {
             if (!inventory.getStackInSlot(i).isEmpty()) return false;
         }
-        return fluidTank.getTank().isEmpty();
+        return fluidTank.isEmpty();
     }
 
     public IItemHandler getItemHandler() {
@@ -371,7 +394,7 @@ public class MortarBlockEntity extends SyncedBlockEntity {
     }
 
     public IFluidHandler getFluidHandler() {
-        return fluidTank.getTank();
+        return fluidTank.getCapability();
     }
 
     public MortarFluidTank getFluidTank() {
@@ -432,7 +455,7 @@ public class MortarBlockEntity extends SyncedBlockEntity {
                 setChanged();
             }
 
-            fluidTank.getFluidLevel().forceNextSync();
+            fluidTank.forceNextSync();
             fluidTank.syncLevelToContents();
         }
     }

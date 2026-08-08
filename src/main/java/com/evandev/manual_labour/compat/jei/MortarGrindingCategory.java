@@ -13,6 +13,7 @@ import net.createmod.catnip.layout.LayoutHelper;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
+import net.neoforged.neoforge.fluids.FluidStack;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.List;
@@ -43,14 +44,19 @@ public class MortarGrindingCategory extends ManualRecipeCategory<Recipe<?>> {
                 .addIngredients(inputs.getFirst());
 
         List<ProcessingOutput> outputs = process.displayOutputs();
+        List<FluidStack> fluidOutputs = process.fluidResults();
         int xOffset = getBackground().getWidth() / 2;
         int yOffset = 86;
-        LayoutHelper layout = LayoutHelper.centeredHorizontal(outputs.size(), 1, 18, 18, 1);
+        LayoutHelper layout = LayoutHelper.centeredHorizontal(outputs.size() + fluidOutputs.size(), 1, 18, 18, 1);
         for (ProcessingOutput output : outputs) {
             builder.addSlot(RecipeIngredientRole.OUTPUT, xOffset + layout.getX() + 1, yOffset + layout.getY() + 1)
                     .setBackground(getRenderedSlot(output), -1, -1)
                     .addItemStack(output.getStack())
                     .addRichTooltipCallback(addStochasticTooltip(output));
+            layout.next();
+        }
+        for (FluidStack fluidOutput : fluidOutputs) {
+            addFluidSlot(builder, xOffset + layout.getX() + 1, yOffset + layout.getY() + 1, fluidOutput);
             layout.next();
         }
     }

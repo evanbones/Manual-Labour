@@ -161,7 +161,7 @@ public interface CreateIntegration {
 
     default boolean tryFillItemFromTank(Level level, BlockPos pos, Player player, InteractionHand hand,
                                         ItemStack held, IFluidHandler tank) {
-        FluidStack available = tank.getFluidInTank(0);
+        FluidStack available = tank.drain(Integer.MAX_VALUE, FluidAction.SIMULATE);
         if (available.isEmpty()) return false;
 
         IFluidHandlerItem handler = FluidUtil.getFluidHandler(held.copyWithCount(1)).orElse(null);

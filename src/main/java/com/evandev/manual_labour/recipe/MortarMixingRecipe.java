@@ -15,9 +15,11 @@ import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.Optional;
 
 public class MortarMixingRecipe implements Recipe<MortarMixingRecipeInput> {
@@ -28,18 +30,24 @@ public class MortarMixingRecipe implements Recipe<MortarMixingRecipeInput> {
     private final Optional<SizedFluidIngredient> fluidInput;
     private final int processingTime;
     private final NonNullList<ChanceResult> results;
+    private final NonNullList<FluidStack> fluidResults;
 
     public MortarMixingRecipe(String group, NonNullList<Ingredient> inputs, Optional<SizedFluidIngredient> fluidInput,
-                              int processingTime, NonNullList<ChanceResult> results) {
+                              int processingTime, NonNullList<ChanceResult> results, NonNullList<FluidStack> fluidResults) {
         this.group = group;
         this.inputs = inputs;
         this.fluidInput = fluidInput;
         this.processingTime = processingTime;
         this.results = results;
+        this.fluidResults = fluidResults;
     }
 
     public NonNullList<ChanceResult> getResults() {
         return results;
+    }
+
+    public NonNullList<FluidStack> getFluidResults() {
+        return fluidResults;
     }
 
     public Optional<SizedFluidIngredient> getFluidInput() {
@@ -102,13 +110,16 @@ public class MortarMixingRecipe implements Recipe<MortarMixingRecipeInput> {
                 Ingredient.CODEC_NONEMPTY.listOf().fieldOf("ingredients").forGetter(r -> r.inputs),
                 SizedFluidIngredient.FLAT_CODEC.optionalFieldOf("fluid_ingredient").forGetter(MortarMixingRecipe::getFluidInput),
                 Codec.INT.optionalFieldOf("processing_time", DEFAULT_PROCESSING_TIME).forGetter(MortarMixingRecipe::getProcessingTime),
-                ChanceResult.CODEC.listOf().fieldOf("results").forGetter(r -> r.results)
-        ).apply(inst, (group, inputsList, fluidInput, processingTime, resultsList) -> {
+                ChanceResult.CODEC.listOf().optionalFieldOf("results", List.of()).forGetter(r -> r.results),
+                FluidStack.CODEC.listOf().optionalFieldOf("fluid_results", List.of()).forGetter(r -> r.fluidResults)
+        ).apply(inst, (group, inputsList, fluidInput, processingTime, resultsList, fluidResultsList) -> {
             NonNullList<Ingredient> inputs = NonNullList.create();
             inputs.addAll(inputsList);
             NonNullList<ChanceResult> results = NonNullList.create();
             results.addAll(resultsList);
-            return new MortarMixingRecipe(group, inputs, fluidInput, processingTime, results);
+            NonNullList<FluidStack> fluidResults = NonNullList.create();
+            fluidResults.addAll(fluidResultsList);
+            return new MortarMixingRecipe(group, inputs, fluidInput, processingTime, results, fluidResults);
         }));
 
         public static final StreamCodec<RegistryFriendlyByteBuf, MortarMixingRecipe> STREAM_CODEC = StreamCodec.of(
@@ -125,6 +136,10 @@ public class MortarMixingRecipe implements Recipe<MortarMixingRecipeInput> {
                     for (ChanceResult result : recipe.results) {
                         ItemStack.STREAM_CODEC.encode(buffer, result.stack());
                         buffer.writeFloat(result.chance());
+                    }
+                    buffer.writeVarInt(recipe.fluidResults.size());
+                    for (FluidStack fluidResult : recipe.fluidResults) {
+                        FluidStack.STREAM_CODEC.encode(buffer, fluidResult);
                     }
                 },
                 (buffer) -> {
@@ -143,7 +158,12 @@ public class MortarMixingRecipe implements Recipe<MortarMixingRecipeInput> {
                     for (int i = 0; i < resultCount; i++) {
                         results.add(new ChanceResult(ItemStack.STREAM_CODEC.decode(buffer), buffer.readFloat()));
                     }
-                    return new MortarMixingRecipe(group, inputs, fluidInput, processingTime, results);
+                    int fluidResultCount = buffer.readVarInt();
+                    NonNullList<FluidStack> fluidResults = NonNullList.createWithCapacity(fluidResultCount);
+                    for (int i = 0; i < fluidResultCount; i++) {
+                        fluidResults.add(FluidStack.STREAM_CODEC.decode(buffer));
+                    }
+                    return new MortarMixingRecipe(group, inputs, fluidInput, processingTime, results, fluidResults);
                 }
         );
 

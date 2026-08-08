@@ -225,16 +225,30 @@ public class MortarRenderer implements BlockEntityRenderer<MortarBlockEntity> {
 
     private float renderFluid(MortarBlockEntity mortar, float partialTicks, PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
         MortarFluidTank tank = mortar.getFluidTank();
-        if (tank.isEmpty(partialTicks)) return 0.0F;
+        float totalUnits = tank.getTotalUnits(partialTicks);
+        if (totalUnits < 1.0F) return 0.0F;
 
-        float fill = Mth.clamp(tank.getFluidLevel().getValue(partialTicks), 0.0F, 1.0F);
+        float fill = Mth.clamp(totalUnits / (tank.getCapacity() * tank.getSegments().size()), 0.0F, 1.0F);
         fill = 1.0F - ((1.0F - fill) * (1.0F - fill));
 
         float fluidY = Mth.lerp(fill, FLUID_MIN_Y, FLUID_MAX_Y);
 
-        NeoForgeCatnipServices.FLUID_RENDERER.renderFluidBox(tank.getRenderedFluid(),
-                FLUID_MIN_X, FLUID_MIN_Y, FLUID_MIN_X, FLUID_MAX_X, fluidY, FLUID_MAX_X,
-                buffer, poseStack, packedLight, false, false);
+        float xMin = FLUID_MIN_X;
+        float xMax = FLUID_MIN_X;
+
+        for (MortarFluidTank.Segment segment : tank.getSegments()) {
+            if (segment.getRenderedFluid().isEmpty()) continue;
+
+            float units = segment.getTotalUnits(partialTicks);
+            if (units < 1.0F) continue;
+
+            xMax += Mth.clamp(units / totalUnits, 0.0F, 1.0F) * (FLUID_MAX_X - FLUID_MIN_X);
+            NeoForgeCatnipServices.FLUID_RENDERER.renderFluidBox(segment.getRenderedFluid(),
+                    xMin, FLUID_MIN_Y, FLUID_MIN_X, xMax, fluidY, FLUID_MAX_X,
+                    buffer, poseStack, packedLight, false, false);
+
+            xMin = xMax;
+        }
 
         return fluidY;
     }

@@ -53,7 +53,7 @@ public interface MortarProcess {
 
         @Override
         public List<FluidStack> fluidResults() {
-            return List.of();
+            return recipe.getFluidResults();
         }
 
         @Override
@@ -89,7 +89,7 @@ public interface MortarProcess {
 
         @Override
         public List<FluidStack> fluidResults() {
-            return List.of();
+            return recipe.getFluidResults();
         }
 
         @Override
