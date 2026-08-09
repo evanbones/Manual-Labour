@@ -1,6 +1,8 @@
 package com.evandev.manual_labour.datagen.providers;
 
 import com.evandev.manual_labour.Constants;
+import com.evandev.manual_labour.content.item.HammerMaterial;
+import com.evandev.manual_labour.registry.HammerMaterials;
 import com.evandev.manual_labour.registry.ModItems;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.PackOutput;
@@ -24,6 +26,9 @@ public class ModItemModelProvider extends ItemModelProvider {
         handheldItem(ModItems.GOLDEN_HAMMER.get());
         handheldItem(ModItems.DIAMOND_HAMMER.get());
         handheldItem(ModItems.NETHERITE_HAMMER.get());
+        for (HammerMaterial material : HammerMaterials.COMPAT) {
+            handheldItem(material.itemId());
+        }
 
         handheldItem(ModItems.PESTLE.get())
                 .transforms()
@@ -75,7 +80,10 @@ public class ModItemModelProvider extends ItemModelProvider {
     }
 
     public @NotNull ItemModelBuilder handheldItem(@NotNull Item item) {
-        String name = BuiltInRegistries.ITEM.getKey(item).getPath();
+        return handheldItem(BuiltInRegistries.ITEM.getKey(item).getPath());
+    }
+
+    public @NotNull ItemModelBuilder handheldItem(@NotNull String name) {
         return withExistingParent(name, "item/handheld")
                 .texture("layer0", modLoc("item/" + name));
     }

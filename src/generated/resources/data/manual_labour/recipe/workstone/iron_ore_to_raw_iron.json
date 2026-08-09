@@ -1,14 +1,9 @@
 {
   "type": "manual_labour:workstone",
   "ingredients": [
-    [
-      {
-        "item": "minecraft:iron_ore"
-      },
-      {
-        "item": "minecraft:deepslate_iron_ore"
-      }
-    ],
+    {
+      "tag": "c:ores/iron"
+    },
     {
       "tag": "manual_labour:hammers"
     }

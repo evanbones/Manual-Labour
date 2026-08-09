@@ -2,6 +2,7 @@ package com.evandev.manual_labour.registry;
 
 import com.evandev.manual_labour.Constants;
 import com.evandev.manual_labour.content.item.HammerItem;
+import com.evandev.manual_labour.content.item.HammerMaterial;
 import com.evandev.manual_labour.content.item.LadleItem;
 import com.evandev.manual_labour.content.item.PestleItem;
 import net.minecraft.world.item.BlockItem;
@@ -11,6 +12,9 @@ import net.minecraft.world.item.Tiers;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class ModItems {
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(Constants.MOD_ID);
@@ -29,4 +33,19 @@ public class ModItems {
 
     public static final DeferredItem<Item> PESTLE = ITEMS.register("pestle", () -> new PestleItem(new Item.Properties().durability(64)));
     public static final DeferredItem<Item> LADLE = ITEMS.register("ladle", () -> new LadleItem(new Item.Properties().durability(48)));
+
+    public static final Map<String, DeferredItem<Item>> COMPAT_HAMMERS = registerCompatHammers();
+
+    private static Map<String, DeferredItem<Item>> registerCompatHammers() {
+        Map<String, DeferredItem<Item>> hammers = new LinkedHashMap<>();
+        for (HammerMaterial material : HammerMaterials.loaded()) {
+            hammers.put(material.id(), ITEMS.register(material.itemId(), () -> new HammerItem(
+                    material.tier(),
+                    material.attackDamageModifier(),
+                    material.attackSpeedModifier(),
+                    material.properties().apply(new Item.Properties())
+            )));
+        }
+        return hammers;
+    }
 }

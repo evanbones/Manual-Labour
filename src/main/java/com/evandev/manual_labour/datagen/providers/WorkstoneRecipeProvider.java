@@ -86,11 +86,11 @@ public class WorkstoneRecipeProvider {
                 new ProcessingOutput(new ItemStack(Items.BONE_MEAL, 1), 0.50F)
         ));
 
-        hammer(output, "coal_ore_to_coal", Ingredient.of(Items.COAL_ORE, Items.DEEPSLATE_COAL_ORE), List.of(
+        hammer(output, "coal_ore_to_coal", Ingredient.of(Tags.Items.ORES_COAL), List.of(
                 new ProcessingOutput(new ItemStack(Items.COAL, 1), 1.0F),
                 new ProcessingOutput(new ItemStack(Items.COAL, 1), 0.50F)
         ));
-        hammer(output, "iron_ore_to_raw_iron", Ingredient.of(Items.IRON_ORE, Items.DEEPSLATE_IRON_ORE), List.of(
+        hammer(output, "iron_ore_to_raw_iron", Ingredient.of(Tags.Items.ORES_IRON), List.of(
                 new ProcessingOutput(new ItemStack(Items.RAW_IRON, 1), 1.0F),
                 new ProcessingOutput(new ItemStack(Items.RAW_IRON, 1), 0.35F)
         ));
@@ -98,27 +98,27 @@ public class WorkstoneRecipeProvider {
                 new ProcessingOutput(new ItemStack(Items.RAW_GOLD, 1), 1.0F),
                 new ProcessingOutput(new ItemStack(Items.RAW_GOLD, 1), 0.35F)
         ));
-        hammer(output, "copper_ore_to_raw_copper", Ingredient.of(Items.COPPER_ORE, Items.DEEPSLATE_COPPER_ORE), List.of(
+        hammer(output, "copper_ore_to_raw_copper", Ingredient.of(Tags.Items.ORES_COPPER), List.of(
                 new ProcessingOutput(new ItemStack(Items.RAW_COPPER, 3), 1.0F),
                 new ProcessingOutput(new ItemStack(Items.RAW_COPPER, 2), 0.50F)
         ));
-        hammer(output, "redstone_ore_to_redstone", Ingredient.of(Items.REDSTONE_ORE, Items.DEEPSLATE_REDSTONE_ORE), List.of(
+        hammer(output, "redstone_ore_to_redstone", Ingredient.of(Tags.Items.ORES_REDSTONE), List.of(
                 new ProcessingOutput(new ItemStack(Items.REDSTONE, 4), 1.0F),
                 new ProcessingOutput(new ItemStack(Items.REDSTONE, 2), 0.50F)
         ));
-        hammer(output, "lapis_ore_to_lapis", Ingredient.of(Items.LAPIS_ORE, Items.DEEPSLATE_LAPIS_ORE), List.of(
+        hammer(output, "lapis_ore_to_lapis", Ingredient.of(Tags.Items.ORES_LAPIS), List.of(
                 new ProcessingOutput(new ItemStack(Items.LAPIS_LAZULI, 4), 1.0F),
                 new ProcessingOutput(new ItemStack(Items.LAPIS_LAZULI, 3), 0.50F)
         ));
-        hammer(output, "diamond_ore_to_diamond", Ingredient.of(Items.DIAMOND_ORE, Items.DEEPSLATE_DIAMOND_ORE), List.of(
+        hammer(output, "diamond_ore_to_diamond", Ingredient.of(Tags.Items.ORES_DIAMOND), List.of(
                 new ProcessingOutput(new ItemStack(Items.DIAMOND, 1), 1.0F),
                 new ProcessingOutput(new ItemStack(Items.DIAMOND, 1), 0.25F)
         ));
-        hammer(output, "emerald_ore_to_emerald", Ingredient.of(Items.EMERALD_ORE, Items.DEEPSLATE_EMERALD_ORE), List.of(
+        hammer(output, "emerald_ore_to_emerald", Ingredient.of(Tags.Items.ORES_EMERALD), List.of(
                 new ProcessingOutput(new ItemStack(Items.EMERALD, 1), 1.0F),
                 new ProcessingOutput(new ItemStack(Items.EMERALD, 1), 0.25F)
         ));
-        hammer(output, "nether_quartz_ore_to_quartz", Items.NETHER_QUARTZ_ORE, List.of(
+        hammer(output, "nether_quartz_ore_to_quartz", Ingredient.of(Tags.Items.ORES_QUARTZ), List.of(
                 new ProcessingOutput(new ItemStack(Items.QUARTZ, 1), 1.0F),
                 new ProcessingOutput(new ItemStack(Items.QUARTZ, 1), 0.75F)
         ));

@@ -1,5 +1,6 @@
 package com.evandev.manual_labour.datagen.providers;
 
+import com.evandev.manual_labour.Constants;
 import com.evandev.manual_labour.compat.create.CreateCompat;
 import com.evandev.manual_labour.compat.create.impl.millstone.CreateContent;
 import com.evandev.manual_labour.registry.ModBlocks;
@@ -8,6 +9,7 @@ import com.simibubi.create.AllBlocks;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.*;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -77,7 +79,8 @@ public class ModRecipeProvider extends RecipeProvider {
                 Ingredient.of(Items.NETHERITE_INGOT),
                 RecipeCategory.TOOLS,
                 ModItems.NETHERITE_HAMMER.get()
-        ).unlocks("has_netherite_ingot", has(Items.NETHERITE_INGOT)).save(output, "netherite_hammer_smithing");
+        ).unlocks("has_netherite_ingot", has(Items.NETHERITE_INGOT))
+                .save(output, ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "netherite_hammer_smithing"));
 
         ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModBlocks.MORTAR.get())
                 .pattern("C C")

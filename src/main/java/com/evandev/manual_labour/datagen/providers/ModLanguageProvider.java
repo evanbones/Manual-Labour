@@ -3,6 +3,8 @@ package com.evandev.manual_labour.datagen.providers;
 import com.evandev.manual_labour.Constants;
 import com.evandev.manual_labour.compat.create.impl.millstone.CreateContent;
 import com.evandev.manual_labour.compat.ponder.ManualLabourPonderPlugin;
+import com.evandev.manual_labour.content.item.HammerMaterial;
+import com.evandev.manual_labour.registry.HammerMaterials;
 import com.evandev.manual_labour.registry.ModBlocks;
 import com.evandev.manual_labour.registry.ModItems;
 import net.createmod.ponder.foundation.PonderIndex;
@@ -88,6 +90,10 @@ public class ModLanguageProvider extends LanguageProvider {
         addItem(ModItems.PESTLE, "Pestle");
         addItem(ModItems.LADLE, "Ladle");
 
+        for (HammerMaterial material : HammerMaterials.COMPAT) {
+            add("item.manual_labour." + material.itemId(), capitalize(material.id()) + " Hammer");
+        }
+
         add("subtitles.manual_labour.block.workstone.hammer", "Workstone hammered");
         add("recipe.assembly.manual_labour.workstone", "Hit with %s");
         add("recipe.assembly.manual_labour.workstone.invalid", "Invalid Step");
@@ -122,5 +128,9 @@ public class ModLanguageProvider extends LanguageProvider {
     private void providePonderLang() {
         PonderIndex.addPlugin(new ManualLabourPonderPlugin());
         PonderIndex.getLangAccess().provideLang(Constants.MOD_ID, this::add);
+    }
+
+    private static String capitalize(String id) {
+        return Character.toUpperCase(id.charAt(0)) + id.substring(1);
     }
 }

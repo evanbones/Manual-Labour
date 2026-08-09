@@ -86,6 +86,7 @@ public class ManualLabour {
             event.accept(ModItems.NETHERITE_HAMMER);
             event.accept(ModItems.PESTLE);
             event.accept(ModItems.LADLE);
+            ModItems.COMPAT_HAMMERS.values().forEach(event::accept);
         }
 
         CreateCompat.get().addCreativeTabItems(event);

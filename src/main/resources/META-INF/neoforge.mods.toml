@@ -56,3 +56,17 @@ type = "optional"
 versionRange = "[6.0.10,)"
 ordering = "AFTER"
 side = "BOTH"
+
+[[dependencies.${ mod_id }]]
+modId = "caverns_and_chasms"
+type = "optional"
+versionRange = "[3.0.0,)"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies.${ mod_id }]]
+modId = "oreganized"
+type = "optional"
+versionRange = "[5.0.0,)"
+ordering = "AFTER"
+side = "BOTH"

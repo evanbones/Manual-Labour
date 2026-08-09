@@ -1,14 +1,9 @@
 {
   "type": "manual_labour:workstone",
   "ingredients": [
-    [
-      {
-        "item": "minecraft:lapis_ore"
-      },
-      {
-        "item": "minecraft:deepslate_lapis_ore"
-      }
-    ],
+    {
+      "tag": "c:ores/lapis"
+    },
     {
       "tag": "manual_labour:hammers"
     }

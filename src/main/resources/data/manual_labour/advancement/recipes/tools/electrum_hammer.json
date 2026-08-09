@@ -1,11 +1,17 @@
 {
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "oreganized"
+    }
+  ],
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_netherite_ingot": {
+    "has_electrum": {
       "conditions": {
         "items": [
           {
-            "items": "minecraft:netherite_ingot"
+            "items": "#c:ingots/electrum"
           }
         ]
       },
@@ -13,7 +19,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "minecraft:netherite_hammer_smithing"
+        "recipe": "manual_labour:electrum_hammer"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -21,12 +27,12 @@
   "requirements": [
     [
       "has_the_recipe",
-      "has_netherite_ingot"
+      "has_electrum"
     ]
   ],
   "rewards": {
     "recipes": [
-      "minecraft:netherite_hammer_smithing"
+      "manual_labour:electrum_hammer"
     ]
   }
 }

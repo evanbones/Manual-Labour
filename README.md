@@ -46,11 +46,15 @@ all the same recipes and is powered similarly to the other Create machines.
 
 ## Compatibility & Integrations
 
-* **Create** *(optional)*: Manual Labour tools are designed as manual alternatives to Create's Mechanical Press, Mechanical Mixer, and Sequenced Assembly. With Create installed the Mortar also grinds Millstone recipes, the Workstone completes Deployer and Press steps inside Sequenced Assembly, the Ladle can stir a Basin, and the Millstone becomes available. Every one of these can be toggled in the config.
+* **Create**: Manual Labour tools are designed as manual alternatives to Create's Mechanical Press, Mechanical Mixer, and Sequenced Assembly. With Create installed the Mortar also grinds Millstone recipes, the Workstone completes Deployer and Press steps inside Sequenced Assembly, the Ladle can stir a Basin, and the Millstone becomes available. Every one of these can be toggled in the config.
 * **JEI Support**: Full recipe viewer integration for all Workstone, Mortar, and Millstone recipes. Works with EMI using [TMRV](https://modrinth.com/mod/tmrv).
 * **Ponder Support**: Features interactive Ponder scenes to visually guide you through using each workstation in-game. Ponder is bundled with the mod.
 
 ![Ponder & Mod Compatibility](https://raw.githubusercontent.com/evanbones/Manual-Labour/refs/heads/1.21.1/images/ponder.png)
+
+### Hammers
+
+Hammer variants are automatically added for [Caverns and Chasms](https://modrinth.com/mod/caverns-and-chasms) and [Oreganized](https://modrinth.com/mod/oreganized) ores, thanks to BurningSulphur!
 
 ---
 
@@ -69,7 +73,9 @@ Contains code from [Create](https://modrinth.com/mod/create), used under its MIT
 
 Project commissioned by AuroraAster.
 
-All art, branding, and sounds by [Baileybun](https://modrinth.com/user/Baileybun)!
+Art, branding, and sounds by [Baileybun](https://modrinth.com/user/Baileybun)!
+
+Caverns and Chasms and Oreganized Hammer variants by [Burning_Sulphur](https://modrinth.com/user/Burning_Sulphur).
 
 ---
 

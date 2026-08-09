@@ -1,5 +1,17 @@
 {
   "values": [
+    {
+      "id": "manual_labour:silver_hammer",
+      "required": false
+    },
+    {
+      "id": "manual_labour:necromium_hammer",
+      "required": false
+    },
+    {
+      "id": "manual_labour:electrum_hammer",
+      "required": false
+    },
     "manual_labour:flint_hammer",
     "manual_labour:iron_hammer",
     "manual_labour:golden_hammer",
