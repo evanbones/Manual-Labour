@@ -1,14 +1,9 @@
 {
   "type": "manual_labour:workstone",
   "ingredients": [
-    [
-      {
-        "item": "minecraft:copper_ore"
-      },
-      {
-        "item": "minecraft:deepslate_copper_ore"
-      }
-    ],
+    {
+      "tag": "c:ores/copper"
+    },
     {
       "tag": "manual_labour:hammers"
     }
