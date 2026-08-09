@@ -2,7 +2,7 @@
   "type": "manual_labour:workstone",
   "ingredients": [
     {
-      "item": "minecraft:nether_quartz_ore"
+      "tag": "c:ores/quartz"
     },
     {
       "tag": "manual_labour:hammers"

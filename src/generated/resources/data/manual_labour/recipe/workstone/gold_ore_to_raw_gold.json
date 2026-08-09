@@ -1,14 +1,9 @@
 {
   "type": "manual_labour:workstone",
   "ingredients": [
-    [
-      {
-        "item": "minecraft:gold_ore"
-      },
-      {
-        "item": "minecraft:deepslate_gold_ore"
-      }
-    ],
+    {
+      "tag": "c:ores/gold"
+    },
     {
       "tag": "manual_labour:hammers"
     }
