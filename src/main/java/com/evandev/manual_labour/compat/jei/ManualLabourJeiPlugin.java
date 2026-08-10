@@ -108,6 +108,8 @@ public class ManualLabourJeiPlugin implements IModPlugin {
 
     @Override
     public void registerCategories(IRecipeCategoryRegistration registration) {
+        categories.clear();
+
         IGuiHelper guiHelper = registration.getJeiHelpers().getGuiHelper();
         CategorySkin.init(guiHelper);
 

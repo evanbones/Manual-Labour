@@ -6,6 +6,7 @@ import com.evandev.manual_labour.compat.jei.ItemIcon;
 import com.evandev.manual_labour.compat.jei.ManualLabourJeiPlugin;
 import com.evandev.manual_labour.compat.jei.ManualRecipeCategory;
 import com.evandev.manual_labour.config.ModConfig;
+import com.evandev.manual_labour.recipe.ManualProcessingExclusions;
 import com.evandev.manual_labour.recipe.WorkstoneRecipeLike;
 import com.evandev.manual_labour.registry.ModBlocks;
 import com.evandev.manual_labour.registry.ModRecipeTypes;
@@ -63,8 +64,13 @@ public final class CreateJeiCategories {
     private static List<RecipeHolder<AbstractCrushingRecipe>> gatherMillingRecipes() {
         RecipeManager manager = ManualLabourJeiPlugin.recipeManager();
         if (manager == null) return List.of();
-        return new ArrayList<>(manager.getAllRecipesFor(
-                AllRecipeTypes.MILLING.<RecipeInput, AbstractCrushingRecipe>getType()));
+
+        List<RecipeHolder<AbstractCrushingRecipe>> recipes = new ArrayList<>();
+        manager.getAllRecipesFor(AllRecipeTypes.MILLING.<RecipeInput, AbstractCrushingRecipe>getType())
+                .forEach(r -> {
+                    if (!ManualProcessingExclusions.isExcluded(r.id())) recipes.add(r);
+                });
+        return recipes;
     }
 
     private static List<RecipeHolder<PressingRecipe>> gatherPressingRecipes() {
@@ -81,6 +87,8 @@ public final class CreateJeiCategories {
         List<RecipeHolder<PressingRecipe>> recipes = new ArrayList<>();
         for (RecipeHolder<PressingRecipe> holder : manager.getAllRecipesFor(
                 AllRecipeTypes.PRESSING.<SingleRecipeInput, PressingRecipe>getType())) {
+            if (ManualProcessingExclusions.isExcluded(holder.id())) continue;
+
             boolean covered = false;
             for (ItemStack stack : holder.value().getIngredients().getFirst().getItems()) {
                 if (overridden.contains(stack.getItem())) {

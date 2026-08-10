@@ -33,3 +33,81 @@ This example lets you hammer cobblestone into gravel, with a 25% chance for an a
   ]
 }
 ```
+
+## Combining with Create's Sequenced Assembly
+
+With Create installed, a `manual_labour:workstone` recipe can be used as a step inside a `create:sequenced_assembly` recipe, alongside Create's own `create:deploying` steps. This lets you build recipes like "attach two ingots to an item, then hammer it into shape" for example.
+
+A sequence only needs one manually-completable step (a `manual_labour:workstone` step, or a `create:deploying`/`create:pressing` step) to show up and be completable in Manual Labour. By default the deployed item (first ingredient) is consumed; add `"keep_held_item": true` to a `create:deploying` step to keep it, e.g. for a tool that shouldn't be used up.
+
+This example turns an iron ingot into a chain by deploying two more iron ingots onto it, then hammering it:
+
+```json
+{
+  "type": "create:sequenced_assembly",
+  "ingredient": {
+    "item": "minecraft:iron_ingot"
+  },
+  "transitional_item": {
+    "id": "minecraft:iron_ingot"
+  },
+  "loops": 1,
+  "sequence": [
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "minecraft:iron_ingot"
+        },
+        {
+          "item": "minecraft:iron_ingot"
+        }
+      ],
+      "results": [
+        {
+          "id": "minecraft:iron_ingot"
+        }
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "minecraft:iron_ingot"
+        },
+        {
+          "item": "minecraft:iron_ingot"
+        }
+      ],
+      "results": [
+        {
+          "id": "minecraft:iron_ingot"
+        }
+      ]
+    },
+    {
+      "type": "manual_labour:workstone",
+      "ingredients": [
+        {
+          "item": "minecraft:iron_ingot"
+        },
+        {
+          "tag": "manual_labour:hammers"
+        }
+      ],
+      "results": [
+        {
+          "id": "minecraft:chain"
+        }
+      ]
+    }
+  ],
+  "results": [
+    {
+      "id": "minecraft:chain"
+    }
+  ]
+}
+```
+
+This recipe type doesn't exist without Create, so it has no non-Create equivalent. If you want a sequence to also work without Create, use Manual Assembly instead.
