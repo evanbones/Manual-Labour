@@ -12,6 +12,22 @@
       "id": "manual_labour:electrum_hammer",
       "required": false
     },
+    {
+      "id": "manual_labour:copper_hammer",
+      "required": false
+    },
+    {
+      "id": "manual_labour:exposed_copper_hammer",
+      "required": false
+    },
+    {
+      "id": "manual_labour:weathered_copper_hammer",
+      "required": false
+    },
+    {
+      "id": "manual_labour:oxidized_copper_hammer",
+      "required": false
+    },
     "manual_labour:flint_hammer",
     "manual_labour:iron_hammer",
     "manual_labour:golden_hammer",

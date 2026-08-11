@@ -1,6 +1,7 @@
 package com.evandev.manual_labour.datagen.providers;
 
 import com.evandev.manual_labour.Constants;
+import com.evandev.manual_labour.compat.caverns_and_chasms.CavernsAndChasmsCompat;
 import com.evandev.manual_labour.compat.create.impl.millstone.CreateContent;
 import com.evandev.manual_labour.compat.ponder.ManualLabourPonderPlugin;
 import com.evandev.manual_labour.content.item.HammerMaterial;
@@ -10,6 +11,9 @@ import com.evandev.manual_labour.registry.ModItems;
 import net.createmod.ponder.foundation.PonderIndex;
 import net.minecraft.data.PackOutput;
 import net.neoforged.neoforge.common.data.LanguageProvider;
+
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 public class ModLanguageProvider extends LanguageProvider {
 
@@ -93,6 +97,9 @@ public class ModLanguageProvider extends LanguageProvider {
         for (HammerMaterial material : HammerMaterials.COMPAT) {
             add("item.manual_labour." + material.itemId(), capitalize(material.id()) + " Hammer");
         }
+        for (String copperHammerId : CavernsAndChasmsCompat.COPPER_HAMMER_IDS) {
+            add("item.manual_labour." + copperHammerId, capitalize(copperHammerId.replace("_hammer", "")) + " Hammer");
+        }
 
         add("subtitles.manual_labour.block.workstone.hammer", "Workstone hammered");
         add("recipe.assembly.manual_labour.workstone", "Hit with %s");
@@ -131,6 +138,8 @@ public class ModLanguageProvider extends LanguageProvider {
     }
 
     private static String capitalize(String id) {
-        return Character.toUpperCase(id.charAt(0)) + id.substring(1);
+        return Arrays.stream(id.split("_"))
+                .map(word -> Character.toUpperCase(word.charAt(0)) + word.substring(1))
+                .collect(Collectors.joining(" "));
     }
 }

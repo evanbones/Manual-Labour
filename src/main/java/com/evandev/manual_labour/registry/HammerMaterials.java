@@ -19,7 +19,7 @@ public final class HammerMaterials {
                     6.0F, -3.0F, ingotTag("silver")),
 
             new HammerMaterial("necromium", "caverns_and_chasms",
-                    new SimpleTier(BlockTags.INCORRECT_FOR_NETHERITE_TOOL, 2031, 9.0F, 3.0F, 15, () -> Ingredient.of(ingotTag("necromium"))),
+                    new SimpleTier(BlockTags.INCORRECT_FOR_IRON_TOOL, 2031, 9.0F, 3.0F, 15, () -> Ingredient.of(ingotTag("necromium"))),
                     6.0F, -3.0F, ingotTag("necromium")),
 
             new HammerMaterial("electrum", "oreganized",

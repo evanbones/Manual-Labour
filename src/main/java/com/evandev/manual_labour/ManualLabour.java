@@ -1,6 +1,7 @@
 package com.evandev.manual_labour;
 
 import com.evandev.manual_labour.client.ClientConfigSetup;
+import com.evandev.manual_labour.compat.caverns_and_chasms.CavernsAndChasmsCompat;
 import com.evandev.manual_labour.compat.create.BasinStirClientState;
 import com.evandev.manual_labour.compat.create.BasinStirPayload;
 import com.evandev.manual_labour.compat.create.CreateCompat;
@@ -27,6 +28,7 @@ import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 public class ManualLabour {
     public ManualLabour(IEventBus modEventBus, ModContainer modContainer) {
         CreateCompat.init();
+        CavernsAndChasmsCompat.init();
 
         modEventBus.addListener(this::commonSetup);
         modEventBus.addListener(this::registerPayloads);
@@ -87,6 +89,7 @@ public class ManualLabour {
             event.accept(ModItems.PESTLE);
             event.accept(ModItems.LADLE);
             ModItems.COMPAT_HAMMERS.values().forEach(event::accept);
+            CavernsAndChasmsCompat.copperHammers().forEach(event::accept);
         }
 
         CreateCompat.get().addCreativeTabItems(event);

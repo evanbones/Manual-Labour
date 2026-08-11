@@ -1,6 +1,7 @@
 package com.evandev.manual_labour.datagen.providers;
 
 import com.evandev.manual_labour.Constants;
+import com.evandev.manual_labour.compat.caverns_and_chasms.CavernsAndChasmsCompat;
 import com.evandev.manual_labour.content.item.HammerMaterial;
 import com.evandev.manual_labour.registry.HammerMaterials;
 import com.evandev.manual_labour.registry.ModItems;
@@ -28,6 +29,9 @@ public class ModItemModelProvider extends ItemModelProvider {
         handheldItem(ModItems.NETHERITE_HAMMER.get());
         for (HammerMaterial material : HammerMaterials.COMPAT) {
             handheldItem(material.itemId());
+        }
+        for (String copperHammerId : CavernsAndChasmsCompat.COPPER_HAMMER_IDS) {
+            handheldItem(copperHammerId);
         }
 
         handheldItem(ModItems.PESTLE.get())

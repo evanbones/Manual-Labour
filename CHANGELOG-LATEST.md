@@ -1,4 +1,8 @@
+### Added
+
+- Added Caverns and Chasms Copper hammers and their oxidized variants (thanks, BurningSulphur!).
+
 ### Fixed
 
-- Fixed duplicate recipe registration with EMI+TMRV.
-- Fixed Create recipe exclusions not being hidden from JEI.
+- Fixed server crash when stirring Mortar with Create installed.
+- Fixed mod compatibility hammers missing tags.

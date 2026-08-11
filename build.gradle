@@ -98,6 +98,18 @@ repositories {
             includeGroup "mezz.jei"
         }
     }
+
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = "TeamAbnormals"
+                url = "https://maven.teamabnormals.com/"
+            }
+        }
+        filter {
+            includeGroup "com.teamabnormals"
+        }
+    }
 }
 
 neoForge {
@@ -152,6 +164,14 @@ dependencies {
     compileOnly "com.simibubi.create:create-${minecraft_version}:${create_version}"
     if (create_in_dev_runtime.toBoolean()) {
         runtimeOnly "com.simibubi.create:create-${minecraft_version}:${create_version}"
+    }
+
+    // Caverns and Chasms
+    compileOnly "maven.modrinth:caverns-and-chasms:${caverns_and_chasms_version}"
+    compileOnly "com.teamabnormals:blueprint:${minecraft_version}-${blueprint_version}"
+    if (caverns_and_chasms_in_dev_runtime.toBoolean()) {
+        runtimeOnly "maven.modrinth:caverns-and-chasms:${caverns_and_chasms_version}"
+        runtimeOnly "com.teamabnormals:blueprint:${minecraft_version}-${blueprint_version}"
     }
 
     jarJar(implementation("net.createmod.ponder:ponder-neoforge:${ponder_version}+mc${minecraft_version}") {

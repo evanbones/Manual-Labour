@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/handheld",
+  "textures": {
+    "layer0": "manual_labour:item/exposed_copper_hammer"
+  }
+}

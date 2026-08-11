@@ -11,7 +11,6 @@ import com.evandev.manual_labour.recipe.WorkstoneProcess;
 import com.evandev.manual_labour.registry.ModRecipeTypes;
 import com.simibubi.create.*;
 import com.simibubi.create.api.stress.BlockStressValues;
-import com.simibubi.create.content.fluids.FluidFX;
 import com.simibubi.create.content.fluids.transfer.GenericItemEmptying;
 import com.simibubi.create.content.fluids.transfer.GenericItemFilling;
 import com.simibubi.create.content.kinetics.crusher.AbstractCrushingRecipe;
@@ -31,7 +30,9 @@ import com.simibubi.create.foundation.item.TooltipModifier;
 import net.createmod.catnip.data.Pair;
 import net.createmod.ponder.api.registration.PonderSceneRegistrationHelper;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
@@ -322,7 +323,7 @@ public class CreateIntegrationImpl implements CreateIntegration {
 
     @Override
     public ParticleOptions fluidParticle(FluidStack fluid) {
-        return FluidFX.getFluidParticle(fluid);
+        return new BlockParticleOption(ParticleTypes.BLOCK, fluid.getFluid().defaultFluidState().createLegacyBlock());
     }
 
     @Override
