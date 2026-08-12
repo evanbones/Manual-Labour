@@ -156,6 +156,12 @@ public class CreateIntegrationImpl implements CreateIntegration {
             if (deployingStep.isPresent() && !ManualProcessingExclusions.isExcluded(deployingStep.get().id())) {
                 return Optional.of(CreateWorkstoneProcess.of(deployingStep.get().value()));
             }
+
+            Optional<RecipeHolder<DeployerApplicationRecipe>> standaloneDeploying =
+                    AllRecipeTypes.DEPLOYING.find(wrapper, level);
+            if (standaloneDeploying.isPresent() && !ManualProcessingExclusions.isExcluded(standaloneDeploying.get().id())) {
+                return Optional.of(CreateWorkstoneProcess.of(standaloneDeploying.get().value()));
+            }
         }
 
         return Optional.empty();

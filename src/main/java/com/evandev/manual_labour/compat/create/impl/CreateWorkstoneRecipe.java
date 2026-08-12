@@ -5,12 +5,17 @@ import com.evandev.manual_labour.foundation.recipe.ProcessingOutput;
 import com.evandev.manual_labour.recipe.WorkstoneRecipeLike;
 import com.evandev.manual_labour.recipe.WorkstoneStepDescription;
 import com.evandev.manual_labour.registry.ModBlocks;
+import com.mojang.serialization.MapCodec;
 import com.simibubi.create.compat.jei.category.sequencedAssembly.SequencedAssemblySubCategory;
-import com.simibubi.create.content.processing.recipe.ProcessingRecipeParams;
-import com.simibubi.create.content.processing.recipe.StandardProcessingRecipe;
+import com.simibubi.create.content.processing.recipe.ProcessingRecipe;
+import com.simibubi.create.content.processing.recipe.ProcessingRecipeBuilder;
 import com.simibubi.create.content.processing.sequenced.IAssemblyRecipe;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
@@ -23,11 +28,16 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
 
-public class CreateWorkstoneRecipe extends StandardProcessingRecipe<RecipeWrapper>
+public class CreateWorkstoneRecipe extends ProcessingRecipe<RecipeWrapper, WorkstoneParams>
         implements IAssemblyRecipe, WorkstoneRecipeLike {
 
-    public CreateWorkstoneRecipe(ProcessingRecipeParams params) {
+    public CreateWorkstoneRecipe(WorkstoneParams params) {
         super(WorkstoneRecipeTypeInfo.INSTANCE, params);
+    }
+
+    @Override
+    public ToolUse toolUse() {
+        return params.toolUse();
     }
 
     @Override
@@ -86,9 +96,44 @@ public class CreateWorkstoneRecipe extends StandardProcessingRecipe<RecipeWrappe
         return () -> WorkstoneAssemblySubCategory::new;
     }
 
-    public static class Serializer extends StandardProcessingRecipe.Serializer<CreateWorkstoneRecipe> {
+    public static class Serializer implements RecipeSerializer<CreateWorkstoneRecipe> {
+        private final MapCodec<CreateWorkstoneRecipe> codec;
+        private final StreamCodec<RegistryFriendlyByteBuf, CreateWorkstoneRecipe> streamCodec;
+
         public Serializer() {
-            super(CreateWorkstoneRecipe::new);
+            this.codec = ProcessingRecipe.codec(CreateWorkstoneRecipe::new, WorkstoneParams.CODEC);
+            this.streamCodec = ProcessingRecipe.streamCodec(CreateWorkstoneRecipe::new, WorkstoneParams.STREAM_CODEC);
+        }
+
+        @Override
+        public MapCodec<CreateWorkstoneRecipe> codec() {
+            return codec;
+        }
+
+        @Override
+        public StreamCodec<RegistryFriendlyByteBuf, CreateWorkstoneRecipe> streamCodec() {
+            return streamCodec;
+        }
+    }
+
+    public static class Builder extends ProcessingRecipeBuilder<WorkstoneParams, CreateWorkstoneRecipe, Builder> {
+        public Builder(ResourceLocation recipeId) {
+            super(CreateWorkstoneRecipe::new, recipeId);
+        }
+
+        public Builder toolUse(ToolUse toolUse) {
+            params.toolUse = toolUse;
+            return self();
+        }
+
+        @Override
+        protected WorkstoneParams createParams() {
+            return new WorkstoneParams();
+        }
+
+        @Override
+        public Builder self() {
+            return this;
         }
     }
 }

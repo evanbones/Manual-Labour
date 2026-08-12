@@ -184,8 +184,8 @@ public class WorkstoneRecipeProvider {
     private static void createHammerRecipe(RecipeOutput output, String recipeName, Ingredient input, List<ProcessingOutput> resultsList) {
         Ingredient tool = Ingredient.of(ModTags.Items.HAMMERS);
 
-        StandardProcessingRecipe.Builder<CreateWorkstoneRecipe> builder = new StandardProcessingRecipe.Builder<>(
-                CreateWorkstoneRecipe::new, ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, recipeName))
+        CreateWorkstoneRecipe.Builder builder = new CreateWorkstoneRecipe.Builder(
+                ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, recipeName))
                 .require(input)
                 .require(tool);
 
