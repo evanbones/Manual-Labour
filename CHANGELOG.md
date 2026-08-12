@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.1] - 2026-08-11
+
+### Added
+
+- Added support for `"tool_use": "consume"` and `"keep"` in Workstone recipes.
+    - This allows for items to be consumed during Manual Assembly sequences without requiring Create.
+
+### Changed
+
+- Tweaked action bar feedback messages.
+
 ## [2.2.0] - 2026-08-10
 
 ### Added

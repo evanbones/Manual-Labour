@@ -93,7 +93,11 @@ public class WorkstoneBlockEntity extends BlockEntity {
 
             if (!level.isClientSide) {
                 switch (process.toolUse()) {
-                    case CONSUME -> toolStack.shrink(1);
+                    case CONSUME -> {
+                        if (player == null || !player.getAbilities().instabuild) {
+                            toolStack.shrink(1);
+                        }
+                    }
                     case KEEP -> {
                     }
                     case DAMAGE -> toolStack.hurtAndBreak(1, (ServerLevel) level, player, (item) -> {
@@ -141,7 +145,7 @@ public class WorkstoneBlockEntity extends BlockEntity {
 
             if (player instanceof ServerPlayer serverPlayer) {
                 ItemStack remaining = getStoredItem();
-                if (!remaining.isEmpty()) {
+                if (!remaining.isEmpty() && remaining.getCount() > 1 && !stillInProgress) {
                     serverPlayer.displayClientMessage(Component.translatable("manual_labour.workstone.remaining_items", remaining.getCount()), true);
                 } else {
                     serverPlayer.displayClientMessage(Component.empty(), true);

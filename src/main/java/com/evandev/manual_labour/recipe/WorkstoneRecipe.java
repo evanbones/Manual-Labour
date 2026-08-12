@@ -5,6 +5,7 @@ import com.evandev.manual_labour.foundation.recipe.ProcessingRecipeData;
 import com.evandev.manual_labour.registry.ModRecipeSerializers;
 import com.evandev.manual_labour.registry.ModRecipeTypes;
 import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -20,7 +21,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public record WorkstoneRecipe(ProcessingRecipeData data) implements WorkstoneRecipeLike {
+public record WorkstoneRecipe(ProcessingRecipeData data, ToolUse toolUse) implements WorkstoneRecipeLike {
 
     @Override
     public boolean matches(@NotNull RecipeWrapper inv, @NotNull Level level) {
@@ -90,11 +91,16 @@ public record WorkstoneRecipe(ProcessingRecipeData data) implements WorkstoneRec
 
     public static class Serializer implements RecipeSerializer<WorkstoneRecipe> {
 
-        private static final MapCodec<WorkstoneRecipe> CODEC =
-                ProcessingRecipeData.CODEC.xmap(WorkstoneRecipe::new, WorkstoneRecipe::data);
+        private static final MapCodec<WorkstoneRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+                ProcessingRecipeData.CODEC.forGetter(WorkstoneRecipe::data),
+                ToolUse.CODEC.optionalFieldOf("tool_use", ToolUse.DAMAGE).forGetter(WorkstoneRecipe::toolUse)
+        ).apply(instance, WorkstoneRecipe::new));
 
-        private static final StreamCodec<RegistryFriendlyByteBuf, WorkstoneRecipe> STREAM_CODEC =
-                ProcessingRecipeData.STREAM_CODEC.map(WorkstoneRecipe::new, WorkstoneRecipe::data);
+        private static final StreamCodec<RegistryFriendlyByteBuf, WorkstoneRecipe> STREAM_CODEC = StreamCodec.composite(
+                ProcessingRecipeData.STREAM_CODEC, WorkstoneRecipe::data,
+                ToolUse.STREAM_CODEC, WorkstoneRecipe::toolUse,
+                WorkstoneRecipe::new
+        );
 
         @Override
         public @NotNull MapCodec<WorkstoneRecipe> codec() {

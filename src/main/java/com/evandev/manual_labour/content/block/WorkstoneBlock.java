@@ -90,6 +90,10 @@ public class WorkstoneBlock extends BaseEntityBlock implements SimpleWaterlogged
             return ItemInteractionResult.SUCCESS;
         }
 
+        if (workstone.processStoredItemUsingTool(mainHandStack, player)) {
+            return ItemInteractionResult.SUCCESS;
+        }
+
         if (workstone.canAddItem(mainHandStack)) {
             if (level.isClientSide) return ItemInteractionResult.CONSUME;
             ItemStack remainderStack = workstone.addItem(player.getAbilities().instabuild ? mainHandStack.copy() : mainHandStack);
@@ -97,10 +101,6 @@ public class WorkstoneBlock extends BaseEntityBlock implements SimpleWaterlogged
             Vec3 centerPos = pos.getCenter();
             level.playSound(null, centerPos.x(), centerPos.y(), centerPos.z(), SoundEvents.STONE_PLACE, SoundSource.BLOCKS, 1.0F, 0.8F);
             return ItemInteractionResult.SUCCESS;
-        } else {
-            if (workstone.processStoredItemUsingTool(mainHandStack, player)) {
-                return ItemInteractionResult.SUCCESS;
-            }
         }
         return ItemInteractionResult.CONSUME;
     }

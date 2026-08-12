@@ -3,13 +3,13 @@
 
 A recipe type for when one hit on the workstone isn't enough. The item is hit once per step, carrying a `transitional_item` between hits, and only turns into a result once the whole `sequence` has run `loops` times. So a single-step sequence with `"loops": 5` simply means "hit this five times".
 
-Each entry in `sequence` is a `manual_labour:workstone` recipe.
+Each entry in `sequence` is a `manual_labour:workstone` recipe. Steps can use `"tool_use": "consume"` to consume materials applied to the base item, or default to `"tool_use": "damage"` for hammer hits.
 
 `results` is a weighted pool. The first entry is the actual output and any others are salvage rolled instead of it. `loops` defaults to `1`.
 
 The transitional item sits on the Workstone between hits and shows its progress and next step on its tooltip.
 
-Here's an example of hammering an iron ingot 3 times, to get an iron pickaxe:
+Here's an example of crafting an iron pickaxe by applying 2 additional iron ingots and 2 sticks to an iron ingot, then hammering it:
 
 ```json
 {
@@ -18,34 +18,69 @@ Here's an example of hammering an iron ingot 3 times, to get an iron pickaxe:
     "item": "minecraft:iron_ingot"
   },
   "transitional_item": {
-    "id": "minecraft:iron_nugget"
+    "id": "minecraft:iron_ingot"
   },
-  "loops": 3,
+  "loops": 1,
   "sequence": [
     {
       "type": "manual_labour:workstone",
+      "tool_use": "consume",
       "ingredients": [
-        {
-          "item": "minecraft:iron_ingot"
-        },
-        {
-          "tag": "manual_labour:hammers"
-        }
+        { "item": "minecraft:iron_ingot" },
+        { "item": "minecraft:iron_ingot" }
       ],
       "results": [
-        {
-          "id": "minecraft:iron_nugget"
-        }
+        { "id": "minecraft:iron_ingot" }
+      ]
+    },
+    {
+      "type": "manual_labour:workstone",
+      "tool_use": "consume",
+      "ingredients": [
+        { "item": "minecraft:iron_ingot" },
+        { "item": "minecraft:iron_ingot" }
+      ],
+      "results": [
+        { "id": "minecraft:iron_ingot" }
+      ]
+    },
+    {
+      "type": "manual_labour:workstone",
+      "tool_use": "consume",
+      "ingredients": [
+        { "item": "minecraft:iron_ingot" },
+        { "item": "minecraft:stick" }
+      ],
+      "results": [
+        { "id": "minecraft:iron_ingot" }
+      ]
+    },
+    {
+      "type": "manual_labour:workstone",
+      "tool_use": "consume",
+      "ingredients": [
+        { "item": "minecraft:iron_ingot" },
+        { "item": "minecraft:stick" }
+      ],
+      "results": [
+        { "id": "minecraft:iron_ingot" }
+      ]
+    },
+    {
+      "type": "manual_labour:workstone",
+      "tool_use": "damage",
+      "ingredients": [
+        { "item": "minecraft:iron_ingot" },
+        { "tag": "manual_labour:hammers" }
+      ],
+      "results": [
+        { "id": "minecraft:iron_pickaxe" }
       ]
     }
   ],
   "results": [
     {
       "id": "minecraft:iron_pickaxe"
-    },
-    {
-      "id": "minecraft:flint",
-      "chance": 0.25
     }
   ]
 }

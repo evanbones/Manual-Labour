@@ -103,7 +103,10 @@ public class ModLanguageProvider extends LanguageProvider {
 
         add("subtitles.manual_labour.block.workstone.hammer", "Workstone hammered");
         add("recipe.assembly.manual_labour.workstone", "Hit with %s");
+        add("recipe.assembly.manual_labour.workstone.consume", "Apply %s");
+        add("recipe.assembly.manual_labour.workstone.keep", "Use %s");
         add("recipe.assembly.manual_labour.workstone.invalid", "Invalid Step");
+        add("manual_labour.ingredient.hammer", "a Hammer");
 
         add("manual_labour.recipe.assembly", "Recipe Sequence");
         add("manual_labour.recipe.assembly.progress", "Progress: %1$s/%2$s");

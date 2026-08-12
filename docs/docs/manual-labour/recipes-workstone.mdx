@@ -1,7 +1,12 @@
 # Workstone
 **Type:** `manual_labour:workstone`
 
-This takes two ingredients (the item to process, then the tool that must hit it) and an array of chance-weighted results.
+This takes two ingredients (the item to process, then the tool/item applied to it) and an array of chance-weighted results.
+
+Optionally, you can specify `"tool_use"`:
+- `"damage"` (default): Uses 1 durability on the tool.
+- `"consume"`: Consumes 1 item from the held stack.
+- `"keep"`: Uses the item without consuming or damaging it.
 
 For Create users, this falls back to Deployer steps in Sequenced Assembly, or the Mechanical Press. You can toggle this behavior with `use_create_deploying_recipes` and `use_create_pressing_recipes`. A Workstone recipe can also be a step in a Sequenced Assembly itself.
 
@@ -110,4 +115,4 @@ This example turns an iron ingot into a chain by deploying two more iron ingots 
 }
 ```
 
-This recipe type doesn't exist without Create, so it has no non-Create equivalent. If you want a sequence to also work without Create, use Manual Assembly instead.
+The `create:sequenced_assembly` recipe type requires Create to be installed. If you want a sequence to work without Create, use Manual Assembly instead.

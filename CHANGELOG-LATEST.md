@@ -1,8 +1,8 @@
 ### Added
 
-- Added Caverns and Chasms Copper hammers and their oxidized variants (thanks, BurningSulphur!).
+- Added support for `"tool_use": "consume"` (and `"keep"`) in `manual_labour:workstone` recipes.
+  - This allows for items to be consumed during Manual Assembly sequences without requiring Create.
 
-### Fixed
+### Changed
 
-- Fixed server crash when stirring Mortar with Create installed.
-- Fixed mod compatibility hammers missing tags.
+- Tweaked action bar feedback messages.
