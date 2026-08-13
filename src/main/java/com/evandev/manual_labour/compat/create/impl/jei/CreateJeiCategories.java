@@ -55,6 +55,7 @@ public final class CreateJeiCategories {
     public static void addSequencedAssemblies(RecipeManager manager, List<RecipeHolder<Recipe<?>>> out) {
         for (RecipeHolder<SequencedAssemblyRecipe> holder :
                 manager.getAllRecipesFor(AllRecipeTypes.SEQUENCED_ASSEMBLY.<RecipeWrapper, SequencedAssemblyRecipe>getType())) {
+            if (ManualProcessingExclusions.isExcluded(holder.id())) continue;
             if (CreateAssemblyView.isManual(holder.value())) {
                 out.add(new RecipeHolder<>(holder.id(), holder.value()));
             }

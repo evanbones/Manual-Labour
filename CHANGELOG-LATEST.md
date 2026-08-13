@@ -1,3 +1,3 @@
 ### Fixed
 
-- Fixed `tool_use` not working with Create installed.
+- Fixed recipe exclusions not properly hiding from JEI.
