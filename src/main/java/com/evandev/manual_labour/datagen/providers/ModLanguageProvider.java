@@ -131,6 +131,7 @@ public class ModLanguageProvider extends LanguageProvider {
         add("subtitles.manual_labour.block.millstone.loop", "Millstone turns");
         add("subtitles.manual_labour.block.millstone.use", "Millstone grinds");
         add("manual_labour.millstone.too_fast", "Too Fast");
+        add("pack.manual_labour.2d_pestle_and_ladle", "2D Pestle and Ladle");
 
         providePonderLang();
     }

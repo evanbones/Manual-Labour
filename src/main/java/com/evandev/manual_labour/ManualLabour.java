@@ -8,6 +8,11 @@ import com.evandev.manual_labour.compat.create.CreateCompat;
 import com.evandev.manual_labour.config.ModConfig;
 import com.evandev.manual_labour.recipe.ManualProcessingExclusions;
 import com.evandev.manual_labour.registry.*;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.repository.Pack;
+import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -18,6 +23,7 @@ import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+import net.neoforged.neoforge.event.AddPackFindersEvent;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
@@ -32,6 +38,7 @@ public class ManualLabour {
 
         modEventBus.addListener(this::commonSetup);
         modEventBus.addListener(this::registerPayloads);
+        modEventBus.addListener(this::addPackFinders);
 
         ModBlocks.BLOCKS.register(modEventBus);
         ModItems.ITEMS.register(modEventBus);
@@ -107,5 +114,16 @@ public class ManualLabour {
     private void commonSetup(final FMLCommonSetupEvent event) {
         ModConfig.load();
         event.enqueueWork(() -> CreateCompat.get().onCommonSetup());
+    }
+
+    private void addPackFinders(final AddPackFindersEvent event) {
+        event.addPackFinders(
+                ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "resourcepacks/2d_pestle_and_ladle"),
+                PackType.CLIENT_RESOURCES,
+                Component.translatable("pack.manual_labour.2d_pestle_and_ladle"),
+                PackSource.BUILT_IN,
+                false,
+                Pack.Position.TOP
+        );
     }
 }

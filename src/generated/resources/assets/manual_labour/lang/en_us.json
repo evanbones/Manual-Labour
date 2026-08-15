@@ -108,5 +108,6 @@
   "recipe.assembly.manual_labour.workstone.invalid": "Invalid Step",
   "subtitles.manual_labour.block.millstone.loop": "Millstone turns",
   "subtitles.manual_labour.block.millstone.use": "Millstone grinds",
+  "pack.manual_labour.2d_pestle_and_ladle": "2D Pestle and Ladle",
   "subtitles.manual_labour.block.workstone.hammer": "Workstone hammered"
 }
