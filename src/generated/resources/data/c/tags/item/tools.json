@@ -28,6 +28,22 @@
       "id": "manual_labour:oxidized_copper_hammer",
       "required": false
     },
+    {
+      "id": "manual_labour:waxed_copper_hammer",
+      "required": false
+    },
+    {
+      "id": "manual_labour:waxed_exposed_copper_hammer",
+      "required": false
+    },
+    {
+      "id": "manual_labour:waxed_weathered_copper_hammer",
+      "required": false
+    },
+    {
+      "id": "manual_labour:waxed_oxidized_copper_hammer",
+      "required": false
+    },
     "manual_labour:flint_hammer",
     "manual_labour:iron_hammer",
     "manual_labour:golden_hammer",

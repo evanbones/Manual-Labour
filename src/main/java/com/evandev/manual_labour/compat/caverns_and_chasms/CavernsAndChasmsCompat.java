@@ -12,7 +12,8 @@ public final class CavernsAndChasmsCompat {
     public static final String MOD_ID = "caverns_and_chasms";
 
     public static final List<String> COPPER_HAMMER_IDS = List.of(
-            "copper_hammer", "exposed_copper_hammer", "weathered_copper_hammer", "oxidized_copper_hammer"
+            "copper_hammer", "exposed_copper_hammer", "weathered_copper_hammer", "oxidized_copper_hammer",
+            "waxed_copper_hammer", "waxed_exposed_copper_hammer", "waxed_weathered_copper_hammer", "waxed_oxidized_copper_hammer"
     );
 
     private static final String CONTENT_IMPL = "com.evandev.manual_labour.compat.caverns_and_chasms.impl.CopperHammerContent";

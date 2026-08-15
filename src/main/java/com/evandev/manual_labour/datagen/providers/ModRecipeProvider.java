@@ -55,6 +55,14 @@ public class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy("has_iron", has(Tags.Items.INGOTS_IRON))
                 .save(output);
 
+        SimpleCookingRecipeBuilder.smelting(Ingredient.of(ModItems.IRON_HAMMER.get()), RecipeCategory.MISC, Items.IRON_NUGGET, 0.1F, 200)
+                .unlockedBy("has_iron_hammer", has(ModItems.IRON_HAMMER.get()))
+                .save(output, ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "iron_nugget_from_smelting_iron_hammer"));
+
+        SimpleCookingRecipeBuilder.blasting(Ingredient.of(ModItems.IRON_HAMMER.get()), RecipeCategory.MISC, Items.IRON_NUGGET, 0.1F, 100)
+                .unlockedBy("has_iron_hammer", has(ModItems.IRON_HAMMER.get()))
+                .save(output, ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "iron_nugget_from_blasting_iron_hammer"));
+
         ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, ModItems.GOLDEN_HAMMER.get())
                 .pattern("XXX")
                 .pattern("X|X")
@@ -63,6 +71,14 @@ public class ModRecipeProvider extends RecipeProvider {
                 .define('|', Items.STICK)
                 .unlockedBy("has_gold", has(Tags.Items.INGOTS_GOLD))
                 .save(output);
+
+        SimpleCookingRecipeBuilder.smelting(Ingredient.of(ModItems.GOLDEN_HAMMER.get()), RecipeCategory.MISC, Items.GOLD_NUGGET, 0.1F, 200)
+                .unlockedBy("has_golden_hammer", has(ModItems.GOLDEN_HAMMER.get()))
+                .save(output, ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "gold_nugget_from_smelting_golden_hammer"));
+
+        SimpleCookingRecipeBuilder.blasting(Ingredient.of(ModItems.GOLDEN_HAMMER.get()), RecipeCategory.MISC, Items.GOLD_NUGGET, 0.1F, 100)
+                .unlockedBy("has_golden_hammer", has(ModItems.GOLDEN_HAMMER.get()))
+                .save(output, ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "gold_nugget_from_blasting_golden_hammer"));
 
         ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, ModItems.DIAMOND_HAMMER.get())
                 .pattern("XXX")

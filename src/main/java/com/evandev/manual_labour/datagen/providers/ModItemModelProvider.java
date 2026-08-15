@@ -31,7 +31,12 @@ public class ModItemModelProvider extends ItemModelProvider {
             handheldItem(material.itemId());
         }
         for (String copperHammerId : CavernsAndChasmsCompat.COPPER_HAMMER_IDS) {
-            handheldItem(copperHammerId);
+            if (copperHammerId.startsWith("waxed_")) {
+                withExistingParent(copperHammerId, "item/handheld")
+                        .texture("layer0", modLoc("item/" + copperHammerId.substring("waxed_".length())));
+            } else {
+                handheldItem(copperHammerId);
+            }
         }
 
         handheldItem(ModItems.PESTLE.get())

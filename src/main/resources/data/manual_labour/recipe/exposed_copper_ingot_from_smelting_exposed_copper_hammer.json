@@ -1,0 +1,19 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "caverns_and_chasms"
+    }
+  ],
+  "type": "minecraft:smelting",
+  "category": "misc",
+  "cookingtime": 200,
+  "experience": 0.1,
+  "ingredient": {
+    "item": "manual_labour:exposed_copper_hammer"
+  },
+  "result": {
+    "count": 1,
+    "id": "caverns_and_chasms:exposed_copper_ingot"
+  }
+}

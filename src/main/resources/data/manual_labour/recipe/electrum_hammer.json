@@ -5,23 +5,18 @@
       "modid": "oreganized"
     }
   ],
-  "type": "minecraft:crafting_shaped",
-  "category": "equipment",
-  "key": {
-    "X": {
-      "tag": "c:ingots/electrum"
-    },
-    "|": {
-      "item": "minecraft:stick"
-    }
+  "type": "minecraft:smithing_transform",
+  "addition": {
+    "tag": "c:ingots/electrum"
   },
-  "pattern": [
-    "XXX",
-    "X|X",
-    " | "
-  ],
+  "base": {
+    "item": "manual_labour:diamond_hammer"
+  },
   "result": {
     "count": 1,
     "id": "manual_labour:electrum_hammer"
+  },
+  "template": {
+    "item": "oreganized:electrum_upgrade_smithing_template"
   }
 }

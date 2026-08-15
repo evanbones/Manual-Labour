@@ -1,0 +1,26 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "oreganized"
+    },
+    {
+      "type": "neoforge:not",
+      "value": {
+        "type": "neoforge:mod_loaded",
+        "modid": "caverns_and_chasms"
+      }
+    }
+  ],
+  "type": "minecraft:blasting",
+  "category": "misc",
+  "cookingtime": 50,
+  "experience": 0.1,
+  "ingredient": {
+    "item": "manual_labour:silver_hammer"
+  },
+  "result": {
+    "count": 1,
+    "id": "oreganized:silver_nugget"
+  }
+}

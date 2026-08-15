@@ -1,7 +1,8 @@
 ### Added
 
-- Added an optional 2D Pestle and Ladle resource pack (@RareSauce).
+- Added waxed variants for copper hammers.
+- Added Hammer smelting recipes.
 
 ### Fixed
 
-- Removed debug recipe that was accidentally left in (whoops!).
+- Fixed Electrum hammer recipe.

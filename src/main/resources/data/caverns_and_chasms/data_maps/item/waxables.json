@@ -1,0 +1,16 @@
+{
+  "values": {
+    "manual_labour:copper_hammer": {
+      "waxed": "manual_labour:waxed_copper_hammer"
+    },
+    "manual_labour:exposed_copper_hammer": {
+      "waxed": "manual_labour:waxed_exposed_copper_hammer"
+    },
+    "manual_labour:weathered_copper_hammer": {
+      "waxed": "manual_labour:waxed_weathered_copper_hammer"
+    },
+    "manual_labour:oxidized_copper_hammer": {
+      "waxed": "manual_labour:waxed_oxidized_copper_hammer"
+    }
+  }
+}
