@@ -44,7 +44,7 @@ public final class CreateJeiCategories {
         if (ModConfig.get().enableManualPressingJei && ModConfig.get().useCreatePressingRecipes) {
             sink.accept(new ManualPressingCategory(ManualLabourJeiPlugin.info(
                     ManualLabourJeiPlugin.id("manual_pressing"),
-                    new EmptyBackground(177, 70),
+                    new EmptyBackground(117, 70),
                     new ItemIcon(() -> new ItemStack(ModBlocks.WORKSTONE.get())),
                     CreateJeiCategories::gatherPressingRecipes,
                     List.of(() -> new ItemStack(ModBlocks.WORKSTONE.get()))

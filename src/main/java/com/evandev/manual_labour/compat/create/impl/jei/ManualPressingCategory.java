@@ -27,22 +27,21 @@ public class ManualPressingCategory extends ManualRecipeCategory<PressingRecipe>
     @Override
     public void setRecipe(IRecipeLayoutBuilder builder, PressingRecipe recipe, IFocusGroup focuses) {
         builder
-                .addSlot(RecipeIngredientRole.INPUT, 27, 51)
-                .setBackground(getRenderedSlot(), -1, -1)
-                .addIngredients(recipe.getIngredients().getFirst());
-        builder
-                .addSlot(RecipeIngredientRole.INPUT, 51, 5)
+                .addSlot(RecipeIngredientRole.INPUT, 43, 8)
                 .setBackground(getRenderedSlot(), -1, -1)
                 .addIngredients(Ingredient.of(ModTags.Items.HAMMERS));
+        builder
+                .addSlot(RecipeIngredientRole.INPUT, 43, 31)
+                .addIngredients(recipe.getIngredients().getFirst());
 
         List<com.simibubi.create.content.processing.recipe.ProcessingOutput> results = recipe.getRollableResults();
         boolean single = results.size() == 1;
         for (int i = 0; i < results.size(); i++) {
             var result = results.get(i);
             ProcessingOutput output = new ProcessingOutput(result.getStack(), result.getChance());
-            int xOffset = i % 2 == 0 ? 0 : 19;
+            int xOffset = (single ? 9 : 0) + (i % 2 == 0 ? 0 : 19);
             int yOffset = (i / 2) * -19;
-            builder.addSlot(RecipeIngredientRole.OUTPUT, single ? 132 : 132 + xOffset, 51 + yOffset)
+            builder.addSlot(RecipeIngredientRole.OUTPUT, 77 + xOffset, 47 + yOffset)
                     .setBackground(getRenderedSlot(output), -1, -1)
                     .addItemStack(output.getStack())
                     .addRichTooltipCallback(addStochasticTooltip(output));
@@ -52,8 +51,8 @@ public class ManualPressingCategory extends ManualRecipeCategory<PressingRecipe>
     @Override
     public void draw(PressingRecipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics graphics, double mouseX, double mouseY) {
         CategorySkin skin = CategorySkin.get();
-        skin.drawShadow(graphics, 62, 57);
-        skin.drawDownArrow(graphics, 126, 29 + (recipe.getRollableResults().size() > 2 ? -19 : 0));
-        JeiBlockIcon.draw(graphics, ModBlocks.WORKSTONE.get().defaultBlockState(), getBackground().getWidth() / 2 - 13, 56, 20);
+        skin.drawShadow(graphics, 25, 54);
+        skin.drawDownArrow(graphics, recipe.getRollableResults().size() > 1 ? 73 : 80, 22 + (recipe.getRollableResults().size() > 2 ? -19 : 0));
+        JeiBlockIcon.draw(graphics, ModBlocks.WORKSTONE.get().defaultBlockState(), 38, 58, 20);
     }
 }

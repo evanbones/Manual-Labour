@@ -31,6 +31,7 @@ import java.util.*;
 public class ManualAssemblyCategory extends ManualRecipeCategory<Recipe<?>> {
 
     private static final int STEP_MARGIN = 3;
+    private static final String[] ROMANS = {"I", "II", "III", "IV", "V", "VI", "-"};
 
     private final Map<Recipe<?>, AssemblyView> views = new IdentityHashMap<>();
 
@@ -127,8 +128,11 @@ public class ManualAssemblyCategory extends ManualRecipeCategory<Recipe<?>> {
         List<AssemblyStep> steps = view.steps();
         for (int i = 0; i < steps.size(); i++) {
             AssemblyStep step = steps.get(i);
+            int stepWidth = step.width();
+            MutableComponent component = Component.literal(ROMANS[Math.min(i, 6)]);
+            graphics.drawString(font, component, font.width(component) / -2 + stepWidth / 2, 2, 0x888888, false);
             step.draw(graphics, mouseX, mouseY, i);
-            pose.translate(step.width() + STEP_MARGIN, 0, 0);
+            pose.translate(stepWidth + STEP_MARGIN, 0, 0);
         }
         pose.popPose();
 

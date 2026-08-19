@@ -1,8 +1,7 @@
-### Added
+### Changed
 
-- Added waxed variants for copper hammers.
-- Added Hammer smelting recipes.
+- Reworked manual pressing JEI category (thanks, @raspmary!)
 
 ### Fixed
 
-- Fixed Electrum hammer recipe.
+- Fixed missing step numbers in the JEI manual assembly category.
