@@ -4,15 +4,12 @@
   "key": {
     "C": {
       "item": "minecraft:cobblestone"
-    },
-    "L": {
-      "tag": "minecraft:logs"
     }
   },
   "pattern": [
     "C C",
-    "CCC",
-    "L L"
+    "C C",
+    " C "
   ],
   "result": {
     "count": 1,

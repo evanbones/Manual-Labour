@@ -100,10 +100,9 @@ public class ModRecipeProvider extends RecipeProvider {
 
         ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModBlocks.MORTAR.get())
                 .pattern("C C")
-                .pattern("CCC")
-                .pattern("L L")
+                .pattern("C C")
+                .pattern(" C ")
                 .define('C', Blocks.COBBLESTONE)
-                .define('L', ItemTags.LOGS)
                 .unlockedBy("has_cobblestone", has(Blocks.COBBLESTONE))
                 .save(output);
 
