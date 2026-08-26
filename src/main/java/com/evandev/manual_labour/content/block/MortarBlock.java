@@ -48,10 +48,7 @@ public class MortarBlock extends BaseEntityBlock implements SimpleWaterloggedBlo
     public static final MapCodec<MortarBlock> CODEC = simpleCodec(MortarBlock::new);
 
     protected static final VoxelShape SHAPE = Shapes.or(
-            Block.box(0.0D, 0.0D, 0.0D, 3.0D, 3.0D, 3.0D),
-            Block.box(13.0D, 0.0D, 0.0D, 16.0D, 3.0D, 3.0D),
-            Block.box(0.0D, 0.0D, 13.0D, 3.0D, 3.0D, 16.0D),
-            Block.box(13.0D, 0.0D, 13.0D, 16.0D, 3.0D, 16.0D),
+            Block.box(2.0D, 0.0D, 2.0D, 14.0D, 3.0D, 14.0D),
             Block.box(0.0D, 3.0D, 0.0D, 16.0D, 5.0D, 16.0D),
             Block.box(0.0D, 5.0D, 0.0D, 2.0D, 16.0D, 16.0D),
             Block.box(14.0D, 5.0D, 0.0D, 16.0D, 16.0D, 16.0D),

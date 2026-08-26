@@ -2,6 +2,7 @@ package com.evandev.manual_labour.compat.jei;
 
 import com.evandev.manual_labour.compat.create.CreateCompat;
 import com.evandev.manual_labour.content.block.MortarHeat;
+import com.evandev.manual_labour.foundation.item.ItemHelper;
 import com.evandev.manual_labour.foundation.recipe.HeatCondition;
 import com.evandev.manual_labour.foundation.recipe.ProcessingOutput;
 import com.evandev.manual_labour.recipe.MortarMixingRecipe;
@@ -11,17 +12,21 @@ import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
+import net.createmod.catnip.data.Pair;
 import net.createmod.catnip.layout.LayoutHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.ArrayList;
 import java.util.List;
 
 @ParametersAreNonnullByDefault
@@ -47,7 +52,7 @@ public class MortarMixingCategory extends ManualRecipeCategory<Recipe<?>> {
         MortarProcess process = process(recipe);
         if (process == null) return;
 
-        List<Ingredient> inputs = process.ingredients();
+        List<Pair<Ingredient, MutableInt>> inputs = ItemHelper.condenseIngredients(process.ingredients());
         List<SizedFluidIngredient> fluidInputs = process.fluidIngredients();
         List<ProcessingOutput> outputs = process.displayOutputs();
         List<FluidStack> fluidOutputs = process.fluidResults();
@@ -55,10 +60,17 @@ public class MortarMixingCategory extends ManualRecipeCategory<Recipe<?>> {
         int xOffset = getBackground().getWidth() / 2;
         LayoutHelper inputLayout = LayoutHelper.centeredHorizontal(inputs.size() + fluidInputs.size(), 1, 18, 18, 1);
 
-        for (Ingredient ingredient : inputs) {
+        for (Pair<Ingredient, MutableInt> ingredient : inputs) {
+            List<ItemStack> stacks = new ArrayList<>();
+            for (ItemStack itemStack : ingredient.getFirst().getItems()) {
+                ItemStack copy = itemStack.copy();
+                copy.setCount(ingredient.getSecond().getValue());
+                stacks.add(copy);
+            }
+
             builder.addSlot(RecipeIngredientRole.INPUT, xOffset + inputLayout.getX() + 1, 10 + inputLayout.getY() + 1)
                     .setBackground(getRenderedSlot(), -1, -1)
-                    .addIngredients(ingredient);
+                    .addItemStacks(stacks);
             inputLayout.next();
         }
         for (SizedFluidIngredient fluidInput : fluidInputs) {

@@ -1,7 +1,4 @@
 ### Changed
 
-- Reworked manual pressing JEI category (thanks, @raspmary!)
-
-### Fixed
-
-- Fixed missing step numbers in the JEI manual assembly category.
+- Remodeled and retextured the Mortar.
+- Tweaked the JEI recipes. 

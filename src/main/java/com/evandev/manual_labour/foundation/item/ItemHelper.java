@@ -1,12 +1,18 @@
 package com.evandev.manual_labour.foundation.item;
 
+import net.createmod.catnip.data.Pair;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Containers;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.items.IItemHandler;
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Helpers from Create's {@code com.simibubi.create.foundation.item.ItemHelper}
@@ -15,6 +21,29 @@ import org.jetbrains.annotations.Nullable;
 public final class ItemHelper {
 
     private ItemHelper() {
+    }
+
+    public static List<Pair<Ingredient, MutableInt>> condenseIngredients(List<Ingredient> recipeIngredients) {
+        List<Pair<Ingredient, MutableInt>> actualIngredients = new ArrayList<>();
+        Ingredients:
+        for (Ingredient igd : recipeIngredients) {
+            for (Pair<Ingredient, MutableInt> pair : actualIngredients) {
+                ItemStack[] stacks1 = pair.getFirst().getItems();
+                ItemStack[] stacks2 = igd.getItems();
+                if (stacks1.length != stacks2.length)
+                    continue;
+                for (int i = 0; i <= stacks1.length; i++) {
+                    if (i == stacks1.length) {
+                        pair.getSecond().increment();
+                        continue Ingredients;
+                    }
+                    if (!ItemStack.matches(stacks1[i], stacks2[i]))
+                        break;
+                }
+            }
+            actualIngredients.add(Pair.of(igd, new MutableInt(1)));
+        }
+        return actualIngredients;
     }
 
     public static int calcRedstoneFromInventory(@Nullable IItemHandler inv) {
