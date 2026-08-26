@@ -1,10 +1,7 @@
 {
   "neoforge:conditions": [
     {
-      "type": "neoforge:not",
-      "value": {
-        "type": "manual_labour:legacy_mortar_model"
-      }
+      "type": "manual_labour:legacy_mortar_model"
     }
   ],
   "type": "minecraft:crafting_shaped",
@@ -12,12 +9,15 @@
   "key": {
     "C": {
       "item": "minecraft:cobblestone"
+    },
+    "L": {
+      "tag": "minecraft:logs"
     }
   },
   "pattern": [
     "C C",
-    "C C",
-    " C "
+    "CCC",
+    "L L"
   ],
   "result": {
     "count": 1,

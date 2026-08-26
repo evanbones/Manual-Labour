@@ -1,10 +1,7 @@
 {
   "neoforge:conditions": [
     {
-      "type": "neoforge:not",
-      "value": {
-        "type": "manual_labour:legacy_mortar_model"
-      }
+      "type": "manual_labour:legacy_mortar_model"
     }
   ],
   "parent": "minecraft:recipes/root",
@@ -21,7 +18,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "manual_labour:mortar"
+        "recipe": "manual_labour:mortar_legacy"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -34,7 +31,7 @@
   ],
   "rewards": {
     "recipes": [
-      "manual_labour:mortar"
+      "manual_labour:mortar_legacy"
     ]
   }
 }

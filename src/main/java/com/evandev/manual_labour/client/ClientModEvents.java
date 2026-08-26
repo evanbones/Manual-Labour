@@ -7,7 +7,9 @@ import com.evandev.manual_labour.compat.create.CreateCompat;
 import com.evandev.manual_labour.compat.ponder.ManualLabourPonderPlugin;
 import com.evandev.manual_labour.config.ModConfig;
 import com.evandev.manual_labour.registry.ModBlockEntities;
+import com.evandev.manual_labour.registry.ModBlocks;
 import net.createmod.ponder.foundation.PonderIndex;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -35,7 +37,15 @@ public class ClientModEvents {
     public static void registerAdditionalModels(ModelEvent.RegisterAdditional event) {
         event.register(ModToolModels.LADLE);
         event.register(ModToolModels.PESTLE);
+        event.register(MortarModelSwitcher.LEGACY);
         CreateCompat.client().registerAdditionalModels(event);
+    }
+
+    @SubscribeEvent
+    public static void modifyMortarModel(ModelEvent.ModifyBakingResult event) {
+        var mortarId = BuiltInRegistries.BLOCK.getKey(ModBlocks.MORTAR.get());
+        event.getModels().replaceAll((location, model) ->
+                location.id().equals(mortarId) ? new MortarModelSwitcher(model) : model);
     }
 
     @SubscribeEvent

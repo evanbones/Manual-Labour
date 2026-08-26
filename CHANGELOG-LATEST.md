@@ -1,4 +1,7 @@
+### Added
+
+- Added a config option to revert the Mortar model.
+
 ### Changed
 
-- Remodeled and retextured the Mortar.
-- Tweaked the JEI recipes. 
+- Changed the default Mortar recipe.

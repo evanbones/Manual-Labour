@@ -3,6 +3,7 @@ package com.evandev.manual_labour.datagen.providers;
 import com.evandev.manual_labour.Constants;
 import com.evandev.manual_labour.compat.create.CreateCompat;
 import com.evandev.manual_labour.compat.create.impl.millstone.CreateContent;
+import com.evandev.manual_labour.foundation.condition.LegacyMortarModelCondition;
 import com.evandev.manual_labour.registry.ModBlocks;
 import com.evandev.manual_labour.registry.ModItems;
 import com.simibubi.create.AllBlocks;
@@ -16,6 +17,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Blocks;
 import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.common.conditions.ModLoadedCondition;
+import net.neoforged.neoforge.common.conditions.NotCondition;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletableFuture;
@@ -98,13 +100,24 @@ public class ModRecipeProvider extends RecipeProvider {
         ).unlocks("has_netherite_ingot", has(Items.NETHERITE_INGOT))
                 .save(output, ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "netherite_hammer_smithing"));
 
+        RecipeOutput currentMortarOutput = output.withConditions(new NotCondition(new LegacyMortarModelCondition()));
         ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModBlocks.MORTAR.get())
                 .pattern("C C")
                 .pattern("C C")
                 .pattern(" C ")
                 .define('C', Blocks.COBBLESTONE)
                 .unlockedBy("has_cobblestone", has(Blocks.COBBLESTONE))
-                .save(output);
+                .save(currentMortarOutput);
+
+        RecipeOutput legacyMortarOutput = output.withConditions(new LegacyMortarModelCondition());
+        ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModBlocks.MORTAR.get())
+                .pattern("C C")
+                .pattern("CCC")
+                .pattern("L L")
+                .define('C', Blocks.COBBLESTONE)
+                .define('L', ItemTags.LOGS)
+                .unlockedBy("has_cobblestone", has(Blocks.COBBLESTONE))
+                .save(legacyMortarOutput, ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "mortar_legacy"));
 
         ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, ModItems.PESTLE.get())
                 .pattern("L")

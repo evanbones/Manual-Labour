@@ -51,7 +51,9 @@ public class ClientConfigScreen {
                 .option(createFloatOption("ladle_stir_speed", 12.0F, 2.0F, 36.0F, 0.5F,
                         () -> ModConfig.get().ladleStirSpeed, val -> ModConfig.get().ladleStirSpeed = val))
                 .option(createBoolOption("instant_fluid_fill", !CREATE, // default depends on whether or not Create is loaded
-                        () -> ModConfig.get().instantFluidFill, val -> ModConfig.get().instantFluidFill = val));
+                        () -> ModConfig.get().instantFluidFill, val -> ModConfig.get().instantFluidFill = val))
+                .option(createBoolOption("legacy_mortar_model", false,
+                        () -> ModConfig.get().legacyMortarModel, val -> ModConfig.get().legacyMortarModel = val));
 
         ConfigCategory.Builder create = ConfigCategory.createBuilder()
                 .name(Component.translatable("config.manual_labour.category.create"))

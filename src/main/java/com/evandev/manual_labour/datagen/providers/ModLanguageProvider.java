@@ -28,7 +28,7 @@ public class ModLanguageProvider extends LanguageProvider {
         add("config.manual_labour.option.workstone_hammer_cooldown_ticks", "Workstone Hammer Cooldown (Ticks)");
         add("config.manual_labour.option.workstone_hammer_cooldown_ticks.tooltip", "Cooldown in ticks applied to tools when processing items on the Workstone. Set to 0 to disable.");
         add("manual_labour.workstone.remaining_items", "%s left...");
-        add("config.manual_labour.category.mortar", "Mortar Tools");
+        add("config.manual_labour.category.mortar", "Mortar");
         add("config.manual_labour.option.item_pile_y", "Item Pile Height");
         add("config.manual_labour.option.item_pile_y.tooltip", "Vertical position of items piled inside the Mortar, relative to the block's base.");
         add("config.manual_labour.option.item_pile_radius", "Item Pile Spread Radius");
@@ -47,6 +47,8 @@ public class ModLanguageProvider extends LanguageProvider {
         add("config.manual_labour.option.ladle_stir_speed.tooltip", "Speed in degrees per tick at which the Ladle rotates while stirring in a Basin or Mortar.");
         add("config.manual_labour.option.instant_fluid_fill", "Instant Fluid Fill");
         add("config.manual_labour.option.instant_fluid_fill.tooltip", "Snap the Mortar's fluid level straight to its new height instead of animating it, matching how a vanilla Cauldron fills and drains.");
+        add("config.manual_labour.option.legacy_mortar_model", "Legacy Mortar Model");
+        add("config.manual_labour.option.legacy_mortar_model.tooltip", "Revert the Mortar's model, textures, hitbox, and crafting recipe to the older pre-remodel version.");
 
         add("config.manual_labour.category.create", "Create Compatibility");
         add("config.manual_labour.requires_create", "Requires the Create mod, which is not installed.");
