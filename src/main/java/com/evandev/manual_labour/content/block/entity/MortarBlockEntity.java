@@ -229,24 +229,14 @@ public class MortarBlockEntity extends SyncedBlockEntity {
     }
 
     private boolean acceptFluidOutputs(MortarProcess process, boolean simulate) {
-        FluidStack pending = FluidStack.EMPTY;
+        IFluidHandler.FluidAction action = simulate ? IFluidHandler.FluidAction.SIMULATE : IFluidHandler.FluidAction.EXECUTE;
 
         for (FluidStack fluidResult : process.fluidResults()) {
             if (fluidResult.isEmpty()) continue;
-
-            if (pending.isEmpty()) {
-                pending = fluidResult.copy();
-            } else if (FluidStack.isSameFluidSameComponents(pending, fluidResult)) {
-                pending.grow(fluidResult.getAmount());
-            } else {
-                return false;
-            }
+            if (fluidTank.fillOutput(fluidResult, action) != fluidResult.getAmount()) return false;
         }
 
-        if (pending.isEmpty()) return true;
-
-        IFluidHandler.FluidAction action = simulate ? IFluidHandler.FluidAction.SIMULATE : IFluidHandler.FluidAction.EXECUTE;
-        return fluidTank.getOutputTank().fill(pending, action) == pending.getAmount();
+        return true;
     }
 
     private ItemStack getPrimaryItem() {
@@ -273,7 +263,7 @@ public class MortarBlockEntity extends SyncedBlockEntity {
         }
 
         for (SizedFluidIngredient fluidIngredient : process.fluidIngredients()) {
-            if (!fluidIngredient.test(fluidTank.getInputTank().getFluid())) return false;
+            if (!fluidTank.hasInputFluid(fluidIngredient)) return false;
         }
 
         if (!simulate) {
@@ -281,7 +271,7 @@ public class MortarBlockEntity extends SyncedBlockEntity {
                 if (toExtract[i] > 0) inventory.extractItem(i, toExtract[i], false);
             }
             for (SizedFluidIngredient fluidIngredient : process.fluidIngredients()) {
-                fluidTank.getInputTank().drain(fluidIngredient.amount(), IFluidHandler.FluidAction.EXECUTE);
+                fluidTank.drainInput(fluidIngredient, IFluidHandler.FluidAction.EXECUTE);
             }
         }
 
@@ -324,8 +314,8 @@ public class MortarBlockEntity extends SyncedBlockEntity {
         }
 
         if (!processingIsGrinding) {
-            FluidStack fluid = fluidTank.getInputTank().getFluid();
-            if (fluid.isEmpty()) fluid = fluidTank.getOutputTank().getFluid();
+            FluidStack fluid = fluidTank.getAnyInputFluid();
+            if (fluid.isEmpty()) fluid = fluidTank.getAnyOutputFluid();
             if (!fluid.isEmpty()) {
                 serverLevel.sendParticles(CreateCompat.get().fluidParticle(fluid.copy()),
                         worldPosition.getX() + 0.5, worldPosition.getY() + 0.85, worldPosition.getZ() + 0.5,

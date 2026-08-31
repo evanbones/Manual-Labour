@@ -1,7 +1,8 @@
 ### Added
 
-- Added a config option to revert the Mortar model.
+- Added Turkish translation.
+- Mortars now support multiple fluids.
 
-### Changed
+### Removed
 
-- Changed the default Mortar recipe.
+- Removed old Mortar design.

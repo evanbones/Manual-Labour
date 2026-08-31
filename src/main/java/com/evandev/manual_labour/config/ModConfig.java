@@ -43,9 +43,6 @@ public class ModConfig {
     @SerializedName("instant_fluid_fill")
     public boolean instantFluidFill = false;
 
-    @SerializedName("legacy_mortar_model")
-    public boolean legacyMortarModel = false;
-
     @SerializedName("use_create_milling_recipes")
     public boolean useCreateMillingRecipes = true;
 

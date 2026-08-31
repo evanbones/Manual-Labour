@@ -228,7 +228,7 @@ public class MortarRenderer implements BlockEntityRenderer<MortarBlockEntity> {
         float totalUnits = tank.getTotalUnits(partialTicks);
         if (totalUnits < 1.0F) return 0.0F;
 
-        float fill = Mth.clamp(totalUnits / (tank.getCapacity() * tank.getSegments().size()), 0.0F, 1.0F);
+        float fill = Mth.clamp(totalUnits / (tank.getCapacity() * MortarFluidTank.SEGMENTS_PER_SIDE), 0.0F, 1.0F);
         fill = 1.0F - ((1.0F - fill) * (1.0F - fill));
 
         float fluidY = Mth.lerp(fill, FLUID_MIN_Y, FLUID_MAX_Y);

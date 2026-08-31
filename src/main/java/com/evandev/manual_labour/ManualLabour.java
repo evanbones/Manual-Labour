@@ -47,7 +47,6 @@ public class ManualLabour {
         ModRecipeSerializers.RECIPE_SERIALIZERS.register(modEventBus);
         ModDataComponents.DATA_COMPONENTS.register(modEventBus);
         ModSounds.SOUNDS.register(modEventBus);
-        ModConditions.CONDITION_SERIALIZERS.register(modEventBus);
 
         CreateCompat.get().registerContent();
 

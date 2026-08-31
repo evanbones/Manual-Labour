@@ -6,7 +6,6 @@ import com.evandev.manual_labour.content.block.entity.MortarFluidTransfer;
 import com.evandev.manual_labour.registry.ModBlockEntities;
 import com.evandev.manual_labour.registry.ModTags;
 import com.evandev.manual_labour.compat.create.CreateCompat;
-import com.evandev.manual_labour.config.ModConfig;
 import com.evandev.manual_labour.foundation.item.ItemHelper;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
@@ -57,18 +56,6 @@ public class MortarBlock extends BaseEntityBlock implements SimpleWaterloggedBlo
             Block.box(2.0D, 5.0D, 14.0D, 14.0D, 16.0D, 16.0D)
     );
 
-    protected static final VoxelShape LEGACY_SHAPE = Shapes.or(
-            Block.box(0.0D, 0.0D, 0.0D, 3.0D, 3.0D, 3.0D),
-            Block.box(13.0D, 0.0D, 0.0D, 16.0D, 3.0D, 3.0D),
-            Block.box(0.0D, 0.0D, 13.0D, 3.0D, 3.0D, 16.0D),
-            Block.box(13.0D, 0.0D, 13.0D, 16.0D, 3.0D, 16.0D),
-            Block.box(0.0D, 3.0D, 0.0D, 16.0D, 5.0D, 16.0D),
-            Block.box(0.0D, 5.0D, 0.0D, 2.0D, 16.0D, 16.0D),
-            Block.box(14.0D, 5.0D, 0.0D, 16.0D, 16.0D, 16.0D),
-            Block.box(2.0D, 5.0D, 0.0D, 14.0D, 16.0D, 2.0D),
-            Block.box(2.0D, 5.0D, 14.0D, 14.0D, 16.0D, 16.0D)
-    );
-
     public MortarBlock(Properties properties) {
         super(properties);
         this.registerDefaultState(this.getStateDefinition().any().setValue(FACING, Direction.NORTH).setValue(WATERLOGGED, false));
@@ -81,7 +68,7 @@ public class MortarBlock extends BaseEntityBlock implements SimpleWaterloggedBlo
 
     @Override
     public @NotNull VoxelShape getShape(@NotNull BlockState state, @NotNull BlockGetter level, @NotNull BlockPos pos, @NotNull CollisionContext context) {
-        return ModConfig.get().legacyMortarModel ? LEGACY_SHAPE : SHAPE;
+        return SHAPE;
     }
 
     @Override

@@ -4,6 +4,7 @@ import com.evandev.manual_labour.compat.create.CreateIntegration;
 import com.evandev.manual_labour.compat.create.impl.millstone.*;
 import com.evandev.manual_labour.compat.create.impl.ponder.MillstonePonderScene;
 import com.evandev.manual_labour.config.ModConfig;
+import com.evandev.manual_labour.content.block.entity.MortarFluidTank;
 import com.evandev.manual_labour.foundation.recipe.HeatCondition;
 import com.evandev.manual_labour.recipe.ManualProcessingExclusions;
 import com.evandev.manual_labour.recipe.MortarProcess;
@@ -256,7 +257,7 @@ public class CreateIntegrationImpl implements CreateIntegration {
         manager.getAllRecipesFor(AllRecipeTypes.MIXING.<RecipeInput, MixingRecipe>getType()).forEach(r -> {
             MixingRecipe recipe = r.value();
             if (!recipe.getRequiredHeat().testBlazeBurner(HeatLevel.KINDLED)) return;
-            if (recipe.getFluidIngredients().size() > 1) return;
+            if (recipe.getFluidIngredients().size() > MortarFluidTank.SEGMENTS_PER_SIDE) return;
             if (ManualProcessingExclusions.isExcluded(r.id())) return;
             out.add(new RecipeHolder<>(r.id(), recipe));
         });

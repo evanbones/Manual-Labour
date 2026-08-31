@@ -31,8 +31,6 @@
   "config.manual_labour.option.enable_workstone_jei.tooltip": "Show the Workstone category in JEI.",
   "config.manual_labour.option.instant_fluid_fill": "Instant Fluid Fill",
   "config.manual_labour.option.instant_fluid_fill.tooltip": "Snap the Mortar's fluid level straight to its new height instead of animating it, matching how a vanilla Cauldron fills and drains.",
-  "config.manual_labour.option.legacy_mortar_model": "Legacy Mortar Model",
-  "config.manual_labour.option.legacy_mortar_model.tooltip": "Revert the Mortar's model, textures, hitbox, and crafting recipe to the older pre-remodel version.",
   "config.manual_labour.option.item_float_sink_depth": "Item Float Sink Depth",
   "config.manual_labour.option.item_float_sink_depth.tooltip": "How deep floating items sink into fluids inside the Mortar.",
   "config.manual_labour.option.item_pile_radius": "Item Pile Spread Radius",
