@@ -1,5 +1,6 @@
 package com.evandev.manual_labour.content.block.entity;
 
+import com.evandev.manual_labour.compat.create.BasinStirClientState;
 import com.evandev.manual_labour.compat.create.CreateCompat;
 import com.evandev.manual_labour.content.block.MortarBlock;
 import com.evandev.manual_labour.content.block.MortarHeat;
@@ -397,7 +398,9 @@ public class MortarBlockEntity extends SyncedBlockEntity {
         ItemHelper.dropContents(level, pos, inventory);
         if (!decorativeTool.isEmpty()) {
             Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), decorativeTool);
+            decorativeTool = ItemStack.EMPTY;
         }
+        activeTool = ItemStack.EMPTY;
     }
 
     public boolean isProcessing() {
@@ -434,6 +437,14 @@ public class MortarBlockEntity extends SyncedBlockEntity {
         if (!isProcessing() || level == null) return 0F;
         float elapsed = (level.getGameTime() - processingStartGameTime) + partialTick;
         return Mth.clamp(elapsed / processingDuration, 0F, 1F);
+    }
+
+    @Override
+    public void setRemoved() {
+        super.setRemoved();
+        if (level != null && level.isClientSide) {
+            BasinStirClientState.remove(worldPosition);
+        }
     }
 
     @Override

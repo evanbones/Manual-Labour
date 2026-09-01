@@ -25,11 +25,13 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
+import net.minecraft.world.Containers;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -237,6 +239,15 @@ public class WorkstoneBlockEntity extends BlockEntity {
     public ItemStack removeItem() {
         isItemCarvingWorkstone = false;
         return inventory.extractItem(0, inventory.getSlotLimit(0), false);
+    }
+
+    public void dropContents(Level level, BlockPos pos) {
+        ItemStack stored = getStoredItem();
+        if (!stored.isEmpty()) {
+            Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), stored);
+            inventory.setStackInSlot(0, ItemStack.EMPTY);
+        }
+        isItemCarvingWorkstone = false;
     }
 
     public boolean carveToolOnWorkstone(ItemStack toolStack) {

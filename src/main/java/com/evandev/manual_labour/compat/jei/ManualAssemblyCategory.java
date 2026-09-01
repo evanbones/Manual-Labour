@@ -146,19 +146,24 @@ public class ManualAssemblyCategory extends ManualRecipeCategory<Recipe<?>> {
 
         List<Component> tooltip = new ArrayList<>();
         boolean singleOutput = view.outputChance() == 1;
+        boolean willRepeat = view.loops() > 1;
 
-        int xOffset = -7;
+        int xOffset = singleOutput ? 0 : -7;
         int minX = 150 + xOffset;
+        int maxX = minX + 18;
         int minY = 90;
-        if (!singleOutput && mouseX >= minX && mouseX < minX + 18 && mouseY >= minY && mouseY < minY + 18) {
+        int maxY = minY + 18;
+        if (!singleOutput && mouseX >= minX && mouseX < maxX && mouseY >= minY && mouseY < maxY) {
             tooltip.add(Component.translatable("manual_labour.recipe.assembly.junk"));
             tooltip.add(chanceComponent(1 - view.outputChance()));
             return tooltip;
         }
 
         minX = 55 + xOffset;
+        maxX = minX + 65;
         minY = 92;
-        if (view.loops() > 1 && mouseX >= minX && mouseX < minX + 65 && mouseY >= minY && mouseY < minY + 24) {
+        maxY = minY + 24;
+        if (willRepeat && mouseX >= minX && mouseX < maxX && mouseY >= minY && mouseY < maxY) {
             tooltip.add(Component.translatable("manual_labour.recipe.assembly.repeat", view.loops()));
             return tooltip;
         }

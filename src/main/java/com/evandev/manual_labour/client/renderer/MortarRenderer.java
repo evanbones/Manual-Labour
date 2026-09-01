@@ -126,6 +126,8 @@ public class MortarRenderer implements BlockEntityRenderer<MortarBlockEntity> {
             } else {
                 renderDecorativeTool(mortar, decorativeTool, poseStack, buffer, packedLight, packedOverlay);
             }
+        } else {
+            BasinStirClientState.remove(pos);
         }
 
         if (buffer instanceof MultiBufferSource.BufferSource bufferSource) {

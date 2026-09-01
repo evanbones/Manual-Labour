@@ -53,6 +53,6 @@ public record WorkstoneAssemblyStep(Ingredient tool, Component description) impl
 
     @Override
     public List<Ingredient> loopIngredients() {
-        return List.of(tool);
+        return tool.isEmpty() ? List.of() : List.of(tool);
     }
 }

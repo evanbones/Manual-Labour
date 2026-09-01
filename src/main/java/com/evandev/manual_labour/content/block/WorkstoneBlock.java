@@ -109,7 +109,7 @@ public class WorkstoneBlock extends BaseEntityBlock implements SimpleWaterlogged
     public void onRemove(BlockState state, @NotNull Level level, @NotNull BlockPos pos, BlockState newState, boolean isMoving) {
         if (!state.is(newState.getBlock())) {
             if (level.getBlockEntity(pos) instanceof WorkstoneBlockEntity workstone) {
-                Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), workstone.getStoredItem());
+                workstone.dropContents(level, pos);
                 level.updateNeighbourForOutputSignal(pos, this);
             }
             super.onRemove(state, level, pos, newState, isMoving);

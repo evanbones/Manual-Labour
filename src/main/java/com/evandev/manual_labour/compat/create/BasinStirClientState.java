@@ -50,6 +50,10 @@ public final class BasinStirClientState {
         }
     }
 
+    public static void remove(BlockPos pos) {
+        STIR_STATES.remove(pos);
+    }
+
     public static Map<BlockPos, StirState> stirStates() {
         return STIR_STATES;
     }

@@ -1,8 +1,4 @@
-### Added
+### Fixed
 
-- Added Turkish translation.
-- Mortars now support multiple fluids.
-
-### Removed
-
-- Removed old Mortar design.
+- Fixed decorative ladles not dropping from mortars when broken.
+- Small adjustments to the Manual Assembly JEI display.
