@@ -1,5 +1,6 @@
 package com.evandev.manual_labour.recipe;
 
+import com.evandev.manual_labour.config.ModConfig;
 import com.evandev.manual_labour.registry.ModRecipeSerializers;
 import com.evandev.manual_labour.registry.ModRecipeTypes;
 import com.mojang.serialization.Codec;
@@ -21,8 +22,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 public class MortarGrindingRecipe implements Recipe<MortarGrindingRecipeInput> {
-    public static final int DEFAULT_PROCESSING_TIME = 100;
-
     private final String group;
     private final Ingredient input;
     private final int processingTime;
@@ -47,7 +46,7 @@ public class MortarGrindingRecipe implements Recipe<MortarGrindingRecipeInput> {
     }
 
     public int getProcessingTime() {
-        return processingTime;
+        return processingTime > 0 ? processingTime : Math.max(1, ModConfig.get().defaultRecipeProcessingTicks);
     }
 
     @Override
@@ -101,7 +100,7 @@ public class MortarGrindingRecipe implements Recipe<MortarGrindingRecipeInput> {
         public static final MapCodec<MortarGrindingRecipe> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
                 Codec.STRING.optionalFieldOf("group", "").forGetter(MortarGrindingRecipe::getGroup),
                 Ingredient.CODEC_NONEMPTY.fieldOf("ingredient").forGetter(r -> r.input),
-                Codec.INT.optionalFieldOf("processing_time", DEFAULT_PROCESSING_TIME).forGetter(MortarGrindingRecipe::getProcessingTime),
+                Codec.INT.optionalFieldOf("processing_time", 0).forGetter(r -> r.processingTime),
                 ChanceResult.CODEC.listOf().optionalFieldOf("results", List.of()).forGetter(r -> r.results),
                 FluidStack.CODEC.listOf().optionalFieldOf("fluid_results", List.of()).forGetter(r -> r.fluidResults)
         ).apply(inst, (group, input, processingTime, resultsList, fluidResultsList) -> {

@@ -61,6 +61,9 @@ public class ModConfig {
     @SerializedName("workstone_hammer_cooldown_ticks")
     public int workstoneHammerCooldownTicks = 10;
 
+    @SerializedName("default_recipe_processing_ticks")
+    public int defaultRecipeProcessingTicks = 100;
+
     @SerializedName("enable_workstone_jei")
     public boolean enableWorkstoneJei = true;
 

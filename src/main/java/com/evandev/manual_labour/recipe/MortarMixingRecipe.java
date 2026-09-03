@@ -1,5 +1,6 @@
 package com.evandev.manual_labour.recipe;
 
+import com.evandev.manual_labour.config.ModConfig;
 import com.evandev.manual_labour.foundation.recipe.HeatCondition;
 import com.evandev.manual_labour.registry.ModRecipeSerializers;
 import com.evandev.manual_labour.registry.ModRecipeTypes;
@@ -24,8 +25,6 @@ import java.util.List;
 import java.util.Optional;
 
 public class MortarMixingRecipe implements Recipe<MortarMixingRecipeInput> {
-    public static final int DEFAULT_PROCESSING_TIME = 100;
-
     private final String group;
     private final NonNullList<Ingredient> inputs;
     private final Optional<SizedFluidIngredient> fluidInput;
@@ -63,7 +62,7 @@ public class MortarMixingRecipe implements Recipe<MortarMixingRecipeInput> {
     }
 
     public int getProcessingTime() {
-        return processingTime;
+        return processingTime > 0 ? processingTime : Math.max(1, ModConfig.get().defaultRecipeProcessingTicks);
     }
 
     @Override
@@ -117,7 +116,7 @@ public class MortarMixingRecipe implements Recipe<MortarMixingRecipeInput> {
                 Codec.STRING.optionalFieldOf("group", "").forGetter(MortarMixingRecipe::getGroup),
                 Ingredient.CODEC_NONEMPTY.listOf().fieldOf("ingredients").forGetter(r -> r.inputs),
                 SizedFluidIngredient.FLAT_CODEC.optionalFieldOf("fluid_ingredient").forGetter(MortarMixingRecipe::getFluidInput),
-                Codec.INT.optionalFieldOf("processing_time", DEFAULT_PROCESSING_TIME).forGetter(MortarMixingRecipe::getProcessingTime),
+                Codec.INT.optionalFieldOf("processing_time", 0).forGetter(r -> r.processingTime),
                 HeatCondition.CODEC.optionalFieldOf("heat_requirement", HeatCondition.NONE).forGetter(MortarMixingRecipe::getHeatRequirement),
                 ChanceResult.CODEC.listOf().optionalFieldOf("results", List.of()).forGetter(r -> r.results),
                 FluidStack.CODEC.listOf().optionalFieldOf("fluid_results", List.of()).forGetter(r -> r.fluidResults)

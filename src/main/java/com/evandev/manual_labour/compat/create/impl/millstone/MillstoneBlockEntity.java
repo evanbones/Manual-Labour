@@ -1,6 +1,7 @@
 package com.evandev.manual_labour.compat.create.impl.millstone;
 
 import com.evandev.manual_labour.compat.create.impl.millstone.client.MillstoneEffects;
+import com.evandev.manual_labour.config.ModConfig;
 import com.simibubi.create.AllRecipeTypes;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
 import com.simibubi.create.content.kinetics.millstone.MillingRecipe;
@@ -110,17 +111,19 @@ public class MillstoneBlockEntity extends KineticBlockEntity {
         if (millstone.lastRecipe == null || !millstone.lastRecipe.matches(inventoryIn, level)) {
             Optional<RecipeHolder<MillingRecipe>> recipe = AllRecipeTypes.MILLING.find(inventoryIn, level);
             if (recipe.isEmpty()) {
-                millstone.timer = 100;
+                millstone.timer = Math.max(1, ModConfig.get().defaultRecipeProcessingTicks);
                 millstone.sendData();
             } else {
                 millstone.lastRecipe = recipe.get().value();
-                millstone.timer = millstone.lastRecipe.getProcessingDuration();
+                int duration = millstone.lastRecipe.getProcessingDuration();
+                millstone.timer = duration > 0 ? duration : Math.max(1, ModConfig.get().defaultRecipeProcessingTicks);
                 millstone.sendData();
             }
             return;
         }
 
-        millstone.timer = millstone.lastRecipe.getProcessingDuration();
+        int duration = millstone.lastRecipe.getProcessingDuration();
+        millstone.timer = duration > 0 ? duration : Math.max(1, ModConfig.get().defaultRecipeProcessingTicks);
         millstone.sendData();
     }
 

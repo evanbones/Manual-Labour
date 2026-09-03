@@ -34,6 +34,8 @@ public class ClientConfigScreen {
 
         ConfigCategory.Builder mortar = ConfigCategory.createBuilder()
                 .name(Component.translatable("config.manual_labour.category.mortar"))
+                .option(createIntOption("default_recipe_processing_ticks", 100, 1, 1200, 5,
+                        () -> ModConfig.get().defaultRecipeProcessingTicks, val -> ModConfig.get().defaultRecipeProcessingTicks = val))
                 .option(createFloatOption("item_pile_y", 0.65F, 0.0F, 1.0F, 0.005F,
                         () -> ModConfig.get().itemPileY, val -> ModConfig.get().itemPileY = val))
                 .option(createFloatOption("item_pile_radius", 0.3F, 0.0F, 0.5F, 0.005F,

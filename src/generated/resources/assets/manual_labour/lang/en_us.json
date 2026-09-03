@@ -9,6 +9,8 @@
   "config.manual_labour.category.mortar": "Mortar",
   "config.manual_labour.category.ponder": "Ponder",
   "config.manual_labour.category.workstone": "Workstone",
+  "config.manual_labour.option.default_recipe_processing_ticks": "Default Recipe Processing Time (Ticks)",
+  "config.manual_labour.option.default_recipe_processing_ticks.tooltip": "The duration in ticks a recipe takes to process if not explicitly defined in the recipe.",
   "config.manual_labour.option.decorative_tool_side_offset": "Placed Tool Side Offset",
   "config.manual_labour.option.decorative_tool_side_offset.tooltip": "How far to the side a rested Pestle or Ladle is offset from the Mortar's center.",
   "config.manual_labour.option.decorative_tool_tilt": "Placed Tool Tilt",

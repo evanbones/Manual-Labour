@@ -1,5 +1,6 @@
 package com.evandev.manual_labour.foundation.recipe;
 
+import com.evandev.manual_labour.config.ModConfig;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -103,7 +104,7 @@ public class ProcessingRecipeData {
     }
 
     public int getProcessingDuration() {
-        return processingDuration;
+        return processingDuration > 0 ? processingDuration : Math.max(1, ModConfig.get().defaultRecipeProcessingTicks);
     }
 
     public HeatCondition getRequiredHeat() {

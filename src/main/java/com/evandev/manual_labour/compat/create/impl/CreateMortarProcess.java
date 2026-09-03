@@ -1,5 +1,6 @@
 package com.evandev.manual_labour.compat.create.impl;
 
+import com.evandev.manual_labour.config.ModConfig;
 import com.evandev.manual_labour.foundation.recipe.HeatCondition;
 import com.evandev.manual_labour.foundation.recipe.ProcessingOutput;
 import com.evandev.manual_labour.recipe.MortarMixingRecipe;
@@ -28,7 +29,7 @@ public record CreateMortarProcess(ProcessingRecipe<?, ?> recipe) implements Mort
     @Override
     public int processingTime() {
         int duration = recipe.getProcessingDuration();
-        return duration > 0 ? duration : MortarMixingRecipe.DEFAULT_PROCESSING_TIME;
+        return duration > 0 ? duration : Math.max(1, ModConfig.get().defaultRecipeProcessingTicks);
     }
 
     @Override
