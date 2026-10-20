@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.0] - 2026-10-19
+
+### Added
+
+- No Man's Land taps now fill Mortars and Create Basins placed below them with the tapped fluid, such as water from
+  waterlogged blocks or honey from full beehives.
+- Added the `manual_labour:tap_receivers` block tag for blocks that taps can fill.
+
 ## [2.4.0] - 2026-09-02
 
 ### Added

@@ -41,9 +41,6 @@ public final class LadleBasinInteraction {
 
     private static final Map<BasinKey, HoldState> ACTIVE_HOLDS = new HashMap<>();
 
-    private LadleBasinInteraction() {
-    }
-
     public static LadleResult tryStir(Level level, BlockPos pos, Player player, ItemStack ladleStack) {
         if (!(level.getBlockEntity(pos) instanceof BasinBlockEntity basin)) return LadleResult.NOT_A_BASIN;
         if (level.isClientSide) return LadleResult.NOTHING_TO_MIX;

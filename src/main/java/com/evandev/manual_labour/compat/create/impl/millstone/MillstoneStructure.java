@@ -19,9 +19,6 @@ public final class MillstoneStructure {
 
     public static final List<BlockPos> ALL_OFFSETS = BASE_OFFSETS;
 
-    private MillstoneStructure() {
-    }
-
     public static boolean isCorner(BlockPos offset) {
         boolean offCentreOnX = offset.getX() != 0;
         boolean offCentreOnZ = offset.getZ() != 0;

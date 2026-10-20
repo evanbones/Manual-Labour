@@ -9,9 +9,6 @@ import java.util.Optional;
 
 public final class AssemblyViews {
 
-    private AssemblyViews() {
-    }
-
     public static Optional<AssemblyView> describe(Recipe<?> recipe) {
         if (recipe instanceof ManualAssemblyRecipe own) {
             return Optional.of(SimpleAssemblyView.of(own));

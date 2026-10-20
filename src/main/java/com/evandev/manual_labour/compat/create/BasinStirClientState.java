@@ -17,9 +17,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class BasinStirClientState {
     private static final Map<BlockPos, StirState> STIR_STATES = new ConcurrentHashMap<>();
 
-    private BasinStirClientState() {
-    }
-
     public static float getStirSpeed() {
         return ModConfig.get().ladleStirSpeed;
     }

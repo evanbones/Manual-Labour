@@ -20,9 +20,6 @@ import java.util.List;
  */
 public final class ItemHelper {
 
-    private ItemHelper() {
-    }
-
     public static List<Pair<Ingredient, MutableInt>> condenseIngredients(List<Ingredient> recipeIngredients) {
         List<Pair<Ingredient, MutableInt>> actualIngredients = new ArrayList<>();
         Ingredients:

@@ -30,9 +30,6 @@ public final class CreateContent {
             ModBlockEntities.BLOCK_ENTITIES.register("millstone",
                     () -> BlockEntityType.Builder.of(MillstoneBlockEntity::new, MILLSTONE.get()).build(null));
 
-    private CreateContent() {
-    }
-
     public static void register() {
     }
 }

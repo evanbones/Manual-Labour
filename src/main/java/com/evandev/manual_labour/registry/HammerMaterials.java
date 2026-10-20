@@ -34,7 +34,4 @@ public final class HammerMaterials {
     public static TagKey<Item> ingotTag(String material) {
         return ItemTags.create(ResourceLocation.fromNamespaceAndPath("c", "ingots/" + material));
     }
-
-    private HammerMaterials() {
-    }
 }

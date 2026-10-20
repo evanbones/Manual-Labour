@@ -11,9 +11,6 @@ import java.util.List;
 
 public final class CopperHammerContent {
 
-    private CopperHammerContent() {
-    }
-
     public static List<DeferredItem<Item>> register() {
         return List.of(
                 ModItems.ITEMS.register("copper_hammer", () -> new CopperHammerItem(WeatherState.UNAFFECTED, new Item.Properties())),

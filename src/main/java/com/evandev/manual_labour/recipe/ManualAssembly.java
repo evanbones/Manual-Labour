@@ -13,9 +13,6 @@ import java.util.Optional;
 
 public final class ManualAssembly {
 
-    private ManualAssembly() {
-    }
-
     public static boolean isInProgress(ItemStack stack) {
         return stack.has(ModDataComponents.MANUAL_ASSEMBLY.get())
                 || CreateCompat.get().isSequencedAssemblyInProgress(stack);

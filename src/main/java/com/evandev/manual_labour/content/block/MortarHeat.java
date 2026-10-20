@@ -15,9 +15,6 @@ import java.util.List;
 
 public final class MortarHeat {
 
-    private MortarHeat() {
-    }
-
     public static HeatCondition below(BlockGetter level, BlockPos mortarPos) {
         BlockState state = level.getBlockState(mortarPos.below());
 

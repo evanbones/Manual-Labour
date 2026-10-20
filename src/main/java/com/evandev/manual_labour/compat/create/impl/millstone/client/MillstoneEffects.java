@@ -64,9 +64,6 @@ public class MillstoneEffects {
 
     private static final double TAU = Math.PI * 2.0;
 
-    private MillstoneEffects() {
-    }
-
     public static void tick(Level level, BlockPos controllerPos, ItemStack grinding, float speed) {
         BlockPos key = controllerPos.immutable();
         MillstoneLoopSound loop = LOOPS.get(key);

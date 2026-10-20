@@ -31,9 +31,6 @@ public final class CreateAssemblyView {
 
     private static final Map<ResourceLocation, SequencedAssemblySubCategory> SUB_CATEGORIES = new HashMap<>();
 
-    private CreateAssemblyView() {
-    }
-
     public static Optional<AssemblyView> describe(Recipe<?> recipe) {
         if (!(recipe instanceof SequencedAssemblyRecipe sequenced)) return Optional.empty();
 

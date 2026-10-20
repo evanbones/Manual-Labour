@@ -35,9 +35,6 @@ public interface CategorySkin {
     final class Holder {
         private static CategorySkin current;
 
-        private Holder() {
-        }
-
         static void init(IGuiHelper guiHelper) {
             if (CreateCompat.isLoaded()) {
                 try {

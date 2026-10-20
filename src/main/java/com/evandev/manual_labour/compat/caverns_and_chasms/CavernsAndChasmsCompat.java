@@ -21,9 +21,6 @@ public final class CavernsAndChasmsCompat {
     private static boolean loaded;
     private static List<DeferredItem<Item>> copperHammers = List.of();
 
-    private CavernsAndChasmsCompat() {
-    }
-
     public static boolean isLoaded() {
         return loaded;
     }
@@ -36,7 +33,7 @@ public final class CavernsAndChasmsCompat {
     public static void init() {
         loaded = ModList.get().isLoaded(MOD_ID);
         if (!loaded) {
-            Constants.LOG.info("Caverns and Chasms is not installed; copper hammer variants are disabled");
+            Constants.LOG.debug("Caverns and Chasms is not installed; copper hammer variants are disabled");
             return;
         }
         try {

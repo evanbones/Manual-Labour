@@ -14,9 +14,6 @@ public class WorkstoneRecipeTypeInfo implements IRecipeTypeInfo {
 
     public static final WorkstoneRecipeTypeInfo INSTANCE = new WorkstoneRecipeTypeInfo();
 
-    private WorkstoneRecipeTypeInfo() {
-    }
-
     @Override
     public ResourceLocation getId() {
         return ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "workstone");

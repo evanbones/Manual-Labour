@@ -9,9 +9,6 @@ import java.util.List;
 import java.util.Optional;
 
 public final class MortarMatching {
-    private MortarMatching() {
-    }
-
     public static boolean matchIngredients(List<Ingredient> ingredients, List<ItemStack> availableStacks) {
         if (ingredients.isEmpty()) return true;
         boolean[] claimed = new boolean[availableStacks.size()];

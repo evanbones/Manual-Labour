@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.evandev.manual_labour.mixin.nomansland",
+  "plugin": "com.moulberry.mixinconstraints.ConstraintsMixinPlugin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "TapBlockEntityMixin",
+    "TapBlockMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

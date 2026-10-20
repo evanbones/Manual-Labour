@@ -1,0 +1,9 @@
+{
+  "values": [
+    "manual_labour:mortar",
+    {
+      "id": "create:basin",
+      "required": false
+    }
+  ]
+}

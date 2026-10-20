@@ -10,9 +10,6 @@ import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 
 public final class MortarFluidTransfer {
 
-    private MortarFluidTransfer() {
-    }
-
     public static boolean tryEmptyItemIntoTank(Level level, BlockPos pos, Player player, InteractionHand hand,
                                                ItemStack heldItem, IFluidHandler tank) {
         return CreateCompat.get().tryEmptyItemIntoTank(level, pos, player, hand, heldItem, tank);

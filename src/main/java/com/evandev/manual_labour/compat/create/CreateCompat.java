@@ -18,9 +18,6 @@ public final class CreateCompat {
     private static CreateIntegration integration = ABSENT;
     private static CreateClientIntegration clientIntegration = CreateClientIntegration.ABSENT;
 
-    private CreateCompat() {
-    }
-
     public static void init() {
         loaded = ModList.get().isLoaded(CREATE);
         if (!loaded) {
@@ -32,11 +29,6 @@ public final class CreateCompat {
             loaded = false;
             return;
         }
-        // Must happen here, not at FMLClientSetupEvent: EntityRenderersEvent.RegisterRenderers is fired
-        // from ClientHooks.initClientHooks in the Minecraft constructor, which runs *before* the resource
-        // reload that dispatches the setup events. ModelEvent.RegisterAdditional is fired from the
-        // ModelBakery constructor on a reload worker, concurrently with mod setup. Neither can see an
-        // integration resolved during setup. The dist check keeps CLIENT_IMPL off the dedicated server.
         if (FMLEnvironment.dist.isClient()) {
             clientIntegration = instantiate(CLIENT_IMPL, CreateClientIntegration.ABSENT);
         }

@@ -45,5 +45,9 @@ public class ModBlockTagsProvider extends BlockTagsProvider {
                 .add(Blocks.BLAST_FURNACE)
                 .add(Blocks.SMOKER)
                 .addOptionalTag(ResourceLocation.fromNamespaceAndPath("farmersdelight", "heat_sources"));
+
+        this.tag(ModTags.Blocks.TAP_RECEIVERS)
+                .add(ModBlocks.MORTAR.get())
+                .addOptional(ResourceLocation.fromNamespaceAndPath("create", "basin"));
     }
 }

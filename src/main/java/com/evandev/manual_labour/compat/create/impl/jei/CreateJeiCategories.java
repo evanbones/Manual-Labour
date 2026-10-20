@@ -27,9 +27,6 @@ import java.util.function.Consumer;
 
 public final class CreateJeiCategories {
 
-    private CreateJeiCategories() {
-    }
-
     public static void addCategories(Consumer<ManualRecipeCategory<?>> sink) {
         if (ModConfig.get().enableMillstoneJei) {
             sink.accept(new MillstoneCategory(ManualLabourJeiPlugin.info(

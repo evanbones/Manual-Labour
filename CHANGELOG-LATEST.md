@@ -1,8 +1,4 @@
 ### Added
 
-- Added a config option for the default processing time of recipes when not explicitly defined.
-- Added support for custom `processing_time` definitions on individual manual mixing and grinding recipes.
-
-### Fixed
-
-- Millstones and Mortars now properly respect Create recipe fields like `processing_time`.
+- No Man's Land taps now fill Mortars and Create Basins placed below them with the tapped fluid, such as water from waterlogged blocks or honey from full beehives.
+- Added the `manual_labour:tap_receivers` block tag for blocks that taps can fill.

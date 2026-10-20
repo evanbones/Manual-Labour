@@ -6,9 +6,6 @@ import net.minecraft.world.item.ItemStack;
 
 public final class WorkstoneStepDescription {
 
-    private WorkstoneStepDescription() {
-    }
-
     public static Component of(WorkstoneRecipeLike step) {
         if (step.getIngredients().size() < 2) {
             return Component.translatable("recipe.assembly.manual_labour.workstone.invalid");
