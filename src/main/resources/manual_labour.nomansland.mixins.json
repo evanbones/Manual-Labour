@@ -5,8 +5,7 @@
   "plugin": "com.moulberry.mixinconstraints.ConstraintsMixinPlugin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "TapBlockEntityMixin",
-    "TapBlockMixin"
+    "TapBlockEntityMixin"
   ],
   "injectors": {
     "defaultRequire": 1

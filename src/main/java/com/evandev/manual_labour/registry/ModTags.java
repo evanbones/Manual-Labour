@@ -12,6 +12,7 @@ public class ModTags {
     public static class Blocks {
         public static final TagKey<Block> HEAT_SOURCES = tag("heat_sources");
         public static final TagKey<Block> TAP_RECEIVERS = tag("tap_receivers");
+        public static final TagKey<Block> CATCHES_DRIPS = BlockTags.create(ResourceLocation.fromNamespaceAndPath("nomansland", "catches_drips"));
 
         private static TagKey<Block> tag(String name) {
             return BlockTags.create(ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, name));

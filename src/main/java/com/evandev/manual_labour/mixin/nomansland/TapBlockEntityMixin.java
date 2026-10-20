@@ -1,21 +1,23 @@
 package com.evandev.manual_labour.mixin.nomansland;
 
 import com.evandev.manual_labour.compat.nomansland.TapFluidFilling;
-import com.moulberry.mixinconstraints.annotations.IfModLoaded;
 import com.farcr.nomansland.common.blockentity.TapBlockEntity;
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.moulberry.mixinconstraints.annotations.IfModLoaded;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.AbstractCauldronBlock;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @IfModLoaded("nomansland")
 @Mixin(TapBlockEntity.class)
 public abstract class TapBlockEntityMixin {
-    @Inject(method = "tick", at = @At("HEAD"))
-    private static void manual_labour$drainIntoReceiver(Level level, BlockPos pos, BlockState state, TapBlockEntity tap, CallbackInfo ci) {
-        TapFluidFilling.tick(level, pos, state, tap);
+    @WrapMethod(method = "raiseCauldron")
+    private static boolean manual_labour$fillReceiver(Level level, BlockPos pos, BlockState state, Block cauldron, Operation<Boolean> original) {
+        if (state.getBlock() instanceof AbstractCauldronBlock) return original.call(level, pos, state, cauldron);
+        return TapFluidFilling.fillReceiver(level, pos, cauldron);
     }
 }

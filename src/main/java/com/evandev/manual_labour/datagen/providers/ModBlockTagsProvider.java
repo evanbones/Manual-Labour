@@ -49,5 +49,8 @@ public class ModBlockTagsProvider extends BlockTagsProvider {
         this.tag(ModTags.Blocks.TAP_RECEIVERS)
                 .add(ModBlocks.MORTAR.get())
                 .addOptional(ResourceLocation.fromNamespaceAndPath("create", "basin"));
+
+        this.tag(ModTags.Blocks.CATCHES_DRIPS)
+                .addTag(ModTags.Blocks.TAP_RECEIVERS);
     }
 }

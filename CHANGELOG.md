@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.1] - 2026-10-20
+
+### Fixed
+
+- Fixed crash with latest No Man's Land update.
+
+### Changed
+
+- Taps now use No Man's Land's own fluid filling: blocks in `manual_labour:tap_receivers` are added to
+  `nomansland:catches_drips` and tree taps pour into Mortars and Create Basins.
+
 ## [2.5.0] - 2026-10-19
 
 ### Added
