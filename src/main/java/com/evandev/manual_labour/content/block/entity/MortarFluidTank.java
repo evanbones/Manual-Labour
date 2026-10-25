@@ -21,14 +21,14 @@ public class MortarFluidTank {
 
     private static final double CHASE_SPEED = 0.25D;
 
-    private final MortarBlockEntity blockEntity;
+    private final AbstractMortarBlockEntity blockEntity;
     private final int capacity;
     private final List<Segment> outputSegments;
     private final List<Segment> inputSegments;
     private final List<Segment> segments;
     private final IFluidHandler capability;
 
-    public MortarFluidTank(int capacity, MortarBlockEntity blockEntity) {
+    public MortarFluidTank(int capacity, AbstractMortarBlockEntity blockEntity) {
         this.blockEntity = blockEntity;
         this.capacity = capacity;
 

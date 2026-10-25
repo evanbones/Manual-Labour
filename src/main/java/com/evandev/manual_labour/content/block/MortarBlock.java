@@ -1,6 +1,6 @@
 package com.evandev.manual_labour.content.block;
 
-import com.evandev.manual_labour.content.block.entity.MortarBlockEntity;
+import com.evandev.manual_labour.content.block.entity.AbstractMortarBlockEntity;
 import com.evandev.manual_labour.content.block.entity.MortarFluidTank;
 import com.evandev.manual_labour.content.block.entity.MortarFluidTransfer;
 import com.evandev.manual_labour.registry.ModBlockEntities;
@@ -78,7 +78,7 @@ public class MortarBlock extends BaseEntityBlock implements SimpleWaterloggedBlo
 
     @Override
     public @NotNull ItemInteractionResult useItemOn(@NotNull ItemStack stack, @NotNull BlockState state, Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull InteractionHand hand, @NotNull BlockHitResult hit) {
-        if (!(level.getBlockEntity(pos) instanceof MortarBlockEntity mortar)) {
+        if (!(level.getBlockEntity(pos) instanceof AbstractMortarBlockEntity mortar)) {
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
 
@@ -149,7 +149,7 @@ public class MortarBlock extends BaseEntityBlock implements SimpleWaterloggedBlo
         super.updateEntityAfterFallOn(level, entity);
         if (!(entity instanceof ItemEntity itemEntity) || !entity.isAlive()) return;
         if (!level.getBlockState(entity.blockPosition()).is(this)) return;
-        if (level.getBlockEntity(entity.blockPosition()) instanceof MortarBlockEntity mortar) {
+        if (level.getBlockEntity(entity.blockPosition()) instanceof AbstractMortarBlockEntity mortar) {
             mortar.tryInsertItemEntity(itemEntity);
         }
     }
@@ -157,7 +157,7 @@ public class MortarBlock extends BaseEntityBlock implements SimpleWaterloggedBlo
     @Override
     public void onRemove(BlockState state, @NotNull Level level, @NotNull BlockPos pos, BlockState newState, boolean isMoving) {
         if (!state.is(newState.getBlock())) {
-            if (level.getBlockEntity(pos) instanceof MortarBlockEntity mortar) {
+            if (level.getBlockEntity(pos) instanceof AbstractMortarBlockEntity mortar) {
                 mortar.dropContents(level, pos);
                 level.updateNeighbourForOutputSignal(pos, this);
             }
@@ -200,7 +200,7 @@ public class MortarBlock extends BaseEntityBlock implements SimpleWaterloggedBlo
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(@NotNull Level level, @NotNull BlockState state, @NotNull BlockEntityType<T> type) {
         return createTickerHelper(type, ModBlockEntities.MORTAR.get(),
-                level.isClientSide ? MortarBlockEntity::clientTick : MortarBlockEntity::serverTick);
+                level.isClientSide ? AbstractMortarBlockEntity::clientTick : AbstractMortarBlockEntity::serverTick);
     }
 
     @Override
@@ -210,7 +210,7 @@ public class MortarBlock extends BaseEntityBlock implements SimpleWaterloggedBlo
 
     @Override
     public int getAnalogOutputSignal(@NotNull BlockState state, Level level, @NotNull BlockPos pos) {
-        if (!(level.getBlockEntity(pos) instanceof MortarBlockEntity mortar)) {
+        if (!(level.getBlockEntity(pos) instanceof AbstractMortarBlockEntity mortar)) {
             return 0;
         }
 

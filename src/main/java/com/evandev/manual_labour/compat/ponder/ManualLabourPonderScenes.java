@@ -1,6 +1,6 @@
 package com.evandev.manual_labour.compat.ponder;
 
-import com.evandev.manual_labour.content.block.entity.MortarBlockEntity;
+import com.evandev.manual_labour.content.block.entity.AbstractMortarBlockEntity;
 import com.evandev.manual_labour.registry.ModItems;
 import net.createmod.catnip.math.Pointing;
 import net.createmod.ponder.api.PonderPalette;
@@ -41,7 +41,7 @@ public class ManualLabourPonderScenes {
                 scene.world().createItemEntity(entitySpawn, util.vector().of(0, 0.2, 0), wheat);
         scene.idle(15);
         scene.world().modifyEntity(wheatEntity, Entity::discard);
-        scene.world().modifyBlockEntity(mortarPos, MortarBlockEntity.class,
+        scene.world().modifyBlockEntity(mortarPos, AbstractMortarBlockEntity.class,
                 mortar -> mortar.insertFromPlayer(wheat.copy()));
         scene.idle(10);
 
@@ -72,7 +72,7 @@ public class ManualLabourPonderScenes {
                 .placeNearTarget();
         scene.idle(70);
 
-        scene.world().modifyBlockEntity(mortarPos, MortarBlockEntity.class,
+        scene.world().modifyBlockEntity(mortarPos, AbstractMortarBlockEntity.class,
                 mortar -> mortar.placeDecorativeTool(pestle.copy(), true));
         scene.idle(15);
 
@@ -84,7 +84,7 @@ public class ManualLabourPonderScenes {
                 .placeNearTarget();
         scene.idle(80);
 
-        scene.world().modifyBlockEntity(mortarPos, MortarBlockEntity.class, MortarBlockEntity::removeDecorativeTool);
+        scene.world().modifyBlockEntity(mortarPos, AbstractMortarBlockEntity.class, AbstractMortarBlockEntity::removeDecorativeTool);
         scene.idle(10);
 
         scene.overlay().showText(60)
