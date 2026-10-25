@@ -4,7 +4,7 @@ import com.evandev.manual_labour.client.ModToolModels;
 import com.evandev.manual_labour.compat.create.BasinStirClientState;
 import com.evandev.manual_labour.config.ModConfig;
 import com.evandev.manual_labour.content.block.MortarBlock;
-import com.evandev.manual_labour.content.block.entity.MortarBlockEntity;
+import com.evandev.manual_labour.content.block.entity.AbstractMortarBlockEntity;
 import com.evandev.manual_labour.content.block.entity.MortarFluidTank;
 import com.evandev.manual_labour.registry.ModTags;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -31,14 +31,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class MortarRenderer implements BlockEntityRenderer<MortarBlockEntity> {
+public class MortarRenderer implements BlockEntityRenderer<AbstractMortarBlockEntity> {
     private static final float PESTLE_THUMP_SPEED = 18.0F;
     private static final float PESTLE_GRIND_SPEED = 10.0F;
-
-    private static final float FLUID_MIN_X = 2.0F / 16.0F;
-    private static final float FLUID_MAX_X = 14.0F / 16.0F;
-    private static final float FLUID_MIN_Y = 5.0F / 16.0F;
-    private static final float FLUID_MAX_Y = 14.0F / 16.0F;
 
     private static final int CROWDED_PILE_COUNT = 4;
     private static final float CROWDED_PILE_SCALE = 0.6F;
@@ -52,7 +47,7 @@ public class MortarRenderer implements BlockEntityRenderer<MortarBlockEntity> {
     }
 
     @Override
-    public void render(MortarBlockEntity mortar, float partialTicks, @NotNull PoseStack poseStack, @NotNull MultiBufferSource buffer, int packedLight, int packedOverlay) {
+    public void render(@NotNull AbstractMortarBlockEntity mortar, float partialTicks, @NotNull PoseStack poseStack, @NotNull MultiBufferSource buffer, int packedLight, int packedOverlay) {
         float fluidSurfaceY = renderFluid(mortar, partialTicks, poseStack, buffer, packedLight);
 
         List<ItemStack> stacks = new ArrayList<>();
@@ -68,7 +63,7 @@ public class MortarRenderer implements BlockEntityRenderer<MortarBlockEntity> {
         float ringRadius = config.itemPileRadius * (crowded ? CROWDED_RING_SPREAD : 1.0F);
 
         float basePileY = fluidSurfaceY > 0.0F
-                ? Math.max(FLUID_MIN_Y, fluidSurfaceY - config.itemFloatSinkDepth)
+                ? Math.max(mortar.getFluidMinY(), fluidSurfaceY - config.itemFloatSinkDepth)
                 : config.itemPileY;
         float renderTime = AnimationTickHolder.getRenderTime(mortar.getLevel());
         float anglePartition = count > 0 ? 360.0F / count : 0.0F;
@@ -136,7 +131,7 @@ public class MortarRenderer implements BlockEntityRenderer<MortarBlockEntity> {
         }
     }
 
-    private void renderDecorativeTool(MortarBlockEntity mortar, ItemStack tool, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay) {
+    private void renderDecorativeTool(AbstractMortarBlockEntity mortar, ItemStack tool, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay) {
         Direction facing = mortar.getBlockState().getValue(MortarBlock.FACING);
 
         ModConfig config = ModConfig.get();
@@ -225,7 +220,7 @@ public class MortarRenderer implements BlockEntityRenderer<MortarBlockEntity> {
         poseStack.popPose();
     }
 
-    private float renderFluid(MortarBlockEntity mortar, float partialTicks, PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
+    private float renderFluid(AbstractMortarBlockEntity mortar, float partialTicks, PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
         MortarFluidTank tank = mortar.getFluidTank();
         float totalUnits = tank.getTotalUnits(partialTicks);
         if (totalUnits < 1.0F) return 0.0F;
@@ -233,10 +228,10 @@ public class MortarRenderer implements BlockEntityRenderer<MortarBlockEntity> {
         float fill = Mth.clamp(totalUnits / (tank.getCapacity() * MortarFluidTank.SEGMENTS_PER_SIDE), 0.0F, 1.0F);
         fill = 1.0F - ((1.0F - fill) * (1.0F - fill));
 
-        float fluidY = Mth.lerp(fill, FLUID_MIN_Y, FLUID_MAX_Y);
+        float fluidY = Mth.lerp(fill, mortar.getFluidMinY(), mortar.getFluidMaxY());
 
-        float xMin = FLUID_MIN_X;
-        float xMax = FLUID_MIN_X;
+        float xMin = mortar.getFluidMinX();
+        float xMax = mortar.getFluidMinX();
 
         for (MortarFluidTank.Segment segment : tank.getSegments()) {
             if (segment.getRenderedFluid().isEmpty()) continue;
@@ -244,9 +239,9 @@ public class MortarRenderer implements BlockEntityRenderer<MortarBlockEntity> {
             float units = segment.getTotalUnits(partialTicks);
             if (units < 1.0F) continue;
 
-            xMax += Mth.clamp(units / totalUnits, 0.0F, 1.0F) * (FLUID_MAX_X - FLUID_MIN_X);
+            xMax += Mth.clamp(units / totalUnits, 0.0F, 1.0F) * (mortar.getFluidMaxX() - mortar.getFluidMinX());
             NeoForgeCatnipServices.FLUID_RENDERER.renderFluidBox(segment.getRenderedFluid(),
-                    xMin, FLUID_MIN_Y, FLUID_MIN_X, xMax, fluidY, FLUID_MAX_X,
+                    xMin, mortar.getFluidMinY(), mortar.getFluidMinX(), xMax, fluidY, mortar.getFluidMaxX(),
                     buffer, poseStack, packedLight, false, false);
 
             xMin = xMax;

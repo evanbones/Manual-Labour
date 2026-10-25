@@ -3,6 +3,7 @@ package com.evandev.manual_labour.client;
 import com.evandev.manual_labour.Constants;
 import com.evandev.manual_labour.compat.create.BasinStirClientState;
 import com.evandev.manual_labour.compat.create.CreateCompat;
+import com.evandev.manual_labour.content.block.entity.AbstractMortarBlockEntity;
 import com.evandev.manual_labour.content.block.entity.MortarBlockEntity;
 import com.evandev.manual_labour.registry.ModTags;
 import net.minecraft.client.Minecraft;
@@ -34,7 +35,7 @@ public class ToolHandRenderHandler {
         Level level = mc.level;
         BlockPos pos = blockHit.getBlockPos();
         BlockEntity blockEntity = level.getBlockEntity(pos);
-        if (blockEntity instanceof MortarBlockEntity mortar) {
+        if (blockEntity instanceof AbstractMortarBlockEntity mortar) {
             if (mortar.isProcessing()) {
                 event.setCanceled(true);
             }

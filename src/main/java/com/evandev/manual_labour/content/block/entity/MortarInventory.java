@@ -5,7 +5,7 @@ import net.minecraft.world.item.ItemStack;
 
 public class MortarInventory extends SmartInventory {
 
-    public MortarInventory(int slots, MortarBlockEntity be) {
+    public MortarInventory(int slots, AbstractMortarBlockEntity be) {
         super(slots, be, 64, true);
     }
 
