@@ -9,6 +9,8 @@ import java.util.List;
 
 public interface WorkstoneRecipeLike extends Recipe<RecipeWrapper>, WorkstoneProcess {
 
+    int MAX_OUTPUTS = 6;
+
     Ingredient getInputIngredient();
 
     Ingredient getToolIngredient();

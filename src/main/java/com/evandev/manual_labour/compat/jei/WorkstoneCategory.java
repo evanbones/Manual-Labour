@@ -40,19 +40,24 @@ public class WorkstoneCategory extends ManualRecipeCategory<WorkstoneRecipeLike>
 
         List<ProcessingOutput> outputs = recipe.getOutputs();
         int size = outputs.size();
+        int columns = columnsFor(size);
         int centerX = size > 1 ? 1 : 10;
-        int centerY = size > 2 ? 1 : 10;
+        int centerY = size > columns ? 1 : 10;
 
         for (int i = 0; i < size; i++) {
             ProcessingOutput output = outputs.get(i);
-            int xOffset = centerX + (i % 2 == 0 ? 0 : 19);
-            int yOffset = centerY + ((i / 2) * 19);
+            int xOffset = centerX + (i % columns) * 19;
+            int yOffset = centerY + (i / columns) * 19;
 
             builder.addSlot(RecipeIngredientRole.OUTPUT, OUTPUT_GRID_X + xOffset, OUTPUT_GRID_Y + yOffset)
                     .setBackground(getSlot(output), -1, -1)
                     .addItemStack(output.getStack())
                     .addRichTooltipCallback(addStochasticTooltip(output));
         }
+    }
+
+    public static int columnsFor(int outputCount) {
+        return outputCount > 4 ? 3 : 2;
     }
 
     @Override

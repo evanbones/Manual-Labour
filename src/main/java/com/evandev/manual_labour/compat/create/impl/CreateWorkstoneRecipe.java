@@ -53,7 +53,7 @@ public class CreateWorkstoneRecipe extends ProcessingRecipe<RecipeWrapper, Works
 
     @Override
     protected int getMaxOutputCount() {
-        return 4;
+        return WorkstoneRecipeLike.MAX_OUTPUTS;
     }
 
     @Override

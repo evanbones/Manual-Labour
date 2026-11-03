@@ -66,6 +66,14 @@ public class ManualLabourJeiPlugin implements IModPlugin {
         return new ArrayList<>(manager.getAllRecipesFor(ModRecipeTypes.WORKSTONE.get()));
     }
 
+    private static int maxWorkstoneOutputs() {
+        int max = 0;
+        for (RecipeHolder<WorkstoneRecipeLike> holder : gatherWorkstoneRecipes()) {
+            max = Math.max(max, holder.value().getOutputs().size());
+        }
+        return max;
+    }
+
     private static List<RecipeHolder<Recipe<?>>> gatherManualAssemblyRecipes() {
         RecipeManager manager = recipeManager();
         if (manager == null) return List.of();
@@ -115,7 +123,10 @@ public class ManualLabourJeiPlugin implements IModPlugin {
 
         if (ModConfig.get().enableWorkstoneJei) {
             ResourceLocation workstoneTexture = id("textures/gui/jei/workstone.png");
-            IDrawable workstoneBackground = guiHelper.createDrawable(workstoneTexture, 0, 0, 117, 57);
+            int extraColumns = WorkstoneCategory.columnsFor(maxWorkstoneOutputs()) - 2;
+            IDrawable workstoneBackground = guiHelper.drawableBuilder(workstoneTexture, 0, 0, 117, 57)
+                    .addPadding(0, 0, 0, extraColumns * 19)
+                    .build();
             IDrawable workstoneSlot = guiHelper.createDrawable(workstoneTexture, 0, 58, 18, 18);
             IDrawable workstoneChanceSlot = guiHelper.createDrawable(workstoneTexture, 18, 58, 18, 18);
 
