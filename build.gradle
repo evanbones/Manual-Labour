@@ -268,7 +268,6 @@ publishMods {
         requires("yacl")
         optional("create")
         optional("jei")
-        embeds("ponder")
         embeds("flywheel")
     }
 

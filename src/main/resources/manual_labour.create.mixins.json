@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.evandev.manual_labour.mixin.create",
+  "plugin": "com.moulberry.mixinconstraints.ConstraintsMixinPlugin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [],
+  "client": [
+    "KineticBlockEntityRendererMixin",
+    "RotatingInstanceMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

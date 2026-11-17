@@ -102,6 +102,11 @@ public class MillstoneStructuralBlock extends DirectionalBlock {
     }
 
     @Override
+    protected @NotNull VoxelShape getBlockSupportShape(@NotNull BlockState state, @NotNull BlockGetter level, @NotNull BlockPos pos) {
+        return BASE_SHAPE;
+    }
+
+    @Override
     protected @NotNull VoxelShape getShape(@NotNull BlockState state, @NotNull BlockGetter level, @NotNull BlockPos pos, @NotNull CollisionContext context) {
         return Shapes.block();
     }

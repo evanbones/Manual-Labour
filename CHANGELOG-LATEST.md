@@ -1,3 +1,4 @@
-### Changed
+### Fixed
 
-- Workstone recipes can now have up to 6 outputs.
+- Millstones no longer connect to fences.
+- Fixed incorrect shaft rotation angle on millstones.

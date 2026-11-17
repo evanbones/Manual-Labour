@@ -2,6 +2,8 @@ package com.evandev.manual_labour.compat.create.impl.millstone;
 
 import com.mojang.serialization.MapCodec;
 import com.simibubi.create.content.kinetics.base.KineticBlock;
+import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
+import com.simibubi.create.content.kinetics.simpleRelays.ShaftBlock;
 import com.simibubi.create.foundation.block.IBE;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -87,6 +89,14 @@ public class MillstoneBlock extends KineticBlock implements IBE<MillstoneBlockEn
         return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
     }
 
+    public static boolean seatsShaft(KineticBlockEntity kinetic, Direction.Axis axis) {
+        Level level = kinetic.getLevel();
+        if (axis != Direction.Axis.Y || level == null || !(kinetic.getBlockState().getBlock() instanceof ShaftBlock)) {
+            return false;
+        }
+        return level.getBlockState(kinetic.getBlockPos().below()).getBlock() instanceof MillstoneBlock;
+    }
+
     @Nullable
     private static MillstoneBlockEntity lookup(BlockGetter level, BlockPos pos) {
         return level.getBlockEntity(pos) instanceof MillstoneBlockEntity millstone ? millstone : null;
@@ -99,6 +109,11 @@ public class MillstoneBlock extends KineticBlock implements IBE<MillstoneBlockEn
 
     @Override
     protected @NotNull VoxelShape getOcclusionShape(@NotNull BlockState state, @NotNull BlockGetter level, @NotNull BlockPos pos) {
+        return BASE_SHAPE;
+    }
+
+    @Override
+    protected @NotNull VoxelShape getBlockSupportShape(@NotNull BlockState state, @NotNull BlockGetter level, @NotNull BlockPos pos) {
         return BASE_SHAPE;
     }
 
