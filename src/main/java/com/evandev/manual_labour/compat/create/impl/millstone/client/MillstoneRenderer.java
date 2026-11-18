@@ -4,6 +4,7 @@ import com.evandev.manual_labour.Constants;
 import com.evandev.manual_labour.compat.create.impl.millstone.MillstoneBlockEntity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
+import net.createmod.catnip.animation.AnimationTickHolder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -35,7 +36,9 @@ public class MillstoneRenderer implements BlockEntityRenderer<MillstoneBlockEnti
 
     @Override
     public void render(MillstoneBlockEntity millstone, float partialTicks, @NotNull PoseStack poseStack, @NotNull MultiBufferSource buffer, int packedLight, int packedOverlay) {
-        float angle = Mth.lerp(partialTicks, millstone.prevAngle, millstone.angle);
+        float angle = millstone.isOverspeed()
+                ? Mth.lerp(partialTicks, millstone.prevAngle, millstone.angle)
+                : (AnimationTickHolder.getRenderTime(millstone.getLevel()) * millstone.getSpeed() * 3.0F / 10.0F) % 360.0F;
         int light = millstone.hasLevel()
                 ? LevelRenderer.getLightColor(millstone.getLevel(), millstone.getBlockPos().above())
                 : packedLight;

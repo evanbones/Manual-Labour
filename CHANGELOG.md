@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.0] - 2026-11-17
+
+### Added
+
+- With Modest Meals, Workstone hits and Mortar grinding use stamina.
+  - Out of stamina, you can't work them until it recharges.
+  - Both costs are configurable and can be disabled.
+
+### Fixed
+
+- Millstone runners now turn with the shaft, instead of looking rotated, after joining a server
+  or reloading the area.
+
 ## [2.5.3] - 2026-11-16
 
 ### Fixed

@@ -2,6 +2,8 @@ package com.evandev.manual_labour.content.block.entity;
 
 import com.evandev.manual_labour.compat.create.BasinStirClientState;
 import com.evandev.manual_labour.compat.create.CreateCompat;
+import com.evandev.manual_labour.compat.modest_meals.ModestMealsCompat;
+import com.evandev.manual_labour.config.ModConfig;
 import com.evandev.manual_labour.content.block.MortarBlock;
 import com.evandev.manual_labour.content.block.MortarHeat;
 import com.evandev.manual_labour.foundation.blockentity.SyncedBlockEntity;
@@ -99,7 +101,11 @@ public abstract class AbstractMortarBlockEntity extends SyncedBlockEntity {
     }
 
     public boolean startOrContinueGrind(Player player, ItemStack toolStack) {
-        return attemptProcess(player, toolStack, true);
+        float cost = ModConfig.get().mortarGrindingStaminaCost;
+        if (!ModestMealsCompat.canExert(player, cost)) return false;
+        boolean grinding = attemptProcess(player, toolStack, true);
+        if (grinding) ModestMealsCompat.exert(player, cost);
+        return grinding;
     }
 
     public boolean startOrContinueMix(Player player, ItemStack toolStack) {

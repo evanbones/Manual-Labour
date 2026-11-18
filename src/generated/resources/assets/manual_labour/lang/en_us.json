@@ -115,5 +115,9 @@
   "recipe.assembly.manual_labour.workstone.keep": "Use %s",
   "subtitles.manual_labour.block.millstone.loop": "Millstone turns",
   "subtitles.manual_labour.block.millstone.use": "Millstone grinds",
-  "subtitles.manual_labour.block.workstone.hammer": "Workstone hammered"
+  "subtitles.manual_labour.block.workstone.hammer": "Workstone hammered",
+  "config.manual_labour.option.workstone_stamina_cost": "Workstone Stamina Cost",
+  "config.manual_labour.option.workstone_stamina_cost.tooltip": "Modest Meals stamina spent on each Workstone hit, in half-bolts. Out of stamina, the Workstone can't be worked. Set to 0 to disable.",
+  "config.manual_labour.option.mortar_grinding_stamina_cost": "Mortar Grinding Stamina Cost",
+  "config.manual_labour.option.mortar_grinding_stamina_cost.tooltip": "Modest Meals stamina spent while grinding in a Mortar, in half-bolts per pestle stroke. Out of stamina, grinding stops. Set to 0 to disable."
 }

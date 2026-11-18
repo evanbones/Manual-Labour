@@ -27,6 +27,10 @@ public class ModLanguageProvider extends LanguageProvider {
         add("config.manual_labour.category.workstone", "Workstone");
         add("config.manual_labour.option.workstone_hammer_cooldown_ticks", "Workstone Hammer Cooldown (Ticks)");
         add("config.manual_labour.option.workstone_hammer_cooldown_ticks.tooltip", "Cooldown in ticks applied to tools when processing items on the Workstone. Set to 0 to disable.");
+        add("config.manual_labour.option.workstone_stamina_cost", "Workstone Stamina Cost");
+        add("config.manual_labour.option.workstone_stamina_cost.tooltip", "Modest Meals stamina spent on each Workstone hit, in half-bolts. Out of stamina, the Workstone can't be worked. Set to 0 to disable.");
+        add("config.manual_labour.option.mortar_grinding_stamina_cost", "Mortar Grinding Stamina Cost");
+        add("config.manual_labour.option.mortar_grinding_stamina_cost.tooltip", "Modest Meals stamina spent while grinding in a Mortar, in half-bolts per pestle stroke. Out of stamina, grinding stops. Set to 0 to disable.");
         add("manual_labour.workstone.remaining_items", "%s left...");
         add("config.manual_labour.category.mortar", "Mortar");
         add("config.manual_labour.option.item_pile_y", "Item Pile Height");

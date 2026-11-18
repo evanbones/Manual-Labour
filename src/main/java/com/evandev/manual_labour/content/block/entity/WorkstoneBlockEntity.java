@@ -1,6 +1,7 @@
 package com.evandev.manual_labour.content.block.entity;
 
 import com.evandev.manual_labour.compat.create.CreateCompat;
+import com.evandev.manual_labour.compat.modest_meals.ModestMealsCompat;
 import com.evandev.manual_labour.config.ModConfig;
 import com.evandev.manual_labour.content.block.WorkstoneBlock;
 import com.evandev.manual_labour.recipe.ManualAssembly;
@@ -70,6 +71,9 @@ public class WorkstoneBlockEntity extends BlockEntity {
         Optional<WorkstoneProcess> matchingProcess = getMatchingProcess(toolStack);
 
         if (matchingProcess.isPresent()) {
+            float staminaCost = ModConfig.get().workstoneStaminaCost;
+            if (!ModestMealsCompat.canExert(player, staminaCost)) return true;
+            ModestMealsCompat.exert(player, staminaCost);
             WorkstoneProcess process = matchingProcess.get();
             Direction direction = getBlockState().getValue(WorkstoneBlock.FACING).getCounterClockWise();
             ItemStack hitItem = getStoredItem();

@@ -61,6 +61,12 @@ public class ModConfig {
     @SerializedName("workstone_hammer_cooldown_ticks")
     public int workstoneHammerCooldownTicks = 10;
 
+    @SerializedName("workstone_stamina_cost")
+    public float workstoneStaminaCost = 1.0F;
+
+    @SerializedName("mortar_grinding_stamina_cost")
+    public float mortarGrindingStaminaCost = 0.1F;
+
     @SerializedName("default_recipe_processing_ticks")
     public int defaultRecipeProcessingTicks = 100;
 
