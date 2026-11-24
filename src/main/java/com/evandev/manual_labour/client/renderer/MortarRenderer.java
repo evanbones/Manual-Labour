@@ -151,7 +151,7 @@ public class MortarRenderer implements BlockEntityRenderer<AbstractMortarBlockEn
     }
 
     private void renderPestleGrinding(ItemStack tool, ItemStack primary, float pileY, float time, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay) {
-        int maxStackSize = primary.isEmpty() ? 64 : primary.getMaxStackSize();
+        int maxStackSize = primary.isEmpty() ? 64 : Math.min(primary.getMaxStackSize(), 64);
         boolean thumping = primary.getCount() > maxStackSize / 2;
         float contactY = getPileTopY(primary, pileY) + ModConfig.get().pestleTipContactOffset;
 

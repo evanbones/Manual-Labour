@@ -1,3 +1,3 @@
 ### Fixed
 
-- Millstone shafts line up with Create shafts placed above them.
+- The mortar plays its crushing animation again when other mods raise item stack sizes.
