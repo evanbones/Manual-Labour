@@ -291,6 +291,11 @@ public class CreateIntegrationImpl implements CreateIntegration {
     }
 
     @Override
+    public boolean isBlazeBurner(BlockState state) {
+        return state.hasProperty(BlazeBurnerBlock.HEAT_LEVEL);
+    }
+
+    @Override
     public HeatCondition getBlazeBurnerHeat(BlockState state) {
         if (!state.hasProperty(BlazeBurnerBlock.HEAT_LEVEL)) return HeatCondition.NONE;
 

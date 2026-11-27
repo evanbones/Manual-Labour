@@ -18,8 +18,7 @@ public final class MortarHeat {
     public static HeatCondition below(BlockGetter level, BlockPos mortarPos) {
         BlockState state = level.getBlockState(mortarPos.below());
 
-        HeatCondition blazeBurner = CreateCompat.get().getBlazeBurnerHeat(state);
-        if (blazeBurner != HeatCondition.NONE) return blazeBurner;
+        if (CreateCompat.get().isBlazeBurner(state)) return CreateCompat.get().getBlazeBurnerHeat(state);
 
         return isLitHeatSource(state) ? HeatCondition.HEATED : HeatCondition.NONE;
     }

@@ -1,3 +1,3 @@
 ### Fixed
 
-- The mortar plays its crushing animation again when other mods raise item stack sizes.
+- An unfed Blaze Burner under a mortar no longer counts as heated.

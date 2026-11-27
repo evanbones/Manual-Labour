@@ -111,6 +111,10 @@ public interface CreateIntegration {
         return Optional.empty();
     }
 
+    default boolean isBlazeBurner(BlockState state) {
+        return false;
+    }
+
     default HeatCondition getBlazeBurnerHeat(BlockState state) {
         return HeatCondition.NONE;
     }
